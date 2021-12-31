@@ -22,9 +22,22 @@ const commands = {
         response: (argument) => `Successfully upvoted ${argument}`
     },
     tinderquote: {
-        response: () => {
-            console.log('tinderquote');
-            return "tinderQuote";
+        response: async () => {
+            let tinderEntries = await Tinder.find({});
+            if (tinderEntries.length > 0) {
+                let tinder = getRandom(tinderEntries);
+
+                client.say(target, `${tinder.text}`);
+                if (tinder.title != "") {
+                    client.say(
+                    target,
+                    `This Tinder bio was brought to you by the glorious, and taint-filled @${tinder.user}`
+                );
+                }
+            }
+            else {
+                client.say(target, `Tinder bio? What Tinder bio?`)
+            }
         }
     },
     addtinder: {
@@ -40,6 +53,8 @@ const commands = {
         response: 'Who loves the booty?'
     }
 }
+
+
 
 console.log('hello, twitch');
 
@@ -66,10 +81,12 @@ client.on('message', async (channel, context, message) => {
 
     if (!command) return;
 
-    const { response } = commands[command.toLowerCase()] || {};
+    const { response } = await commands[command.toLowerCase()] || {};
 
     if (typeof response === 'function') {
-        client.say(channel, response(argument));
+        // client.say(channel, await response);
+        // console.log(await response)
+        // client.say(channel, "sdads");
     }
     else if (typeof response === 'string') {
         client.say(channel, response);
