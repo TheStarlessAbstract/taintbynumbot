@@ -30,6 +30,9 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			time = new Date();
 			let result = [];
+			let quoteEntries = [];
+			let quote;
+			let reject;
 
 			if (
 				!quoteTimer ||
@@ -37,17 +40,37 @@ const commands = {
 			) {
 				quoteTimer = time.getTime();
 
-				let quoteEntries = await Quote.find({});
+				if (!argument) {
+					quoteEntries = await Quote.find({});
+				} else {
+					if (!isNaN(argument)) {
+						quote = await Quote.findOne({ index: argument });
+						if (!quote) {
+						}
+					} else {
+						quoteEntries = await Quote.find({
+							text: { $regex: argument, $options: "i" },
+						});
+					}
+				}
 
 				if (quoteEntries.length > 0) {
-					let quote = getRandom(quoteEntries);
+					quote = getRandom(quoteEntries);
+				} else if (isNaN(argument)) {
+					reject = "No Starless quote found mentioning: " + argument;
+				} else if (!argument) {
+					reject = "Starless has never said anything of note";
+				}
 
+				if (quote) {
 					result.push(quote.index + `. ` + quote.text);
 				} else {
-					result.push(`Starless has never said anything of note`);
+					if (!isNaN(argument)) {
+						reject = "There is no Starless quote number " + argument;
+					}
+					result.push(reject);
 				}
 			}
-
 			return result;
 		},
 	},
@@ -55,7 +78,7 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			let quoteIndex;
 
-			if (isModUp) {
+			if (isModUp && argument) {
 				let quoteEntries = await Quote.find({});
 
 				if (quoteEntries != 0) {
@@ -69,6 +92,12 @@ const commands = {
 					text: argument,
 					addedBy: context["display-name"],
 				});
+			} else if (!isModUp) {
+				return ["!addquote command is for Mods only"];
+			} else if (!argument) {
+				return [
+					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
+				];
 			}
 		},
 	},
@@ -76,6 +105,9 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			time = new Date();
 			let result = [];
+			let quoteEntries = [];
+			let quote;
+			let reject;
 
 			if (
 				!tinderTimer ||
@@ -83,20 +115,40 @@ const commands = {
 			) {
 				tinderTimer = time.getTime();
 
-				let tinderEntries = await Tinder.find({});
+				if (!argument) {
+					quoteEntries = await Tinder.find({});
+				} else {
+					if (!isNaN(argument)) {
+						quote = await Tinder.findOne({ index: argument });
+						if (!quote) {
+						}
+					} else {
+						quoteEntries = await Tinder.find({
+							text: { $regex: argument, $options: "i" },
+						});
+					}
+				}
 
-				if (tinderEntries.length > 0) {
-					let tinder = getRandom(tinderEntries);
+				if (quoteEntries.length > 0) {
+					quote = getRandom(quoteEntries);
+				} else if (isNaN(argument)) {
+					reject = "No Tinder bio found mentioning: " + argument;
+				} else if (!argument) {
+					reject = "Nobody has ever created Tinder bio for Starless";
+				}
 
-					result.push(tinder.index + `. ` + tinder.text);
-
-					if (tinder.user != "") {
+				if (quote) {
+					result.push(quote.index + `. ` + quote.text);
+					if (quote.user != "") {
 						result.push(
-							`This Tinder bio was brought to you by the glorious, and taint-filled @${tinder.user}`
+							`This Tinder bio was brought to you by the glorious, and taint-filled @${quote.user}`
 						);
 					}
 				} else {
-					result.push(`Tinder bio? What Tinder bio?`);
+					if (!isNaN(argument)) {
+						reject = "There is no Tinder bio number " + argument;
+					}
+					result.push(reject);
 				}
 			}
 
@@ -107,15 +159,15 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			let message;
 			let user;
-			let tinderIndex;
+			let quoteIndex;
 
-			if (isModUp) {
-				let tinderEntries = await Tinder.find({});
+			if (isModUp && argument) {
+				let quoteEntries = await Tinder.find({});
 
-				if (tinderEntries != 0) {
-					tinderIndex = getNextIndex(tinderEntries);
+				if (quoteEntries != 0) {
+					quoteIndex = getNextIndex(quoteEntries);
 				} else {
-					tinderIndex = 1;
+					quoteIndex = 1;
 				}
 
 				if (argument.includes("@")) {
@@ -128,11 +180,17 @@ const commands = {
 				}
 
 				await Tinder.create({
-					index: tinderIndex,
+					index: quoteIndex,
 					user: user,
 					text: message,
 					addedBy: context["display-name"],
 				});
+			} else if (!isModUp) {
+				return ["!addTinder command is for Mods only"];
+			} else if (!argument) {
+				return [
+					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
+				];
 			}
 		},
 	},
@@ -140,6 +198,9 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			time = new Date();
 			let result = [];
+			let quoteEntries = [];
+			let quote;
+			let reject;
 
 			if (
 				!titleTimer ||
@@ -147,20 +208,41 @@ const commands = {
 			) {
 				titleTimer = time.getTime();
 
-				let titleEntries = await Title.find({});
+				if (!argument) {
+					quoteEntries = await Title.find({});
+				} else {
+					if (!isNaN(argument)) {
+						quote = await Title.findOne({ index: argument });
+						if (!quote) {
+						}
+					} else {
+						quoteEntries = await Title.find({
+							text: { $regex: argument, $options: "i" },
+						});
+					}
+				}
 
-				if (titleEntries.length > 0) {
-					let title = getRandom(titleEntries);
+				if (quoteEntries.length > 0) {
+					quote = getRandom(quoteEntries);
+				} else if (isNaN(argument)) {
+					reject = "No Title found mentioning: " + argument;
+				} else if (!argument) {
+					reject =
+						"The mods don't seem to have been very abusive lately...with titles";
+				}
 
-					result.push(title.index + `. ` + title.text);
-
-					if (title.user != "") {
+				if (quote) {
+					result.push(quote.index + `. ` + quote.text);
+					if (quote.user != "") {
 						result.push(
-							`This possible streamer harrassment was brought to you by the glorious, and taint-filled @${title.user}`
+							`This possible streamer harassment was brought to you by the glorious, and taint-filled @${quote.user}`
 						);
 					}
 				} else {
-					result.push(`The mods don't seem to have been very abusive lately`);
+					if (!isNaN(argument)) {
+						reject = "There is no Tinder bio number " + argument;
+					}
+					result.push(reject);
 				}
 			}
 
@@ -171,15 +253,15 @@ const commands = {
 		response: async (isModUp, context, argument) => {
 			let message;
 			let user;
-			let titleIndex;
+			let quoteIndex;
 
-			if (isModUp) {
-				let titleEntries = await Title.find({});
+			if (isModUp && argument) {
+				let quoteEntries = await Title.find({});
 
-				if (titleEntries != 0) {
-					titleIndex = getNextIndex(titleEntries);
+				if (quoteEntries != 0) {
+					quoteIndex = getNextIndex(quoteEntries);
 				} else {
-					titleIndex = 1;
+					quoteIndex = 1;
 				}
 
 				if (argument.includes("@")) {
@@ -191,12 +273,18 @@ const commands = {
 					user = "";
 				}
 
-				await Tinder.create({
-					index: titleIndex,
+				await Title.create({
+					index: quoteIndex,
 					user: user,
 					text: message,
 					addedBy: context["display-name"],
 				});
+			} else if (!isModUp) {
+				return ["!addTitle command is for Mods only"];
+			} else if (!argument) {
+				return [
+					"To add a Title quote, you must include the quote after the command: '!addtitle Rose never doesn't get some abuse in through editing my titles @design_by_rose'",
+				];
 			}
 		},
 	},
@@ -204,8 +292,6 @@ const commands = {
 		response: "Who loves the booty?",
 	},
 };
-
-console.log("hello, twitch");
 
 const client = new tmi.Client({
 	connection: {
