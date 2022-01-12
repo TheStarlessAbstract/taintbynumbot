@@ -1,12 +1,15 @@
 require("dotenv").config();
+const axios = require("axios");
 const tmi = require("tmi.js");
 const mongoose = require("mongoose");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
+const TwitchToken = require("./models/twitchtoken");
 const Quote = require("./models/quote");
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
 const QUOTECOOLDOWN = 30000;
+let twitch_access_token;
 let time;
 let tinderTimer;
 let titleTimer;
@@ -24,6 +27,37 @@ mongoose.connect(uri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
+
+const client = new tmi.Client({
+	connection: {
+		reconnect: true,
+	},
+	channels: ["thestarlessabstract"],
+	identity: {
+		username: process.env.TWITCH_BOT_USERNAME,
+		password: process.env.TWITCH_OAUTH_TOKEN,
+	},
+});
+
+client.connect();
+
+init();
+
+async function init() {
+	twitch_access_token = await getTwitchAccessToken();
+
+	if (twitch_access_token == null) {
+		twitch_access_token = await createTwitchAccessToken();
+		if (twitch_access_token == null) {
+			client.say(
+				channel,
+				"TaintByNumBot is feeling a little scuffed, and Starless should probably sort this shit out at some point"
+			);
+		} else {
+			await storeTwitchAccessToken(twitch_access_token);
+		}
+	}
+}
 
 const commands = {
 	quote: {
@@ -254,57 +288,89 @@ const commands = {
 			let message;
 			let user;
 			let quoteIndex;
+			let result = [];
+			let created;
 
-			if (isModUp && argument) {
+			if (isModUp) {
+				// gets all current titles
 				let quoteEntries = await Title.find({});
 
+				// sets index quote index
 				if (quoteEntries != 0) {
 					quoteIndex = getNextIndex(quoteEntries);
 				} else {
 					quoteIndex = 1;
 				}
 
-				if (argument.includes("@")) {
-					argument = argument.split("@");
-					message = argument[0];
-					user = argument[1];
-				} else {
-					message = argument;
-					user = "";
+				// if no argument sent with !addTitle command
+				if (!argument) {
+					let config = {
+						headers: {
+							Authorization: "Bearer " + twitch_access_token,
+							"Client-Id": process.env.TWITCH_CLIENT_ID,
+						},
+					};
+
+					try {
+						// gets channel details for broascaster_id
+						let res = await axios.get(
+							"https://api.twitch.tv/helix/channels?broadcaster_id=100612361",
+							config
+						);
+
+						if (res.status == 200) {
+							message = res.data.data[0].title;
+						} else if (res.status == 500) {
+							result.push(
+								"Twitch is dropping the bomb, so try later or just paste the stream title after the command like so: !addtitle This would be a terrible title for a stream"
+							);
+						}
+					} catch (err) {
+						result.push(
+							"Twitch says no, and Starless should really sort this out some time after stream"
+						);
+					}
+				} else if (argument) {
+					if (argument.includes("@")) {
+						argument = argument.split("@");
+						message = argument[0];
+						user = argument[1];
+					} else {
+						message = argument;
+					}
 				}
 
-				await Title.create({
-					index: quoteIndex,
-					user: user,
-					text: message,
-					addedBy: context["display-name"],
-				});
+				try {
+					created = await Title.create({
+						index: quoteIndex,
+						text: message,
+						user: user,
+						addedBy: context["display-name"],
+					});
+
+					if (created._id) {
+						result.push("Title added");
+					}
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This title has already been added");
+					} else {
+						result.push(
+							"There was some problem adding the title, and Starless should really sort this shit out."
+						);
+					}
+				}
 			} else if (!isModUp) {
-				return ["!addTitle command is for Mods only"];
-			} else if (!argument) {
-				return [
-					"To add a Title quote, you must include the quote after the command: '!addtitle Rose never doesn't get some abuse in through editing my titles @design_by_rose'",
-				];
+				result.push("!addTitle command is for Mods only");
 			}
+
+			return result;
 		},
 	},
 	booty: {
 		response: "Who loves the booty?",
 	},
 };
-
-const client = new tmi.Client({
-	connection: {
-		reconnect: true,
-	},
-	channels: ["thestarlessabstract"],
-	identity: {
-		username: process.env.TWITCH_BOT_USERNAME,
-		password: process.env.TWITCH_OAUTH_TOKEN,
-	},
-});
-
-client.connect();
 
 client.on("connected", onConnectedHandler);
 client.on("message", async (channel, context, message) => {
@@ -351,4 +417,50 @@ function onConnectedHandler(addr, port) {
 
 function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
+}
+
+async function getTwitchAccessToken() {
+	let token = await TwitchToken.find({});
+
+	if (token.length > 0) {
+		token = token[0];
+	} else {
+		token = null;
+	}
+
+	return token.accessToken;
+}
+
+async function createTwitchAccessToken() {
+	let accessToken;
+	let params = {
+		client_id: process.env.TWITCH_CLIENT_ID,
+		client_secret: process.env.TWITCH_CLIENT_SECRET,
+		grant_type: "client_credentials",
+	};
+
+	let url = "https://id.twitch.tv/oauth2/token";
+	try {
+		let res = await axios.post(url, params);
+
+		if (res.status == 200) {
+			accessToken = res.data.access_token;
+		}
+	} catch (err) {
+		accessToken = null;
+	}
+	return accessToken;
+}
+
+async function storeTwitchAccessToken(twitch_access_token) {
+	let currentToken = await getTwitchAccessToken();
+	if (currentToken == null) {
+		await TwitchToken.create({
+			accessToken: twitch_access_token,
+		});
+	} else {
+		currentToken.accessToken = twitch_access_token;
+		currentToken.save;
+		// update current token
+	}
 }
