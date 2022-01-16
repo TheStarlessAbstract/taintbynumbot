@@ -2,6 +2,7 @@ require("dotenv").config();
 const axios = require("axios");
 const tmi = require("tmi.js");
 const mongoose = require("mongoose");
+const DeathCounter = require("./models/deathcounter");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
 const TwitchToken = require("./models/twitchtoken");
@@ -14,12 +15,22 @@ let time;
 let tinderTimer;
 let titleTimer;
 let quoteTimer;
+let totalStreamDeaths = 0;
+let gameStreamDeaths;
+let allTimeStreamDeaths = 0;
+
 const uri =
 	"mongodb+srv://" +
 	process.env.USER +
 	":" +
 	process.env.PASS +
 	"@cluster0.8pokz.mongodb.net/taint_bot?retryWrites=true&w=majority";
+
+let config = {
+	headers: {
+		"Client-Id": process.env.TWITCH_CLIENT_ID,
+	},
+};
 
 const regexpCommand = new RegExp(/^!([a-zA-Z0-9]+)(?:\W+)?(.*)?/);
 
@@ -57,9 +68,169 @@ async function init() {
 			await storeTwitchAccessToken(twitch_access_token);
 		}
 	}
+
+	config.headers.Authorization = "Bearer " + twitch_access_token;
+
+	let deathCounters = await DeathCounter.find({}).exec();
+	if (deathCounters.length > 0) {
+		for (let i = 0; i < deathCounters.length; i++) {
+			allTimeStreamDeaths = allTimeStreamDeaths + deathCounters[i].deaths;
+		}
+	}
 }
 
 const commands = {
+	f: {
+		response: async (isModUp, context, argument) => {
+			let result = [];
+			let gameName;
+			let streamDate;
+			let deathCounters;
+			let randomCheck;
+
+			try {
+				let userid;
+				if (!gameStreamDeaths) {
+					userid = 81628627;
+				} else {
+					userid = 140224905;
+				}
+
+				let res = await axios.get(
+					// 100612361
+					"https://api.twitch.tv/helix/streams?user_id=" + userid,
+					config
+				);
+
+				if (res.status == 200) {
+					if (res.data.data.length == 0) {
+						result.push(
+							"Starless doesn't seem to be streaming right now, come back later"
+						);
+					} else {
+						gameName = res.data.data[0].game_name;
+						streamDate = res.data.data[0].started_at;
+						streamDate = new Date(streamDate);
+
+						streamDate = new Date(
+							streamDate.getFullYear(),
+							streamDate.getMonth(),
+							streamDate.getDate()
+						);
+
+						if (!gameStreamDeaths) {
+							deathCounters = await DeathCounter.find({
+								streamStartDate: streamDate,
+							}).exec();
+
+							if (deathCounters.length == 0) {
+								gameStreamDeaths = await createDeathCounter(
+									gameName,
+									streamDate
+								);
+							} else {
+								if (deathCounters > 1) {
+									randomCheck = deathCounters.length + 1;
+								}
+								for (let i = 0; i < deathCounters.length; i++) {
+									totalStreamDeaths =
+										totalStreamDeaths + deathCounters[i].deaths;
+								}
+
+								deathCounters = await DeathCounter.findOne({
+									gameTitle: gameName,
+									streamStartDate: streamDate,
+								}).exec();
+
+								if (deathCounters) {
+									gameStreamDeaths = deathCounters;
+								} else {
+									gameStreamDeaths = await createDeathCounter(
+										gameName,
+										streamDate
+									);
+								}
+							}
+						} else {
+							if (gameStreamDeaths.gameTitle != gameName) {
+								deathCounters = await DeathCounter.findOne({
+									gameTitle: gameName,
+									streamStartDate: streamDate,
+								}).exec();
+
+								if (deathCounters) {
+									gameStreamDeaths = deathCounters;
+								} else {
+									gameStreamDeaths = await createDeathCounter(
+										gameName,
+										streamDate
+									);
+								}
+							}
+						}
+						gameStreamDeaths.deaths++;
+						totalStreamDeaths++;
+						allTimeStreamDeaths++;
+						gameStreamDeaths.save();
+
+						result.push(
+							"Starless has now died " +
+								gameStreamDeaths.deaths +
+								" times while playing " +
+								gameStreamDeaths.gameTitle +
+								" today"
+						);
+
+						let random = Math.floor(Math.random() * 101);
+
+						if (random >= 14 && random <= 27) {
+							result.push(
+								"Since records have started, Starless has died a grand total of " +
+									allTimeStreamDeaths +
+									" times"
+							);
+						} else if (random >= 42 && random <= 55) {
+							result.push(
+								"Starless has played " +
+									randomCheck +
+									" games this stream, and has died about " +
+									totalStreamDeaths +
+									" times"
+							);
+						} else if (random >= 70 && random <= 83) {
+							let gameDeaths = 0;
+							let gameStreams = await DeathCounter.find({
+								gameTitle: gameName,
+							}).exec();
+							if (gameStreams.length > 1) {
+								for (let i = 0; i < gameStreams.length; i++) {
+									gameDeaths = gameDeaths + gameStreams.deaths;
+								}
+							}
+							result.push(
+								"Starless has died at least " +
+									gameDeaths +
+									"times, across all streams while playing " +
+									gameStreams[0].gameTitle
+							);
+						}
+					}
+				} else if (res.status == 500) {
+					result.push("Twitch is dropping the bomb, !f for Twitch instead");
+				} else {
+					console.log(
+						"https://api.twitch.tv/helix/streams?user_id " + res.status
+					);
+				}
+			} catch (err) {
+				result.push(
+					"Twitch says no, and Starless should really sort this out some time after stream"
+				);
+			}
+
+			return result;
+		},
+	},
 	quote: {
 		response: async (isModUp, context, argument) => {
 			time = new Date();
@@ -304,13 +475,6 @@ const commands = {
 
 				// if no argument sent with !addTitle command
 				if (!argument) {
-					let config = {
-						headers: {
-							Authorization: "Bearer " + twitch_access_token,
-							"Client-Id": process.env.TWITCH_CLIENT_ID,
-						},
-					};
-
 					try {
 						// gets channel details for broascaster_id
 						let res = await axios.get(
@@ -463,4 +627,14 @@ async function storeTwitchAccessToken(twitch_access_token) {
 		currentToken.save;
 		// update current token
 	}
+}
+
+async function createDeathCounter(game, date) {
+	let deathCounter = await DeathCounter.create({
+		deaths: 0,
+		gameTitle: game,
+		streamStartDate: date,
+	});
+
+	return deathCounter;
 }
