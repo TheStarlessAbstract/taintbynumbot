@@ -89,16 +89,8 @@ const commands = {
 			let randomCheck;
 
 			try {
-				let userid;
-				if (!gameStreamDeaths) {
-					userid = 81628627;
-				} else {
-					userid = 140224905;
-				}
-
 				let res = await axios.get(
-					// 100612361
-					"https://api.twitch.tv/helix/streams?user_id=" + userid,
+					"https://api.twitch.tv/helix/streams?user_id=100612361",
 					config
 				);
 
