@@ -215,6 +215,7 @@ const commands = {
 					);
 				}
 			} catch (err) {
+				console.log(err);
 				result.push(
 					"Twitch says no, and Starless should really sort this out some time after stream"
 				);
