@@ -121,8 +121,8 @@ const commands = {
 									streamDate
 								);
 							} else {
-								if (deathCounters > 1) {
-									randomCheck = deathCounters.length + 1;
+								if (deathCounters.length > 1) {
+									randomCheck = deathCounters.length;
 								}
 								for (let i = 0; i < deathCounters.length; i++) {
 									totalStreamDeaths =
@@ -170,7 +170,7 @@ const commands = {
 								gameStreamDeaths.deaths +
 								" times while playing " +
 								gameStreamDeaths.gameTitle +
-								" today"
+								" this stream"
 						);
 
 						let random = Math.floor(Math.random() * 101);
@@ -181,7 +181,7 @@ const commands = {
 									allTimeStreamDeaths +
 									" times"
 							);
-						} else if (random >= 42 && random <= 55) {
+						} else if (randomCheck && random >= 42 && random <= 55) {
 							result.push(
 								"Starless has played " +
 									randomCheck +
@@ -198,13 +198,14 @@ const commands = {
 								for (let i = 0; i < gameStreams.length; i++) {
 									gameDeaths = gameDeaths + gameStreams.deaths;
 								}
+
+								result.push(
+									"Starless has died at least " +
+										gameDeaths +
+										" times, across all streams while playing " +
+										gameStreams[0].gameTitle
+								);
 							}
-							result.push(
-								"Starless has died at least " +
-									gameDeaths +
-									"times, across all streams while playing " +
-									gameStreams[0].gameTitle
-							);
 						}
 					}
 				} else if (res.status == 500) {
