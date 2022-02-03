@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
+const fs = require("fs").promises;
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
@@ -30,6 +31,7 @@ server.listen(3000, () => {
 init();
 
 async function init() {
+	await fs.mkdir("./files", { recursive: false }, (err) => {});
 	botIo.setup(io);
 	await chatClient.setup();
 	await pubSubClient.setup(io);
