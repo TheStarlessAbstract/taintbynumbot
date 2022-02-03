@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+    </head>
+    <body style="transparent">
+        <audio id="myAudio">
+            <source src="" id="source">
+        </audio>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            var x = document.getElementById("myAudio"); 
+            var source = document.getElementById("source");
+
+            x.addEventListener("ended", () => {
+                socket.emit("ended", "response");
+            }, false);
+
+            socket.on("playAudio", (url) => {
+                source.src = url;
+                x.load()
+                x.play();
+            });
+        </script>
+    </body>
+</html>
