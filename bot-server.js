@@ -24,8 +24,8 @@ app.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
 });
 
-server.listen(3000, () => {
-	console.log("listening on *:3000");
+server.listen(process.env.PORT || 5000, () => {
+	console.log("listening on *:" + process.env.PORT || 5000);
 });
 
 init();
