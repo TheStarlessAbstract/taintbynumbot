@@ -22,6 +22,10 @@
                 x.load()
                 x.play();
             });
+
+            socket.on("refresh", (text) => {
+                socket.emit("not idle", "refreshed");
+            });
         </script>
     </body>
 </html>

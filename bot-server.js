@@ -14,6 +14,7 @@ const chatClient = require("./bot-chatClient");
 const pubSubClient = require("./bot-pubSubClient");
 
 const uri = process.env.MONGO_URI;
+const port = process.env.PORT || 5000;
 
 mongoose.connect(uri, {
 	useNewUrlParser: true,
@@ -24,14 +25,19 @@ app.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
 });
 
-server.listen(process.env.PORT || 5000, () => {
-	console.log("listening on *:" + process.env.PORT || 5000);
+server.listen(port, () => {
+	console.log("listening on *:" + port);
 });
 
 init();
 
 async function init() {
-	await fs.mkdir("./files", { recursive: false }, (err) => {});
+	try {
+		await fs.mkdir("./files", { recursive: false }, (err) => {
+			if (err) throw err;
+		});
+	} catch (err) {}
+
 	botIo.setup(io);
 	await chatClient.setup();
 	await pubSubClient.setup(io);
