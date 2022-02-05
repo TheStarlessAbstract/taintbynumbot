@@ -1,7 +1,7 @@
 const ApiClient = require("@twurple/api").ApiClient;
 const fs = require("fs").promises;
 
-const Command = require("./models/Command");
+const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
