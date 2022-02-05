@@ -1,3 +1,6 @@
+require("dotenv").config();
+const https = require("https");
+
 const redemptions = require("./bot-redemptions");
 
 let min = 600000;
@@ -11,7 +14,13 @@ function setup(io) {
 		redemptions.setHydrateBooze();
 
 		interval = setInterval(() => {
-			socket.emit("refresh", "not idle");
+			try {
+				https.get(process.env.BOT_DOMAIN, (res) => {
+					// do nothing
+				});
+			} catch (err) {
+				console.log(err);
+			}
 		}, getRandomBetween());
 
 		socket.on("disconnect", () => {

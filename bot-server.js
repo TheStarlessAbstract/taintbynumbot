@@ -21,6 +21,11 @@ mongoose.connect(uri, {
 	useUnifiedTopology: true,
 });
 
+app.get("/", (req, res) => {
+	console.log("hello twitch");
+	res.send("Hello Twitch!");
+});
+
 app.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
 });
