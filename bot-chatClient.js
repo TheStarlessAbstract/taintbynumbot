@@ -7,8 +7,6 @@ const Token = require("./models/token");
 
 const commands = require("./bot-commands");
 
-const regexpCommand = new RegExp(/^!([a-zA-Z0-9]+)(?:\W+)?(.*)?/);
-
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
@@ -86,29 +84,28 @@ async function setup() {
 			if (!isNotBot || !isNotBuhhs) {
 				return;
 			} else {
-				const [raw, command, argument] = message.match(regexpCommand) || [
-					null,
-					null,
-					null,
-				];
-				if (!command) return;
+				if (message.startsWith("!")) {
+					let command = message.split(/\s(.+)/)[0].slice(1);
+					let argument = message.split(/\s(.+)/)[1];
 
-				const { response } = (await commands.list[command.toLowerCase()]) || {};
+					const { response } =
+						(await commands.list[command.toLowerCase()]) || {};
 
-				if (typeof response === "function") {
-					let result = await response({
-						isModUp: isModUp,
-						userInfo: userInfo,
-						argument: argument,
-					});
+					if (typeof response === "function") {
+						let result = await response({
+							isModUp: isModUp,
+							userInfo: userInfo,
+							argument: argument,
+						});
 
-					if (result) {
-						for (let i = 0; i < result.length; i++) {
-							chatClient.say(channel, result[i]);
+						if (result) {
+							for (let i = 0; i < result.length; i++) {
+								chatClient.say(channel, result[i]);
+							}
 						}
+					} else if (typeof response === "string") {
+						chatClient.say(channel, response);
 					}
-				} else if (typeof response === "string") {
-					chatClient.say(channel, response);
 				}
 			}
 		});

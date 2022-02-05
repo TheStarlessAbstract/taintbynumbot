@@ -1,5 +1,7 @@
 const ApiClient = require("@twurple/api").ApiClient;
+const fs = require("fs").promises;
 
+const Command = require("./models/Command");
 const DeathCounter = require("./models/deathcounter");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
@@ -17,8 +19,75 @@ let tinderTimer;
 let titleTimer;
 let totalStreamDeaths = 0;
 let quoteTimer;
+let chatCommands;
 
 const commands = {
+	addcomm: {
+		response: async (config) => {
+			let message;
+			let user;
+			let quoteIndex;
+			let result = [];
+			let commandName;
+			let commandText;
+
+			if (config.isModUp && config.argument) {
+				if (config.argument.startsWith("!")) {
+					commandName = config.argument.split(/\s(.+)/)[0].slice(1);
+					commandText = config.argument.split(/\s(.+)/)[1];
+
+					const { response } =
+						(await commands[commandName.toLowerCase()]) || {};
+
+					if (!commandText) {
+						result.push([
+							"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
+						]);
+					} else {
+						if (
+							!response &&
+							!chatCommands.find((obj) => {
+								return obj.name === commandName;
+							})
+						) {
+							let newCommand = new Command({
+								name: commandName,
+								text: commandText,
+								createdBy: config.userInfo.displayName,
+							});
+							commands[commandName] = {
+								response: commandText,
+							};
+							chatCommands.push(newCommand);
+							await newCommand.save();
+
+							await fs.writeFile(
+								"./files/chatCommands.json",
+								JSON.stringify(chatCommands, null, 4),
+								"UTF-8"
+							);
+
+							result.push(["!" + commandName + " has been created!"]);
+						} else {
+							result.push(["!" + commandName + " already exists"]);
+						}
+					}
+				} else {
+					result.push([
+						"New command must start with !. !addcomm !newcommand this is what a new command looks like",
+					]);
+				}
+			} else if (!config.isModUp) {
+				result.push(["!addComm command is for Mods only"]);
+			} else if (!config.argument) {
+				result.push([
+					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
+				]);
+			}
+
+			return result;
+		},
+	},
 	addtinder: {
 		response: async (config) => {
 			let message;
@@ -532,6 +601,27 @@ function setApiClient(authProvider) {
 	apiClient = new ApiClient({ authProvider });
 }
 
+async function commandsImport() {
+	try {
+		chatCommands = JSON.parse(
+			await fs.readFile("./files/chatCommands.json", "UTF-8")
+		);
+	} catch (error) {
+		chatCommands = await Command.find({});
+		if (chatCommands.length > 0) {
+			await fs.writeFile(
+				"./files/chatCommands.json",
+				JSON.stringify(chatCommands, null, 4),
+				"UTF-8"
+			);
+		}
+	}
+	for (let i = 0; i < chatCommands.length; i++) {
+		commands[chatCommands[i].name] = { response: chatCommands[i].text };
+	}
+}
+
 exports.list = commands;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setApiClient = setApiClient;
+exports.commandsImport = commandsImport;
