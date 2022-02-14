@@ -24,6 +24,7 @@ let isLive = false;
 async function setup() {
 	try {
 		token = await Token.findOne({ name: "chatClient" });
+		await fs.mkdir("./files");
 		tokenData = JSON.parse(
 			await fs.readFile("./files/chatToken.json", "UTF-8")
 		);
