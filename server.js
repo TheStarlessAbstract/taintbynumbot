@@ -9,12 +9,12 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const botIo = require("./bot-io");
-const chatClient = require("./bot-chatClient");
-const pubSubClient = require("./bot-pubSubClient");
+const serverIo = require("./server-io");
 
-const uri = process.env.MONGO_URI;
 const port = process.env.PORT || 5000;
+const uri = process.env.MONGO_URI;
+
+app.use(express.json());
 
 mongoose.connect(uri, {
 	useNewUrlParser: true,
@@ -30,6 +30,11 @@ app.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
 });
 
+app.post("/playaudio", (req, res) => {
+	serverIo.playAudio(req.body.url);
+	res.sendStatus(201);
+});
+
 server.listen(port, () => {
 	console.log("listening on *:" + port);
 });
@@ -43,7 +48,5 @@ async function init() {
 		});
 	} catch (err) {}
 
-	botIo.setup(io);
-	await chatClient.setup();
-	await pubSubClient.setup(io);
+	serverIo.setup(io);
 }

@@ -3,7 +3,7 @@
     <head>
         <title>Socket.IO chat</title>
     </head>
-    <body style="transparent">
+    <body>
         <audio id="myAudio">
             <source src="" id="source">
         </audio>
@@ -21,10 +21,6 @@
                 source.src = url;
                 x.load()
                 x.play();
-            });
-
-            socket.on("refresh", (text) => {
-                socket.emit("not idle", "refreshed");
             });
         </script>
     </body>

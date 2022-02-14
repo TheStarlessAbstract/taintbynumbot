@@ -13,7 +13,7 @@ let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let token;
 let tokenData;
 
-async function setup(io) {
+async function setup() {
 	try {
 		token = await Token.findOne({ name: "pubSubClient" });
 		tokenData = JSON.parse(
@@ -66,7 +66,7 @@ async function setup(io) {
 
 		const pubSubClient = new PubSubClient();
 		const userId = await pubSubClient.registerUserListener(authProvider);
-		const listener = await redemptions.setup(pubSubClient, userId, io);
+		const listener = await redemptions.setup(pubSubClient, userId); // check io
 	}
 }
 

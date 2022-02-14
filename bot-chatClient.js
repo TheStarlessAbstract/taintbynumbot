@@ -1,4 +1,5 @@
 require("dotenv").config();
+const ApiClient = require("@twurple/api").ApiClient;
 const ChatClient = require("@twurple/chat").ChatClient;
 const fs = require("fs").promises;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
@@ -6,12 +7,19 @@ const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 const Token = require("./models/token");
 
 const commands = require("./bot-commands");
+const messages = require("./bot-messages");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
+let username = process.env.TWITCH_USERNAME;
+let botUsername = process.env.TWITCH_BOT_USERNAME;
 
 let token;
 let tokenData;
+let interval;
+let intervalMessages;
+let chatClient;
+let isLive = false;
 
 async function setup() {
 	try {
@@ -63,22 +71,28 @@ async function setup() {
 			},
 			tokenData
 		);
-		const chatClient = new ChatClient({
+		chatClient = new ChatClient({
 			authProvider,
-			channels: [process.env.TWITCH_USERNAME],
+			channels: [username],
+			requestMembershipEvents: true,
 		});
 
-		await chatClient.connect(chatClient);
-		await chatClient.onConnect(onConnectedHandler());
+		const apiClient = new ApiClient({ authProvider });
 
-		chatClient.onMessage(async (channel, user, message, msg) => {
+		await chatClient.connect(chatClient);
+		chatClient.onRegister(async () => {
+			connected();
+			checkLive();
+		});
+
+		await chatClient.onMessage(async (channel, user, message, msg) => {
 			let userInfo = msg.userInfo;
 			const isBroadcaster = userInfo.isBroadcaster;
 			const isMod = userInfo.isMod;
 			const isVip = userInfo.isVip;
 			const isSub = userInfo.isSub;
 			const isModUp = isBroadcaster || isMod;
-			const isNotBot = user != process.env.TWITCH_BOT_USERNAME;
+			const isNotBot = user != botUsername;
 			const isNotBuhhs = user != "buhhsbot";
 
 			if (!isNotBot || !isNotBuhhs) {
@@ -110,13 +124,78 @@ async function setup() {
 			}
 		});
 
-		commands.setApiClient(authProvider);
+		commands.setApiClient(apiClient);
 		commands.setAllTimeStreamDeaths();
 	}
 }
 
-async function onConnectedHandler() {
+async function connected() {
 	console.log(" * Connected to Twitch chat * ");
 }
 
+function checkLive() {
+	setInterval(async () => {
+		try {
+			if ((await isStreamLive()) && !isLive) {
+				console.log(" * stream is live * ");
+				setTimedMessages();
+				isLive = true;
+			} else if ((await !isStreamLive()) && isLive) {
+				clearInterval(interval);
+				isLive = false;
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}, 900000);
+}
+
+async function setTimedMessages() {
+	intervalMessages = await messages.get();
+
+	interval = setInterval(async () => {
+		let message = getRandom(intervalMessages);
+
+		intervalMessages = intervalMessages.filter((e) => e !== message);
+		if (intervalMessages.length == 0) {
+			intervalMessages = await messages.get();
+		}
+
+		await chatClient.say(username, message.text);
+	}, 600000);
+}
+
+function getRandom(array) {
+	return array[Math.floor(Math.random() * array.length)];
+}
+
+function messageUpdate(update) {
+	intervalMessages = update;
+}
+
+async function isStreamLive() {
+	let isLive;
+
+	try {
+		let stream = await apiClient.streams.getStreamByUserId(
+			process.env.TWITCH_USER_ID
+		);
+
+		if (stream == null) {
+			isLive = false;
+		} else {
+			isLive = true;
+		}
+	} catch {
+		isLive = false;
+	}
+
+	return isLive;
+}
+
+function getRandom(array) {
+	return array[Math.floor(Math.random() * array.length)];
+}
+
 exports.setup = setup;
+exports.messageUpdate = messageUpdate;

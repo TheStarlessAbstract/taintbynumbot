@@ -1,11 +1,14 @@
-const ApiClient = require("@twurple/api").ApiClient;
 const fs = require("fs").promises;
 
 const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
+const Message = require("./models/message");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
 const Quote = require("./models/quote");
+
+const chatClient = require("./bot-chatclient");
+const messages = require("./bot-messages");
 
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
@@ -82,6 +85,34 @@ const commands = {
 			} else if (!config.argument) {
 				result.push([
 					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
+				]);
+			}
+
+			return result;
+		},
+	},
+	addmessage: {
+		response: async (config) => {
+			let user;
+			let quoteIndex;
+			let result = [];
+
+			if (config.isModUp && config.argument) {
+				let messagesList = await messages.get();
+
+				let message = await Message.create({
+					text: config.argument,
+					addedBy: config.userInfo.displayName,
+				});
+				messagesList.push(message);
+				messages.update(messagesList);
+
+				result.push(["Added new message"]);
+			} else if (!config.isModUp) {
+				result.push(["!addTinder command is for Mods only"]);
+			} else if (!config.argument) {
+				result.push([
+					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
 				]);
 			}
 
@@ -287,7 +318,8 @@ const commands = {
 			let gameName;
 			let streamDate;
 			let deathCounters;
-			let randomCheck;
+			let gamesPlayed;
+			let pularlity;
 
 			try {
 				let stream = await apiClient.streams.getStreamByUserId(
@@ -316,9 +348,6 @@ const commands = {
 						if (deathCounters.length == 0) {
 							gameStreamDeaths = await createDeathCounter(gameName, streamDate);
 						} else {
-							if (deathCounters.length > 1) {
-								randomCheck = deathCounters.length;
-							}
 							for (let i = 0; i < deathCounters.length; i++) {
 								totalStreamDeaths = totalStreamDeaths + deathCounters[i].deaths;
 							}
@@ -359,46 +388,82 @@ const commands = {
 					allTimeStreamDeaths++;
 					gameStreamDeaths.save();
 
-					result.push(
-						"Starless has now died " +
-							gameStreamDeaths.deaths +
-							" times while playing " +
-							gameStreamDeaths.gameTitle +
-							" this stream"
-					);
+					deathCounters = await DeathCounter.find({
+						streamStartDate: streamDate,
+					}).exec();
+
+					gamesPlayed = deathCounters.length;
 
 					let random = Math.floor(Math.random() * 101);
 
-					if (random >= 14 && random <= 27) {
-						result.push(
-							"Since records have started, Starless has died a grand total of " +
-								allTimeStreamDeaths +
-								" times"
+					if (random == 1) {
+						pularlity = getPlurality(
+							gameStreamDeaths.deaths,
+							"death",
+							"deaths"
 						);
-					} else if (randomCheck && random >= 42 && random <= 55) {
+
 						result.push(
-							"Starless has played " +
-								randomCheck +
-								" games this stream, and has died about " +
-								totalStreamDeaths +
-								" times"
+							"ThisIsFine ThisIsFine ThisIsFine it's only " +
+								gameStreamDeaths.deaths +
+								" " +
+								pularlity +
+								" ThisIsFine ThisIsFine ThisIsFine"
 						);
-					} else if (random >= 70 && random <= 83) {
-						let gameDeaths = 0;
-						let gameStreams = await DeathCounter.find({
-							gameTitle: gameName,
-						}).exec();
-						if (gameStreams.length > 1) {
-							for (let i = 0; i < gameStreams.length; i++) {
-								gameDeaths = gameDeaths + gameStreams.deaths;
-							}
+					} else {
+						pularlity = getPlurality(gameStreamDeaths.deaths, "time", "times");
+
+						result.push(
+							"Starless has now died " +
+								gameStreamDeaths.deaths +
+								" " +
+								pularlity +
+								" while playing " +
+								gameStreamDeaths.gameTitle +
+								" this stream"
+						);
+
+						if (random >= 14 && random <= 27) {
+							pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
 
 							result.push(
-								"Starless has died at least " +
-									gameDeaths +
-									" times, across all streams while playing " +
-									gameStreams[0].gameTitle
+								"Since records have started, Starless has died a grand total of " +
+									allTimeStreamDeaths +
+									" " +
+									pularlity
 							);
+						} else if (gamesPlayed && random >= 42 && random <= 55) {
+							pularlity = getPlurality(totalStreamDeaths, "time", "times");
+
+							result.push(
+								"Starless has played " +
+									gamesPlayed +
+									" games this stream, and has died about " +
+									totalStreamDeaths +
+									" " +
+									pularlity
+							);
+						} else if (random >= 70 && random <= 83) {
+							let gameDeaths = 0;
+							let gameStreams = await DeathCounter.find({
+								gameTitle: gameName,
+							}).exec();
+							if (gameStreams.length > 1) {
+								for (let i = 0; i < gameStreams.length; i++) {
+									gameDeaths = gameDeaths + gameStreams[i].deaths;
+								}
+
+								pularlity = getPlurality(gameDeaths, "time", "times");
+
+								result.push(
+									"Starless has died at least " +
+										gameDeaths +
+										" " +
+										pularlity +
+										", across all streams while playing " +
+										gameStreams[0].gameTitle
+								);
+							}
 						}
 					}
 				}
@@ -590,6 +655,8 @@ async function setAllTimeStreamDeaths() {
 		for (let i = 0; i < deathCounters.length; i++) {
 			allTimeStreamDeaths = allTimeStreamDeaths + deathCounters[i].deaths;
 		}
+	} else {
+		allTimeStreamDeaths = 0;
 	}
 }
 
@@ -597,8 +664,8 @@ function getRandom(array) {
 	return array[Math.floor(Math.random() * array.length)];
 }
 
-function setApiClient(authProvider) {
-	apiClient = new ApiClient({ authProvider });
+function setApiClient(newApiClient) {
+	apiClient = newApiClient;
 }
 
 async function commandsImport() {
@@ -619,6 +686,18 @@ async function commandsImport() {
 	for (let i = 0; i < chatCommands.length; i++) {
 		commands[chatCommands[i].name] = { response: chatCommands[i].text };
 	}
+}
+
+function getPlurality(value, singular, plural) {
+	let result;
+
+	if (value > 1) {
+		result = plural;
+	} else {
+		result = singular;
+	}
+
+	return result;
 }
 
 exports.list = commands;

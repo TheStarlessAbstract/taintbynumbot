@@ -1,56 +1,41 @@
+require("dotenv").config();
+
+const axios = require("axios");
 const fs = require("fs").promises;
 
 const AudioLink = require("./models/audiolink");
 
 let audioLinks;
-let hydrateBooze;
-let hydrateBoozeDivisor;
-let hydrateBoozeTime;
+let audioRedeemCounter;
+let lastAudioPlayed;
 let audioLink;
-let canPlay = true;
-let io;
+let url = process.env.BOT_DOMAIN;
 
-async function setup(pubSubClient, userId, newIo) {
-	io = newIo;
-	const listener = await pubSubClient.onRedemption(userId, (message) => {
-		if (message.rewardTitle == "Hydrate but with booze" && canPlay) {
-			hydrateBooze++;
-			if (
-				message.userName == "clingell" &&
-				(hydrateBooze % 5 === 0 ||
-					new Date().getTime() - hydrateBoozeTime == 60000)
-			) {
-				playAudio();
-			} else if (
-				hydrateBooze % hydrateBoozeDivisor === 0 ||
-				new Date().getTime() - hydrateBoozeTime == 120000
-			) {
-				playAudio();
+async function setup(pubSubClient, userId) {
+	const listener = await pubSubClient.onRedemption(userId, async (message) => {
+		// for playing audio
+		if (
+			message.rewardTitle == "Hydrate but with booze" ||
+			message.rewardTitle == "Hydrate!"
+		) {
+			audioRedeemCounter++;
+
+			if (new Date().getTime() - lastAudioPlayed >= 120000) {
+				audioLink = audioLinks.find(
+					(element) => element.channelPointRedeem == message.rewardTitle
+				);
+
+				let resp = await axios.post(url + "/playaudio", { url: audioLink.url });
 			}
-		} else {
 		}
 	});
 
 	return listener;
 }
 
-function playAudio() {
-	canPlay = false;
-	audioLink = audioLinks.find((e) => e.name == "hiccup");
-	io.emit("playAudio", audioLink.url);
-	hydrateBoozeDivisor = getRandomBetween(5, 15);
-	hydrateBoozeTime = new Date().getTime();
-}
-
 function setHydrateBooze() {
-	canPlay = true;
-	hydrateBooze = 0;
-	hydrateBoozeDivisor = 1;
-	hydrateBoozeTime = new Date().getTime();
-}
-
-function getRandomBetween(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
+	audioRedeemCounter = 0;
+	lastAudioPlayed = new Date().getTime();
 }
 
 async function audioImport() {
@@ -70,14 +55,9 @@ async function audioImport() {
 	}
 }
 
-function setCanPlay() {
-	canPlay = true;
-}
-
 exports.audioImport = audioImport;
 exports.setup = setup;
 exports.setHydrateBooze = setHydrateBooze;
-exports.setCanPlay = setCanPlay;
 
 // let test = {
 //     channelId: message.channelId,
