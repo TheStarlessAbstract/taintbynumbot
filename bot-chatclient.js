@@ -8,6 +8,7 @@ const Token = require("./models/token");
 
 const commands = require("./bot-commands");
 const messages = require("./bot-messages");
+const redemptions = require("./bot-redemptions");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
@@ -20,11 +21,12 @@ let interval;
 let intervalMessages;
 let chatClient;
 let isLive = false;
+let messageCount = 0;
 
 async function setup() {
 	try {
 		token = await Token.findOne({ name: "chatClient" });
-		await fs.mkdir("./files");
+		await fs.mkdir("./files", { recursive: true });
 		tokenData = JSON.parse(
 			await fs.readFile("./files/chatToken.json", "UTF-8")
 		);
@@ -84,6 +86,8 @@ async function setup() {
 		chatClient.onRegister(async () => {
 			connected();
 			checkLive();
+			commands.setApiClient(apiClient);
+			redemptions.setChatClient(chatClient);
 		});
 
 		await chatClient.onMessage(async (channel, user, message, msg) => {
@@ -99,6 +103,7 @@ async function setup() {
 			if (!isNotBot || !isNotBuhhs) {
 				return;
 			} else {
+				messageCount++;
 				if (message.startsWith("!")) {
 					let command = message.split(/\s(.+)/)[0].slice(1);
 					let argument = message.split(/\s(.+)/)[1];
@@ -125,7 +130,6 @@ async function setup() {
 			}
 		});
 
-		commands.setApiClient(apiClient);
 		commands.setAllTimeStreamDeaths();
 	}
 }
@@ -138,32 +142,32 @@ function checkLive() {
 	setInterval(async () => {
 		try {
 			if ((await isStreamLive()) && !isLive) {
-				console.log(" * stream is live * ");
 				setTimedMessages();
 				isLive = true;
 			} else if ((await !isStreamLive()) && isLive) {
 				clearInterval(interval);
 				isLive = false;
 			}
-		} catch (error) {
-			console.error(error);
-		}
-	}, 900000);
+		} catch (error) {}
+	}, 90000);
 }
 
 async function setTimedMessages() {
 	intervalMessages = await messages.get();
 
 	interval = setInterval(async () => {
-		let message = getRandom(intervalMessages);
+		if (messageCount >= 15) {
+			let message = getRandom(intervalMessages);
 
-		intervalMessages = intervalMessages.filter((e) => e !== message);
-		if (intervalMessages.length == 0) {
-			intervalMessages = await messages.get();
+			intervalMessages = intervalMessages.filter((e) => e !== message);
+			if (intervalMessages.length == 0) {
+				intervalMessages = await messages.get();
+			}
+
+			await chatClient.say(username, message.text);
+			messageCount = 0;
 		}
-
-		await chatClient.say(username, message.text);
-	}, 600000);
+	}, 60000);
 }
 
 function getRandom(array) {
@@ -191,11 +195,7 @@ async function isStreamLive() {
 		isLive = false;
 	}
 
-	return isLive;
-}
-
-function getRandom(array) {
-	return array[Math.floor(Math.random() * array.length)];
+	return true;
 }
 
 exports.setup = setup;

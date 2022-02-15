@@ -6,21 +6,20 @@ const chatClient = require("./bot-chatclient");
 
 const Message = require("./models/message");
 
-let messages;
+let messages = [];
 
 async function messagesImport() {
 	try {
 		messages = JSON.parse(await fs.readFile("./files/messages.json", "UTF-8"));
-	} catch (error) {
-		messages = await Message.find({});
+	} catch (error) {}
 
-		if (messages.length > 0) {
-			await fs.writeFile(
-				"./files/messages.json",
-				JSON.stringify(messages, null, 4),
-				"UTF-8"
-			);
-		}
+	if (messages.length == 0) {
+		messages = await Message.find({});
+		await fs.writeFile(
+			"./files/messages.json",
+			JSON.stringify(messages, null, 4),
+			"UTF-8"
+		);
 	}
 }
 

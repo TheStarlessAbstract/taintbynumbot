@@ -1,5 +1,6 @@
 require("dotenv").config();
 const fs = require("fs").promises;
+const ApiClient = require("@twurple/api").ApiClient;
 const PubSubClient = require("@twurple/pubsub").PubSubClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 
@@ -66,6 +67,8 @@ async function setup() {
 
 		const pubSubClient = new PubSubClient();
 		const userId = await pubSubClient.registerUserListener(authProvider);
+		const apiClient = new ApiClient({ authProvider });
+		redemptions.setApiClient(apiClient);
 		const listener = await redemptions.setup(pubSubClient, userId); // check io
 	}
 }
