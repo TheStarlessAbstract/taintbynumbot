@@ -149,7 +149,7 @@ function checkLive() {
 				isLive = false;
 			}
 		} catch (error) {}
-	}, 90000);
+	}, 900000);
 }
 
 async function setTimedMessages() {
@@ -167,7 +167,7 @@ async function setTimedMessages() {
 			await chatClient.say(username, message.text);
 			messageCount = 0;
 		}
-	}, 60000);
+	}, 600000);
 }
 
 function getRandom(array) {
