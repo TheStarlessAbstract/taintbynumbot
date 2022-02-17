@@ -432,7 +432,7 @@ const commands = {
 									" " +
 									pularlity
 							);
-						} else if (gamesPlayed && random >= 42 && random <= 55) {
+						} else if (gamesPlayed > 1 && random >= 42 && random <= 55) {
 							pularlity = getPlurality(totalStreamDeaths, "time", "times");
 
 							result.push(
