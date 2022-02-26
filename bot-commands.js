@@ -633,6 +633,29 @@ const commands = {
 			return result;
 		},
 	},
+	updatemessage: {
+		response: async (config) => {
+			let user;
+			let quoteIndex;
+			let result = [];
+
+			if (config.isModUp && config.argument) {
+				let messagesList = await messages.get();
+
+				messages.update(messagesList);
+
+				result.push(["Updated message list"]);
+			} else if (!config.isModUp) {
+				result.push(["!updateMessage command is for Mods only"]);
+			} else if (!config.argument) {
+				result.push([
+					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
+				]);
+			}
+
+			return result;
+		},
+	},
 };
 
 function getNextIndex(array) {

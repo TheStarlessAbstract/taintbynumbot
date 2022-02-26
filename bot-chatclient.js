@@ -156,7 +156,7 @@ async function setTimedMessages() {
 	intervalMessages = await messages.get();
 
 	interval = setInterval(async () => {
-		if (messageCount >= 15) {
+		if (messageCount >= 25) {
 			let message = getRandom(intervalMessages);
 
 			intervalMessages = intervalMessages.filter((e) => e !== message);
@@ -167,7 +167,7 @@ async function setTimedMessages() {
 			await chatClient.say(username, message.text);
 			messageCount = 0;
 		}
-	}, 600000);
+	}, 900000);
 }
 
 function getRandom(array) {
