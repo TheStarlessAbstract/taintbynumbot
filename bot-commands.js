@@ -639,7 +639,7 @@ const commands = {
 			let quoteIndex;
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (config.isModUp) {
 				let messagesList = await messages.get();
 
 				messages.update(messagesList);
