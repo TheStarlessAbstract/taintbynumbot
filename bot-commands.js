@@ -633,7 +633,7 @@ const commands = {
 			return result;
 		},
 	},
-	updatemessage: {
+	updatemessages: {
 		response: async (config) => {
 			let user;
 			let quoteIndex;
