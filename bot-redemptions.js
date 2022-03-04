@@ -15,14 +15,32 @@ let twitchUsername = process.env.TWITCH_USERNAME;
 let higherLower = getRandom();
 let predictionWinner;
 let chatClient;
+let audioTimeout = false;
+let audioTimeoutPeriod = 10000;
+let audioTimeoutActive = false;
 
 async function setup(pubSubClient, userId) {
 	const listener = await pubSubClient.onRedemption(userId, async (message) => {
-		if (
-			message.rewardTitle == "Hydrate but with booze" ||
-			message.rewardTitle == "Hydrate!"
-		) {
-			if (new Date().getTime() - lastAudioPlayed >= 120000) {
+		audioLink = audioLinks.find(
+			(element) => element.channelPointRedeem == message.rewardTitle
+		);
+
+		if (audioLink) {
+			if (audioTimeout) {
+				if (new Date().getTime() - lastAudioPlayed >= audioTimeoutPeriod) {
+					audioTimeoutActive = false;
+				} else {
+					audioTimeoutActive = true;
+				}
+			} else {
+				audioTimeoutActive = false;
+			}
+
+			console.log(audioTimeoutActive);
+
+			if (!audioTimeoutActive) {
+				lastAudioPlayed = new Date().getTime();
+
 				audioLink = audioLinks.find(
 					(element) => element.channelPointRedeem == message.rewardTitle
 				);
@@ -148,6 +166,19 @@ function setChatClient(newChatClient) {
 	chatClient = newChatClient;
 }
 
+function getAudioTimeout() {
+	return audioTimeout;
+}
+
+function setAudioTimeout(newAudioTimeoutPeriod) {
+	audioTimeoutPeriod = newAudioTimeoutPeriod * 1000 || 10000;
+	if (audioTimeout) {
+		audioTimeout = false;
+	} else {
+		audioTimeout = true;
+	}
+}
+
 function getRandom() {
 	return Math.floor(Math.random() * 100) + 1;
 }
@@ -157,6 +188,8 @@ exports.setup = setup;
 exports.setHydrateBooze = setHydrateBooze;
 exports.setApiClient = setApiClient;
 exports.setChatClient = setChatClient;
+exports.getAudioTimeout = getAudioTimeout;
+exports.setAudioTimeout = setAudioTimeout;
 
 // let test = {
 //     channelId: message.channelId,

@@ -9,6 +9,7 @@ const Quote = require("./models/quote");
 
 const chatClient = require("./bot-chatclient");
 const messages = require("./bot-messages");
+const redemptions = require("./bot-redemptions");
 
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
@@ -270,6 +271,34 @@ const commands = {
 					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
 				];
 			}
+		},
+	},
+	audiotimeout: {
+		response: async (config) => {
+			let result = [];
+
+			if (config.isModUp) {
+				if (config.argument && !isNaN(config.argument)) {
+					redemptions.setAudioTimeout(config.argument);
+					result.push([
+						"Reward audio timeout has been started, and set to " +
+							config.argument +
+							" seconds",
+					]);
+				} else if (config.argument && isNaN(config.argument)) {
+					result.push([
+						"To set the reward audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10",
+					]);
+				} else {
+					redemptions.setAudioTimeout();
+					let status = redemptions.getAudioTimeout() ? "started" : "stopped";
+					result.push(["Reward audio timeout has been turned " + status]);
+				}
+			} else if (!config.isModUp) {
+				result.push(["!audiotimeout command is for Mods only"]);
+			}
+
+			return result;
 		},
 	},
 	booty: {
@@ -635,8 +664,6 @@ const commands = {
 	},
 	updatemessages: {
 		response: async (config) => {
-			let user;
-			let quoteIndex;
 			let result = [];
 
 			if (config.isModUp) {
@@ -649,7 +676,7 @@ const commands = {
 				result.push(["!updateMessage command is for Mods only"]);
 			} else if (!config.argument) {
 				result.push([
-					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
+					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taintum @design_by_rose'",
 				]);
 			}
 
