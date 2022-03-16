@@ -1,7 +1,5 @@
 require("dotenv").config();
 
-const fs = require("fs").promises;
-
 const chatClient = require("./bot-chatclient");
 
 const Message = require("./models/message");
@@ -9,32 +7,12 @@ const Message = require("./models/message");
 let messages = [];
 
 async function messagesImport() {
-	try {
-		messages = JSON.parse(await fs.readFile("./files/messages.json", "UTF-8"));
-	} catch (error) {}
-
-	if (messages.length == 0) {
-		messages = await Message.find({});
-		await fs.writeFile(
-			"./files/messages.json",
-			JSON.stringify(messages, null, 4),
-			"UTF-8"
-		);
-	}
+	messages = await Message.find({});
 }
 
 async function update(update) {
-	let messages = update;
+	messages = update;
 	chatClient.messageUpdate(messages);
-	try {
-		await fs.writeFile(
-			"./files/messages.json",
-			JSON.stringify(messages, null, 4),
-			"UTF-8"
-		);
-	} catch {
-		// do nothing
-	}
 }
 
 function get() {

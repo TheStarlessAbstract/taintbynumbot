@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const axios = require("axios");
-const fs = require("fs").promises;
 
 const AudioLink = require("./models/audiolink");
 
@@ -35,8 +34,6 @@ async function setup(pubSubClient, userId) {
 			} else {
 				audioTimeoutActive = false;
 			}
-
-			console.log(audioTimeoutActive);
 
 			if (!audioTimeoutActive) {
 				lastAudioPlayed = new Date().getTime();
@@ -112,6 +109,13 @@ async function setup(pubSubClient, userId) {
 						" there is already a prediction ongoing, try again later"
 				);
 			}
+		} else if (message.rewardTitle.includes("Kings: Draw a card")) {
+			// cards shuffled at start of stream if a saturday
+			// on redeem pull random card, and remove from deck
+			// display card and rule to chat
+			// check if any cards left in deck, if no more cards, reshuffle deck
+
+			chatClient.say(twitchUsername, "Some card is drawn");
 		}
 	});
 
@@ -129,20 +133,7 @@ function setHydrateBooze() {
 }
 
 async function audioImport() {
-	try {
-		audioLinks = JSON.parse(
-			await fs.readFile("./files/audioLinks.json", "UTF-8")
-		);
-	} catch (error) {
-		audioLinks = await AudioLink.find({});
-		if (audioLinks.length > 0) {
-			await fs.writeFile(
-				"./files/audioLinks.json",
-				JSON.stringify(audioLinks, null, 4),
-				"UTF-8"
-			);
-		}
-	}
+	audioLinks = await AudioLink.find({});
 }
 
 async function setApiClient(newApiClient) {

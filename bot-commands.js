@@ -1,13 +1,11 @@
-const fs = require("fs").promises;
-
 const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
 const Message = require("./models/message");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
 const Quote = require("./models/quote");
+const Card = require("./models/card");
 
-const chatClient = require("./bot-chatclient");
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
 
@@ -26,11 +24,40 @@ let quoteTimer;
 let chatCommands;
 
 const commands = {
+	card: {
+		response: async (config) => {
+			let result = [];
+			let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
+			let values = [
+				"Ace",
+				"2",
+				"3",
+				"4",
+				"5",
+				"6",
+				"7",
+				"8",
+				"9",
+				"10",
+				"Jack",
+				"Queen",
+				"King",
+			];
+
+			for (let i = 0; i < suits.length; i++) {
+				for (let j = 0; j < values.length; j++) {
+					await Card.create({
+						suit: suits[i],
+						value: values[j],
+					});
+				}
+			}
+
+			return result;
+		},
+	},
 	addcomm: {
 		response: async (config) => {
-			let message;
-			let user;
-			let quoteIndex;
 			let result = [];
 			let commandName;
 			let commandText;
@@ -45,7 +72,7 @@ const commands = {
 
 					if (!commandText) {
 						result.push([
-							"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
+							"To add a Command, you must include the Command name, and follwed by the Command output, new Command must start with '!' '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
 						]);
 					} else {
 						if (
@@ -65,12 +92,6 @@ const commands = {
 							chatCommands.push(newCommand);
 							await newCommand.save();
 
-							await fs.writeFile(
-								"./files/chatCommands.json",
-								JSON.stringify(chatCommands, null, 4),
-								"UTF-8"
-							);
-
 							result.push(["!" + commandName + " has been created!"]);
 						} else {
 							result.push(["!" + commandName + " already exists"]);
@@ -78,7 +99,7 @@ const commands = {
 					}
 				} else {
 					result.push([
-						"New command must start with !. !addcomm !newcommand this is what a new command looks like",
+						"New command must start with '!' !addcomm !newcommand this is what a new command looks like",
 					]);
 				}
 			} else if (!config.isModUp) {
@@ -94,8 +115,6 @@ const commands = {
 	},
 	addmessage: {
 		response: async (config) => {
-			let user;
-			let quoteIndex;
 			let result = [];
 
 			if (config.isModUp && config.argument) {
@@ -303,6 +322,72 @@ const commands = {
 	},
 	booty: {
 		response: "Who loves the booty?",
+	},
+	editcomm: {
+		response: async (config) => {
+			let result = [];
+			let commandName;
+			let commandText;
+
+			if (config.isModUp && config.argument) {
+				if (config.argument.startsWith("!")) {
+					commandName = config.argument.split(/\s(.+)/)[0].slice(1);
+					commandText = config.argument.split(/\s(.+)/)[1];
+
+					const { response } =
+						(await commands[commandName.toLowerCase()]) || {};
+
+					if (!commandText) {
+						result.push([
+							"To edit a Command, you must include the Command name, and follwed by the new Command output, Command must start with '!' '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
+						]);
+					} else if (!response) {
+						result.push(["No command found by this name !" + commandName]);
+					} else {
+						if (
+							chatCommands.find((obj) => {
+								return obj.name === commandName;
+							})
+						) {
+							chatCommands.find((obj) => {
+								if (obj.name === commandName) {
+									obj.text = commandText;
+								}
+							});
+
+							let editCommand = await Command.findOne({ name: commandName });
+
+							commands[commandName] = {
+								response: commandText,
+							};
+
+							editCommand.text = commandText;
+							await editCommand.save();
+
+							result.push(["!" + commandName + " has been edited!"]);
+						} else {
+							result.push([
+								"!" +
+									commandName +
+									" is too spicy to be edited in chat, Starless is going to have to do some work for that, so ask nicely",
+							]);
+						}
+					}
+				} else {
+					result.push([
+						"Command being edited must start with '!' !editcomm !editcommand this is what an edit command looks like",
+					]);
+				}
+			} else if (!config.isModUp) {
+				result.push(["!editcomm command is for Mods only"]);
+			} else if (!config.argument) {
+				result.push([
+					"To edit a Command, you must include the Command name, and follwed by the the Command output, edited Command must start with !: '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
+				]);
+			}
+
+			return result;
+		},
 	},
 	edittinderauthor: {
 		response: async (config) => {
@@ -719,20 +804,8 @@ function setApiClient(newApiClient) {
 }
 
 async function commandsImport() {
-	try {
-		chatCommands = JSON.parse(
-			await fs.readFile("./files/chatCommands.json", "UTF-8")
-		);
-	} catch (error) {
-		chatCommands = await Command.find({});
-		if (chatCommands.length > 0) {
-			await fs.writeFile(
-				"./files/chatCommands.json",
-				JSON.stringify(chatCommands, null, 4),
-				"UTF-8"
-			);
-		}
-	}
+	chatCommands = await Command.find({});
+
 	for (let i = 0; i < chatCommands.length; i++) {
 		commands[chatCommands[i].name] = { response: chatCommands[i].text };
 	}
