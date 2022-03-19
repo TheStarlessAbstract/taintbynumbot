@@ -88,6 +88,7 @@ async function setup() {
 			checkLive();
 			commands.setApiClient(apiClient);
 			redemptions.setChatClient(chatClient);
+			redemptions.resetKings();
 		});
 
 		await chatClient.onMessage(async (channel, user, message, msg) => {
@@ -167,7 +168,7 @@ async function setTimedMessages() {
 			await chatClient.say(username, message.text);
 			messageCount = 0;
 		}
-	}, 900000);
+	}, 600000);
 }
 
 function getRandom(array) {

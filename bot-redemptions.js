@@ -3,6 +3,7 @@ require("dotenv").config();
 const axios = require("axios");
 
 const AudioLink = require("./models/audiolink");
+const Deck = require("./models/deck");
 
 let audioLinks;
 let lastAudioPlayed;
@@ -17,9 +18,14 @@ let chatClient;
 let audioTimeout = false;
 let audioTimeoutPeriod = 10000;
 let audioTimeoutActive = false;
+let deck;
+let cardsToDraw = [];
+let kingsCount;
+let redeemUser;
 
 async function setup(pubSubClient, userId) {
 	const listener = await pubSubClient.onRedemption(userId, async (message) => {
+		redeemUser = message.userName;
 		audioLink = audioLinks.find(
 			(element) => element.channelPointRedeem == message.rewardTitle
 		);
@@ -110,12 +116,96 @@ async function setup(pubSubClient, userId) {
 				);
 			}
 		} else if (message.rewardTitle.includes("Kings: Draw a card")) {
-			// cards shuffled at start of stream if a saturday
-			// on redeem pull random card, and remove from deck
-			// display card and rule to chat
-			// check if any cards left in deck, if no more cards, reshuffle deck
+			let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
+			let gameTitle = channelInfo.gameName;
 
-			chatClient.say(twitchUsername, "Some card is drawn");
+			if (deck.game != gameTitle) {
+				deck = await Deck.findOne({ game: gameTitle });
+
+				if (!deck) {
+					createDeck(gameTitle);
+				}
+
+				for (let i = 0; i < cardsToDraw.length; i++) {
+					for (let j = 0; j < deck.cards.length; j++) {
+						if (
+							cardsToDraw[i].suit == deck.cards[j].suit &&
+							cardsToDraw[i].value == deck.cards[j].value
+						) {
+							cardsToDraw[i].rule = deck.cards[j].rule;
+							cardsToDraw[i].explanation = deck.cards[j].explanation;
+						}
+					}
+				}
+
+				let newCards = deck.cards.filter((card) => {
+					let isNotIncluded = true;
+					for (let i = 0; i < cardsToDraw.length; i++) {
+						if (
+							card.suit == cardsToDraw[i].suit &&
+							card.value == cardsToDraw[i].value
+						) {
+							isNotIncluded = false;
+						}
+					}
+
+					if (isNotIncluded && card.rule == "") {
+						isNotIncluded = false;
+					}
+					return isNotIncluded;
+				});
+
+				cardsToDraw = cardsToDraw.filter((card) => card.rule != "");
+
+				if (newCards.length > 0) {
+					newCards.forEach((card, index) => {
+						newCards[index] = {
+							suit: card.suit,
+							value: card.value,
+							rule: card.rule,
+							explanation: card.explanation,
+							isDrawn: false,
+						};
+					});
+
+					cardsToDraw = cardsToDraw.concat(newCards);
+					shuffle();
+				}
+			}
+
+			let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
+			let cardDrawn = drawFrom[Math.floor(Math.random() * drawFrom.length)];
+			cardDrawn.isDrawn = true;
+
+			if (cardDrawn.value == "King") {
+				kingsCount++;
+			}
+
+			chatClient.say(
+				twitchUsername,
+				"@" +
+					redeemUser +
+					" You have drawn the " +
+					cardDrawn.value +
+					" of " +
+					cardDrawn.suit
+			);
+
+			if (kingsCount != 4) {
+				chatClient.say(
+					twitchUsername,
+					"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
+				);
+			} else {
+				chatClient.say(
+					twitchUsername,
+					"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
+				);
+			}
+
+			if (cardsToDraw.filter((card) => card.isDrawn == false).length == 0) {
+				resetKings();
+			}
 		}
 	});
 
@@ -174,6 +264,109 @@ function getRandom() {
 	return Math.floor(Math.random() * 100) + 1;
 }
 
+async function resetKings() {
+	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
+	let gameTitle = channelInfo.gameName;
+
+	cardsToDraw = [];
+	kingsCount = 0;
+
+	if (!deck || deck.game != gameTitle) {
+		deck = await Deck.findOne({ game: gameTitle });
+	}
+
+	if (!deck) {
+		createDeck(gameTitle);
+	}
+
+	for (let i = 0; i < deck.cards.length; i++) {
+		if (deck.cards[i].rule != "") {
+			cardsToDraw.push({
+				suit: deck.cards[i].suit,
+				value: deck.cards[i].value,
+				rule: deck.cards[i].rule,
+				explanation: deck.cards[i].explanation,
+				isDrawn: false,
+			});
+		}
+	}
+
+	shuffle();
+
+	chatClient.say(
+		twitchUsername,
+		"A new game of Kings has been dealt, with " + cardsToDraw.length + " cards!"
+	);
+}
+
+async function createDeck(gameTitle) {
+	deck = new Deck({ game: gameTitle, cards: [] });
+
+	let baseDeck = await Deck.findOne({ game: "base deck" });
+
+	for (let i = 0; i < baseDeck.cards.length; i++) {
+		deck.cards.push({
+			suit: baseDeck.cards[i].suit,
+			value: baseDeck.cards[i].value,
+			rule: baseDeck.cards[i].rule,
+			explanation: baseDeck.cards[i].explanation,
+		});
+	}
+
+	await deck.save();
+}
+
+function shuffle() {
+	let m = cardsToDraw.length,
+		t,
+		i;
+
+	while (m) {
+		i = Math.floor(Math.random() * m--);
+
+		t = cardsToDraw[m];
+		cardsToDraw[m] = cardsToDraw[i];
+		cardsToDraw[i] = t;
+	}
+}
+
+async function addKingsRule(value, rule) {
+	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
+	let gameTitle = channelInfo.gameName;
+	let response;
+
+	if (deck.game != gameTitle) {
+		deck = await Deck.findOne({ game: gameTitle });
+	}
+
+	if (!deck) {
+		createDeck(gameTitle);
+	}
+
+	for (let i = 0; i < deck.cards.length; i++) {
+		if (value == deck.cards[i].value && deck.cards[i].rule == "") {
+			deck.cards[i].rule = rule;
+			cardsToDraw.push({
+				suit: deck.cards[i].suit,
+				value: deck.cards[i].value,
+				rule: deck.cards[i].rule,
+				explanation: deck.cards[i].explanation,
+				isDrawn: false,
+			});
+
+			shuffle();
+
+			await deck.save();
+			reponse = true;
+		} else if (value == deck.cards[i].value && deck.cards[i].rule != "") {
+			reponse = false;
+		} else {
+			response = false;
+		}
+	}
+	return response;
+}
+
 exports.audioImport = audioImport;
 exports.setup = setup;
 exports.setHydrateBooze = setHydrateBooze;
@@ -181,6 +374,8 @@ exports.setApiClient = setApiClient;
 exports.setChatClient = setChatClient;
 exports.getAudioTimeout = getAudioTimeout;
 exports.setAudioTimeout = setAudioTimeout;
+exports.resetKings = resetKings;
+exports.addKingsRule = addKingsRule;
 
 // let test = {
 //     channelId: message.channelId,

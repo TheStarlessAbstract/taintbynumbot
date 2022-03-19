@@ -4,7 +4,7 @@ const Message = require("./models/message");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
 const Quote = require("./models/quote");
-const Card = require("./models/card");
+const Deck = require("./models/deck");
 
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
@@ -29,29 +29,70 @@ const commands = {
 			let result = [];
 			let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
 			let values = [
-				"Ace",
-				"2",
-				"3",
-				"4",
-				"5",
-				"6",
-				"7",
-				"8",
-				"9",
-				"10",
-				"Jack",
-				"Queen",
-				"King",
+				{ value: "Ace", rule: "", explanation: "" },
+				{
+					value: "2",
+					rule: "Fuck you!",
+					explanation:
+						"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+				},
+				{
+					value: "3",
+					rule: "Fuck me!",
+					explanation: "You drew this card, so you drink!",
+				},
+				{ value: "4", rule: "", explanation: "" },
+				{ value: "5", rule: "", explanation: "" },
+				{ value: "6", rule: "", explanation: "" },
+				{ value: "7", rule: "", explanation: "" },
+				{
+					value: "8",
+					rule: "Pick a mate!",
+					explanation:
+						"You and a person of your choosing takes a drink...tell us why it is Starless",
+				},
+				{
+					value: "9",
+					rule: "Bust a rhyme!",
+					explanation:
+						"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
+				},
+				{
+					value: "10",
+					rule: "Make a rule!",
+					explanation:
+						"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
+				},
+				{ value: "Jack", rule: "", explanation: "" },
+				{
+					value: "Queen",
+					rule: "Ask a question!",
+					explanation:
+						"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
+				},
+				{
+					value: "King",
+					rule: "Kings!",
+					explanation:
+						"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
+				},
 			];
+
+			let baseDeck = new Deck({ game: "base deck", cards: [] });
 
 			for (let i = 0; i < suits.length; i++) {
 				for (let j = 0; j < values.length; j++) {
-					await Card.create({
+					baseDeck.cards.push({
 						suit: suits[i],
-						value: values[j],
+						value: values[j].value,
+						rule: values[j].rule,
+						explanation: values[j].explanation,
 					});
 				}
 			}
+
+			await baseDeck.save();
+			console.log(baseDeck);
 
 			return result;
 		},
@@ -108,6 +149,39 @@ const commands = {
 				result.push([
 					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
 				]);
+			}
+
+			return result;
+		},
+	},
+	addkings: {
+		response: async (config) => {
+			time = new Date();
+			let result = [];
+			let cardValue;
+			let cardRule;
+
+			if (config.isModUp && config.argument) {
+				cardValue = config.argument.substring(0, config.argument.indexOf(" "));
+				cardRule = config.argument.substring(config.argument.indexOf(" ") + 1);
+
+				if (cardValue == cardRule) {
+					result.push(
+						"Looks like you are missing the rule or card, try again. !addkings Ace Some rule that will make Starless drink"
+					);
+				} else if (cardRule) {
+					let response = await redemptions.addKingsRule(cardValue, cardRule);
+
+					if (response) {
+						result.push("New rule as been added");
+					} else {
+						result.push("These cards already have a rule, womp womp");
+					}
+				} else {
+					result.push(
+						"Something went wrong, I think. Try again !addkings 4 Some rule that will make Starless drink"
+					);
+				}
 			}
 
 			return result;
@@ -585,6 +659,22 @@ const commands = {
 				result.push(
 					"Twitch says no, and Starless should really sort this out some time after stream"
 				);
+			}
+
+			return result;
+		},
+	},
+	kingsreset: {
+		response: async (config) => {
+			time = new Date();
+			let result = [];
+			let quoteEntries = [];
+			let quote;
+			let reject;
+
+			if (config.isModUp) {
+				redemptions.resetKings();
+				result.push("Kings has been reset");
 			}
 
 			return result;
