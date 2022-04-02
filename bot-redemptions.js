@@ -192,15 +192,24 @@ async function setup(pubSubClient, userId) {
 			);
 
 			if (kingsCount != 4) {
-				chatClient.say(
-					twitchUsername,
-					"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
-				);
+				if (cardDrawn.rule != "") {
+					chatClient.say(
+						twitchUsername,
+						"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
+					);
+				} else {
+					chatClient.say(
+						twitchUsername,
+						"Rule: This card doesn't really have a rule || Hydrate you fools"
+					);
+				}
 			} else {
 				chatClient.say(
 					twitchUsername,
 					"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
 				);
+
+				kingsCount = 0;
 			}
 
 			if (cardsToDraw.filter((card) => card.isDrawn == false).length == 0) {
@@ -280,15 +289,13 @@ async function resetKings() {
 	}
 
 	for (let i = 0; i < deck.cards.length; i++) {
-		if (deck.cards[i].rule != "") {
-			cardsToDraw.push({
-				suit: deck.cards[i].suit,
-				value: deck.cards[i].value,
-				rule: deck.cards[i].rule,
-				explanation: deck.cards[i].explanation,
-				isDrawn: false,
-			});
-		}
+		cardsToDraw.push({
+			suit: deck.cards[i].suit,
+			value: deck.cards[i].value,
+			rule: deck.cards[i].rule,
+			explanation: deck.cards[i].explanation,
+			isDrawn: false,
+		});
 	}
 
 	shuffle();

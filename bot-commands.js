@@ -668,9 +668,6 @@ const commands = {
 		response: async (config) => {
 			time = new Date();
 			let result = [];
-			let quoteEntries = [];
-			let quote;
-			let reject;
 
 			if (config.isModUp) {
 				redemptions.resetKings();
