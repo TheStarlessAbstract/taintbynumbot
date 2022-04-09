@@ -587,8 +587,8 @@ const commands = {
 					if (random == 1) {
 						pularlity = getPlurality(
 							gameStreamDeaths.deaths,
-							"death",
-							"deaths"
+							"death/fail",
+							"deaths/fails"
 						);
 
 						result.push(
@@ -602,7 +602,7 @@ const commands = {
 						pularlity = getPlurality(gameStreamDeaths.deaths, "time", "times");
 
 						result.push(
-							"Starless has now died " +
+							"Starless has now died/failed " +
 								gameStreamDeaths.deaths +
 								" " +
 								pularlity +
@@ -615,7 +615,7 @@ const commands = {
 							pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
 
 							result.push(
-								"Since records have started, Starless has died a grand total of " +
+								"Since records have started, Starless has died/failed a grand total of " +
 									allTimeStreamDeaths +
 									" " +
 									pularlity
@@ -626,7 +626,7 @@ const commands = {
 							result.push(
 								"Starless has played " +
 									gamesPlayed +
-									" games this stream, and has died about " +
+									" games this stream, and has died/failed about " +
 									totalStreamDeaths +
 									" " +
 									pularlity
@@ -644,7 +644,7 @@ const commands = {
 								pularlity = getPlurality(gameDeaths, "time", "times");
 
 								result.push(
-									"Starless has died at least " +
+									"Starless has died/failed at least " +
 										gameDeaths +
 										" " +
 										pularlity +
