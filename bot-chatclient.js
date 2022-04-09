@@ -101,8 +101,7 @@ async function setup() {
 			const isNotBot = user != botUsername;
 			const isNotBuhhs = user != "buhhsbot";
 
-			// if (!isNotBot || !isNotBuhhs) {
-			if (!isNotBuhhs) {
+			if (!isNotBot || !isNotBuhhs) {
 				return;
 			} else {
 				messageCount++;
