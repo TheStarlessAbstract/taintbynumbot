@@ -13,6 +13,8 @@ const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
 const QUOTECOOLDOWN = 30000;
 
+let twitchId = process.env.TWITCH_USER_ID;
+
 let allTimeStreamDeaths = 0;
 let apiClient;
 let gameStreamDeaths;
@@ -664,6 +666,40 @@ const commands = {
 			return result;
 		},
 	},
+	followage: {
+		response: async (config) => {
+			let result = [];
+
+			const follow = await apiClient.users.getFollowFromUserToBroadcaster(
+				config.userInfo.userId,
+				twitchId
+			);
+
+			if (follow) {
+				const currentTimestamp = Date.now();
+				const followStartTimestamp = follow.followDate.getTime();
+
+				let followLength = getFollowLength(
+					currentTimestamp - followStartTimestamp
+				);
+
+				result.push([
+					"@" +
+						config.userInfo.displayName +
+						" has been following TheStarlessAbstract for " +
+						followLength,
+				]);
+			} else {
+				result.push([
+					"@" +
+						config.userInfo.displayName +
+						" hit that follow button, otherwise this command is doing a whole lot of nothing for you",
+				]);
+			}
+
+			return result;
+		},
+	},
 	kingsreset: {
 		response: async (config) => {
 			time = new Date();
@@ -908,6 +944,61 @@ function getPlurality(value, singular, plural) {
 	}
 
 	return result;
+}
+
+function getFollowLength(followTime) {
+	let year, month, week, day, hour, minute, second;
+	let followString = "";
+
+	second = Math.floor(followTime / 1000);
+	minute = Math.floor(second / 60);
+	second = second % 60;
+	hour = Math.floor(minute / 60);
+	minute = minute % 60;
+	day = Math.floor(hour / 24);
+	hour = hour % 24;
+	year = Math.floor(day / 365);
+	day = day % 365;
+	month = Math.floor(day / 30);
+	day = day % 30;
+	week = Math.floor(day / 7);
+	day = day % 7;
+
+	if (year > 0) {
+		followString = followString.concat(
+			year + " " + getPlurality(year, "year", "years") + ", "
+		);
+	}
+	if (month > 0) {
+		followString = followString.concat(
+			month + " " + getPlurality(month, "month", "months") + ", "
+		);
+	}
+	if (week > 0) {
+		followString = followString.concat(
+			week + " " + getPlurality(week, "week", "weeks") + ", "
+		);
+	}
+	if (day > 0) {
+		followString = followString.concat(
+			day + " " + getPlurality(day, "day", "days") + ", "
+		);
+	}
+	if (hour > 0) {
+		followString = followString.concat(
+			hour + " " + getPlurality(hour, "hour", "hours") + ", "
+		);
+	}
+	if (minute > 0) {
+		followString = followString.concat(
+			minute + " " + getPlurality(minute, "minute", "minutes") + ", "
+		);
+	}
+	followString = followString.concat(
+		second + " " + getPlurality(second, "second", "seconds") + ". "
+	);
+
+	return followString;
 }
 
 exports.list = commands;
