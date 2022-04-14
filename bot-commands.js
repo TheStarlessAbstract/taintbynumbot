@@ -713,6 +713,57 @@ const commands = {
 			return result;
 		},
 	},
+	lurk: {
+		response: async (config) => {
+			let result = [];
+
+			result.push(
+				config.userInfo.displayName +
+					" finds a comfortable spot behind the bushes to perv on the stream"
+			);
+
+			return result;
+		},
+	},
+	so: {
+		response: async (config) => {
+			let result = [];
+			let username;
+			let user;
+			let stream;
+
+			if (config.isModUp) {
+				if (config.argument) {
+					username = config.argument;
+					user = await apiClient.users.getUserByName(username);
+
+					if (!user) {
+						result.push(["Couldn't find a user by the name of " + username]);
+					} else {
+						stream = await apiClient.channels.getChannelInfo(user.id);
+
+						result.push(
+							"Go check out " +
+								username +
+								" at twitch.tv/" +
+								username +
+								", they last played " +
+								stream.gameName +
+								". I hear they love the Taint"
+						);
+					}
+				} else {
+					result.push([
+						"You got to include a username to shoutout someone: !so buhhsbot",
+					]);
+				}
+			} else if (!config.isModUp) {
+				result.push(["!so command is for Mods only"]);
+			}
+
+			return result;
+		},
+	},
 	tinderquote: {
 		response: async (config) => {
 			time = new Date();
