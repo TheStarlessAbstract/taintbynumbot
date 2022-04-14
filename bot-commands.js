@@ -747,7 +747,7 @@ const commands = {
 								username +
 								" at twitch.tv/" +
 								username +
-								", they last played " +
+								", they last streamed " +
 								stream.gameName +
 								". I hear they love the Taint"
 						);
