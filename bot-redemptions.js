@@ -285,7 +285,7 @@ async function resetKings() {
 	}
 
 	if (!deck) {
-		createDeck(gameTitle);
+		await createDeck(gameTitle);
 	}
 
 	for (let i = 0; i < deck.cards.length; i++) {
