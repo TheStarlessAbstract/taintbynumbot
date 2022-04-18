@@ -24,6 +24,9 @@ let isLive = false;
 let messageCount = 0;
 
 async function setup() {
+	await commands.setup();
+	await messages.setup();
+
 	try {
 		token = await Token.findOne({ name: "chatClient" });
 		await fs.mkdir("./files", { recursive: true });
@@ -154,7 +157,7 @@ function checkLive() {
 }
 
 async function setTimedMessages() {
-	intervalMessages = await messages.get();
+	intervalMessages = messages.get();
 
 	interval = setInterval(async () => {
 		if (messageCount >= 25) {
@@ -162,7 +165,7 @@ async function setTimedMessages() {
 
 			intervalMessages = intervalMessages.filter((e) => e !== message);
 			if (intervalMessages.length == 0) {
-				intervalMessages = await messages.get();
+				intervalMessages = messages.get();
 			}
 
 			await chatClient.say(username, message.text);

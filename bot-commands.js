@@ -26,79 +26,79 @@ let quoteTimer;
 let chatCommands;
 
 const commands = {
-	card: {
-		response: async (config) => {
-			let result = [];
-			let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
-			let values = [
-				{ value: "Ace", rule: "", explanation: "" },
-				{
-					value: "2",
-					rule: "Fuck you!",
-					explanation:
-						"Choose someone to take a drink...but fuck Starless mainly amirite?!",
-				},
-				{
-					value: "3",
-					rule: "Fuck me!",
-					explanation: "You drew this card, so you drink!",
-				},
-				{ value: "4", rule: "", explanation: "" },
-				{ value: "5", rule: "", explanation: "" },
-				{ value: "6", rule: "", explanation: "" },
-				{ value: "7", rule: "", explanation: "" },
-				{
-					value: "8",
-					rule: "Pick a mate!",
-					explanation:
-						"You and a person of your choosing takes a drink...tell us why it is Starless",
-				},
-				{
-					value: "9",
-					rule: "Bust a rhyme!",
-					explanation:
-						"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
-				},
-				{
-					value: "10",
-					rule: "Make a rule!",
-					explanation:
-						"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
-				},
-				{ value: "Jack", rule: "", explanation: "" },
-				{
-					value: "Queen",
-					rule: "Ask a question!",
-					explanation:
-						"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
-				},
-				{
-					value: "King",
-					rule: "Kings!",
-					explanation:
-						"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
-				},
-			];
+	// card: {
+	// 	response: async (config) => {
+	// 		let result = [];
+	// 		let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
+	// 		let values = [
+	// 			{ value: "Ace", rule: "Musketeers: All for one and one for all", explanation: "Everybody drinks" },
+	// 			{
+	// 				value: "2",
+	// 				rule: "Fuck you!",
+	// 				explanation:
+	// 					"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+	// 			},
+	// 			{
+	// 				value: "3",
+	// 				rule: "Fuck me!",
+	// 				explanation: "You drew this card, so you drink!",
+	// 			},
+	// 			{ value: "4", rule: "", explanation: "" },
+	// 			{ value: "5", rule: "", explanation: "" },
+	// 			{ value: "6", rule: "", explanation: "" },
+	// 			{ value: "7", rule: "", explanation: "" },
+	// 			{
+	// 				value: "8",
+	// 				rule: "Pick a mate!",
+	// 				explanation:
+	// 					"You and a person of your choosing takes a drink...tell us why it is Starless",
+	// 			},
+	// 			{
+	// 				value: "9",
+	// 				rule: "Bust a rhyme!",
+	// 				explanation:
+	// 					"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
+	// 			},
+	// 			{
+	// 				value: "10",
+	// 				rule: "Make a rule!",
+	// 				explanation:
+	// 					"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
+	// 			},
+	// 			{ value: "Jack", rule: "", explanation: "" },
+	// 			{
+	// 				value: "Queen",
+	// 				rule: "Ask a question!",
+	// 				explanation:
+	// 					"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
+	// 			},
+	// 			{
+	// 				value: "King",
+	// 				rule: "Kings!",
+	// 				explanation:
+	// 					"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
+	// 			},
+	// 		];
 
-			let baseDeck = new Deck({ game: "base deck", cards: [] });
+	// 		let baseDeck = new Deck({ game: "base deck", cards: [] });
 
-			for (let i = 0; i < suits.length; i++) {
-				for (let j = 0; j < values.length; j++) {
-					baseDeck.cards.push({
-						suit: suits[i],
-						value: values[j].value,
-						rule: values[j].rule,
-						explanation: values[j].explanation,
-					});
-				}
-			}
+	// 		for (let i = 0; i < suits.length; i++) {
+	// 			for (let j = 0; j < values.length; j++) {
+	// 				baseDeck.cards.push({
+	// 					suit: suits[i],
+	// 					value: values[j].value,
+	// 					rule: values[j].rule,
+	// 					explanation: values[j].explanation,
+	// 				});
+	// 			}
+	// 		}
 
-			await baseDeck.save();
-			console.log(baseDeck);
+	// 		await baseDeck.save();
+	// 		console.log(baseDeck);
 
-			return result;
-		},
-	},
+	// 		return result;
+	// 	},
+	// },
 	addcomm: {
 		response: async (config) => {
 			let result = [];
@@ -731,6 +731,7 @@ const commands = {
 			let username;
 			let user;
 			let stream;
+			let streamed;
 
 			if (config.isModUp) {
 				if (config.argument) {
@@ -742,13 +743,18 @@ const commands = {
 					} else {
 						stream = await apiClient.channels.getChannelInfo(user.id);
 
+						if (stream.gameName != "") {
+							streamed = ", they last streamed " + stream.gameName;
+						} else {
+							streamed = "";
+						}
+
 						result.push(
 							"Go check out " +
 								username +
 								" at twitch.tv/" +
 								username +
-								", they last streamed " +
-								stream.gameName +
+								streamed +
 								". I hear they love the Taint"
 						);
 					}
@@ -944,6 +950,14 @@ const commands = {
 	},
 };
 
+async function setup() {
+	chatCommands = await Command.find({});
+
+	for (let i = 0; i < chatCommands.length; i++) {
+		commands[chatCommands[i].name] = { response: chatCommands[i].text };
+	}
+}
+
 function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
@@ -975,14 +989,6 @@ function getRandom(array) {
 
 function setApiClient(newApiClient) {
 	apiClient = newApiClient;
-}
-
-async function commandsImport() {
-	chatCommands = await Command.find({});
-
-	for (let i = 0; i < chatCommands.length; i++) {
-		commands[chatCommands[i].name] = { response: chatCommands[i].text };
-	}
 }
 
 function getPlurality(value, singular, plural) {
@@ -1055,4 +1061,4 @@ function getFollowLength(followTime) {
 exports.list = commands;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setApiClient = setApiClient;
-exports.commandsImport = commandsImport;
+exports.setup = setup;

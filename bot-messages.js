@@ -6,7 +6,7 @@ const Message = require("./models/message");
 
 let messages = [];
 
-async function messagesImport() {
+async function setup() {
 	messages = await Message.find({});
 }
 
@@ -19,6 +19,6 @@ function get() {
 	return messages;
 }
 
+exports.setup = setup;
 exports.get = get;
-exports.messagesImport = messagesImport;
 exports.update = update;

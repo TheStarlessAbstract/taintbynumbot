@@ -24,6 +24,9 @@ let kingsCount;
 let redeemUser;
 
 async function setup(pubSubClient, userId) {
+	audioLinks = await AudioLink.find({});
+	lastAudioPlayed = new Date().getTime();
+
 	const listener = await pubSubClient.onRedemption(userId, async (message) => {
 		redeemUser = message.userName;
 		audioLink = audioLinks.find(
@@ -227,14 +230,6 @@ async function setup(pubSubClient, userId) {
 	return listener;
 }
 
-function setHydrateBooze() {
-	lastAudioPlayed = new Date().getTime();
-}
-
-async function audioImport() {
-	audioLinks = await AudioLink.find({});
-}
-
 async function setApiClient(newApiClient) {
 	apiClient = newApiClient;
 
@@ -374,9 +369,7 @@ async function addKingsRule(value, rule) {
 	return response;
 }
 
-exports.audioImport = audioImport;
 exports.setup = setup;
-exports.setHydrateBooze = setHydrateBooze;
 exports.setApiClient = setApiClient;
 exports.setChatClient = setChatClient;
 exports.getAudioTimeout = getAudioTimeout;
