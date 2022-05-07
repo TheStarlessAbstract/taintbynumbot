@@ -227,6 +227,8 @@ async function setup(pubSubClient, userId) {
 		title: "Higher or Lower: " + higherLower,
 	});
 
+	resetKings();
+
 	return listener;
 }
 

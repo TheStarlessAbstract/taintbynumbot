@@ -91,7 +91,6 @@ async function setup() {
 			checkLive();
 			commands.setApiClient(apiClient);
 			redemptions.setChatClient(chatClient);
-			redemptions.resetKings();
 		});
 
 		await chatClient.onMessage(async (channel, user, message, msg) => {
