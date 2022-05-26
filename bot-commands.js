@@ -1,3 +1,5 @@
+const axios = require("axios");
+
 const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
 const Message = require("./models/message");
@@ -14,6 +16,7 @@ const TITLECOOLDOWN = 30000;
 const QUOTECOOLDOWN = 30000;
 
 let twitchId = process.env.TWITCH_USER_ID;
+let url = process.env.BOT_DOMAIN;
 
 let allTimeStreamDeaths = 0;
 let apiClient;
@@ -573,10 +576,15 @@ const commands = {
 							}
 						}
 					}
+
 					gameStreamDeaths.deaths++;
 					totalStreamDeaths++;
 					allTimeStreamDeaths++;
 					gameStreamDeaths.save();
+
+					resp = await axios.post(url + "/deathcounter", {
+						deaths: gameDeathsCount,
+					});
 
 					deathCounters = await DeathCounter.find({
 						streamStartDate: streamDate,

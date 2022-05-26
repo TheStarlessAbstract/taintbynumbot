@@ -7,6 +7,7 @@ const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 const Token = require("./models/token");
 
 const commands = require("./bot-commands");
+const deathCounter = require("./bot-deathCounter");
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
 
@@ -91,6 +92,7 @@ async function setup() {
 			checkLive();
 			commands.setApiClient(apiClient);
 			redemptions.setChatClient(chatClient);
+			await deathCounter.setup(apiClient);
 		});
 
 		await chatClient.onMessage(async (channel, user, message, msg) => {

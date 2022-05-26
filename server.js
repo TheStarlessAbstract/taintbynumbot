@@ -30,8 +30,17 @@ app.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
 });
 
+app.get("/deathcounteroverlay", (req, res) => {
+	res.sendFile(__dirname + "/public/bot-deathCounterOverlay.html");
+});
+
 app.post("/playaudio", (req, res) => {
 	serverIo.playAudio(req.body.url);
+	res.sendStatus(201);
+});
+
+app.post("/deathcounter", (req, res) => {
+	serverIo.setDeaths(req.body.deaths);
 	res.sendStatus(201);
 });
 

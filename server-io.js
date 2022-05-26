@@ -9,6 +9,8 @@ let max = 900000;
 let interval;
 let lastPlayFinished = true;
 let isLive = false;
+let deaths = 0;
+
 if (process.env.PORT) {
 	url = process.env.BOT_DOMAIN;
 } else {
@@ -46,6 +48,11 @@ function setup(newIo) {
 		socket.on("ended", () => {
 			lastPlayFinished = true;
 		});
+
+		socket.on("deathCounterConnection", () => {
+			setDeathCounter(deaths);
+			console.log("death");
+		});
 	});
 }
 
@@ -60,5 +67,15 @@ function playAudio(url) {
 	}
 }
 
+function setDeaths(newDeaths) {
+	deaths = newDeaths;
+	setDeathCounter();
+}
+
+function setDeathCounter() {
+	io.emit("setDeath", deaths);
+}
+
 exports.setup = setup;
 exports.playAudio = playAudio;
+exports.setDeaths = setDeaths;

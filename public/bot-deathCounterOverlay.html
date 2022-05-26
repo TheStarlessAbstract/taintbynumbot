@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bowlby+One&family=Ceviche+One&family=Titan+One&display=swap" rel="stylesheet">
+    <head>
+        <title>Death Counter</title>
+    </head>
+    <body>
+        <div id="deathCounter" style="font-size: 50px;color: white;font-family:Bangers; font-weight: bold;-webkit-text-stroke: 1px #ff00ff;">0</div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            var x = document.getElementById("deathCounter");
+
+            socket.emit("deathCounterConnection", {});
+
+            socket.on("setDeath", (deaths) => {
+                x.innerHTML = deaths;
+            });
+        </script>
+    </body>
+</html>
