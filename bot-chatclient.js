@@ -7,7 +7,7 @@ const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 const Token = require("./models/token");
 
 const commands = require("./bot-commands");
-const deathCounter = require("./bot-deathCounter");
+const deathCounter = require("./bot-deathcounter");
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
 
