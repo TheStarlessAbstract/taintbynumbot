@@ -7,29 +7,66 @@ const DeathCounter = require("./models/deathcounter");
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
 
-let gameDeathsCount = 0;
+let gameName;
+let streamDate;
+let streamDeathCounter;
+let gameDeathCounter;
+let allDeathCounter;
+let streamDeaths = 0;
+let gameDeaths = 0;
+let allDeaths = 0;
 
 async function setup(newApiClient) {
 	const apiClient = newApiClient;
 
-	let channelInfo = await apiClient.channels.getChannelInfoById(
-		process.env.TWITCH_USER_ID
+	let stream = await apiClient.streams.getStreamByUserId(
+		"62941202"
+		// process.env.TWITCH_USER_ID
 	);
 
-	let game = channelInfo.gameName;
+	if (stream == null) {
+	} else {
+		gameName = stream.gameName;
+		streamDate = stream.startDate;
+		streamDate = new Date(streamDate);
+		streamDate = new Date(
+			streamDate.getFullYear(),
+			streamDate.getMonth(),
+			streamDate.getDate()
+		);
 
-	let gameDeaths = await DeathCounter.find({
-		gameTitle: game,
-	}).exec();
+		streamDeathCounter = await DeathCounter.findOne({
+			gameTitle: gameName,
+			streamStartDate: streamDate,
+		}).exec();
 
-	if (gameDeaths.length > 0) {
-		for (let i = 0; i < gameDeaths.length; i++) {
-			gameDeathsCount = gameDeathsCount + gameDeaths[i].deaths;
+		gameDeathCounter = await DeathCounter.find({
+			gameTitle: gameName,
+		}).exec();
+
+		allDeathCounter = await DeathCounter.find({}).exec();
+	}
+
+	if (streamDeathCounter) {
+		streamDeaths = streamDeathCounter.deaths;
+	}
+
+	if (gameDeathCounter.length > 0) {
+		for (let i = 0; i < gameDeathCounter.length; i++) {
+			gameDeaths = gameDeaths + gameDeathCounter[i].deaths;
+		}
+	}
+
+	if (allDeathCounter.length > 0) {
+		for (let i = 0; i < allDeathCounter.length; i++) {
+			allDeaths = allDeaths + allDeathCounter[i].deaths;
 		}
 	}
 
 	let resp = await axios.post(url + "/deathcounter", {
-		deaths: gameDeathsCount,
+		deaths: streamDeaths,
+		gameDeaths: gameDeaths,
+		allDeaths: allDeaths,
 	});
 }
 

@@ -40,7 +40,11 @@ app.post("/playaudio", (req, res) => {
 });
 
 app.post("/deathcounter", (req, res) => {
-	serverIo.setDeaths(req.body.deaths);
+	let deaths = req.body.deaths;
+	let gameDeaths = req.body.gameDeaths;
+	let allDeaths = req.body.allDeaths;
+
+	serverIo.setDeaths(deaths);
 	res.sendStatus(201);
 });
 

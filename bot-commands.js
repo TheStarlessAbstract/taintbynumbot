@@ -513,10 +513,13 @@ const commands = {
 			let deathCounters;
 			let gamesPlayed;
 			let pularlity;
+			let gameDeaths = 0;
+			let gameStreams;
 
 			try {
 				let stream = await apiClient.streams.getStreamByUserId(
-					process.env.TWITCH_USER_ID
+					"62941202"
+					//process.env.TWITCH_USER_ID
 				);
 
 				if (stream == null) {
@@ -582,8 +585,20 @@ const commands = {
 					allTimeStreamDeaths++;
 					gameStreamDeaths.save();
 
+					gameStreams = await DeathCounter.find({
+						gameTitle: gameName,
+					}).exec();
+
+					if (gameStreams.length > 1) {
+						for (let i = 0; i < gameStreams.length; i++) {
+							gameDeaths = gameDeaths + gameStreams[i].deaths;
+						}
+					}
+
 					resp = await axios.post(url + "/deathcounter", {
-						deaths: gameDeathsCount,
+						deaths: gameStreamDeaths.deaths,
+						gameDeaths: gameDeaths,
+						allDeaths: allTimeStreamDeaths,
 					});
 
 					deathCounters = await DeathCounter.find({
@@ -593,7 +608,6 @@ const commands = {
 					gamesPlayed = deathCounters.length;
 
 					let random = Math.floor(Math.random() * 101);
-
 					if (random == 1) {
 						pularlity = getPlurality(
 							gameStreamDeaths.deaths,
@@ -642,15 +656,7 @@ const commands = {
 									pularlity
 							);
 						} else if (random >= 70 && random <= 83) {
-							let gameDeaths = 0;
-							let gameStreams = await DeathCounter.find({
-								gameTitle: gameName,
-							}).exec();
-							if (gameStreams.length > 1) {
-								for (let i = 0; i < gameStreams.length; i++) {
-									gameDeaths = gameDeaths + gameStreams[i].deaths;
-								}
-
+							if (gameDeaths != 0) {
 								pularlity = getPlurality(gameDeaths, "time", "times");
 
 								result.push(
@@ -666,6 +672,7 @@ const commands = {
 					}
 				}
 			} catch (err) {
+				console.log(err);
 				result.push(
 					"Twitch says no, and Starless should really sort this out some time after stream"
 				);
