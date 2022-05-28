@@ -518,8 +518,7 @@ const commands = {
 
 			try {
 				let stream = await apiClient.streams.getStreamByUserId(
-					"62941202"
-					//process.env.TWITCH_USER_ID
+					process.env.TWITCH_USER_ID
 				);
 
 				if (stream == null) {
