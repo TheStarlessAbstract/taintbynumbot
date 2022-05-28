@@ -92,7 +92,7 @@ async function setup() {
 			checkLive();
 			commands.setApiClient(apiClient);
 			redemptions.setChatClient(chatClient);
-			await deathCounter.setup(apiClient);
+			// await deathCounter.setup(apiClient);
 		});
 
 		await chatClient.onMessage(async (channel, user, message, msg) => {

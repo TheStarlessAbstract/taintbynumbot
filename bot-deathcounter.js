@@ -50,6 +50,7 @@ async function setup(newApiClient) {
 		streamDeaths = streamDeathCounter.deaths;
 	}
 
+	console.log(gameDeathCounter.length);
 	if (gameDeathCounter.length > 0) {
 		for (let i = 0; i < gameDeathCounter.length; i++) {
 			gameDeaths = gameDeaths + gameDeathCounter[i].deaths;
