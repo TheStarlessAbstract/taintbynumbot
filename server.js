@@ -15,6 +15,7 @@ const port = process.env.PORT || 5000;
 const uri = process.env.MONGO_URI;
 
 app.use(express.json());
+app.use(express.static(__dirname + "/public"));
 
 mongoose.connect(uri, {
 	useNewUrlParser: true,
@@ -44,7 +45,7 @@ app.post("/deathcounter", (req, res) => {
 	let gameDeaths = req.body.gameDeaths;
 	let allDeaths = req.body.allDeaths;
 
-	serverIo.setDeaths(deaths);
+	serverIo.setDeaths(deaths, gameDeaths, allDeaths);
 	res.sendStatus(201);
 });
 

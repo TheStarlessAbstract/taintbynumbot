@@ -750,6 +750,10 @@ const commands = {
 			if (config.isModUp) {
 				if (config.argument) {
 					username = config.argument;
+					if (username.startsWith("@")) {
+						username = username.slice(1);
+					}
+
 					user = await apiClient.users.getUserByName(username);
 
 					if (!user) {

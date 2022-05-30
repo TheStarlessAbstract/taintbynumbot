@@ -10,6 +10,8 @@ let interval;
 let lastPlayFinished = true;
 let isLive = false;
 let deaths = 0;
+let gameDeaths = 0;
+let allDeaths = 0;
 
 if (process.env.PORT) {
 	url = process.env.BOT_DOMAIN;
@@ -67,13 +69,15 @@ function playAudio(url) {
 	}
 }
 
-function setDeaths(newDeaths) {
+function setDeaths(newDeaths, newGameDeaths, newAllDeaths) {
 	deaths = newDeaths;
+	gameDeaths = newGameDeaths;
+	allDeaths = newAllDeaths;
 	setDeathCounter();
 }
 
 function setDeathCounter() {
-	io.emit("setDeath", deaths);
+	io.emit("setDeath", { deaths, gameDeaths, allDeaths });
 }
 
 exports.setup = setup;

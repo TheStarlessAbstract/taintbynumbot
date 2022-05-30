@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bowlby+One&family=Ceviche+One&family=Titan+One&display=swap" rel="stylesheet">
+    
     <head>
         <title>Death Counter</title>
+        <link rel="stylesheet" href="bot-style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bowlby+One&family=Ceviche+One&family=Titan+One&display=swap" rel="stylesheet">
     </head>
     <body>
-        <div id="deathCounter" style="font-size: 50px;color: white;font-family:Bangers; font-weight: bold;-webkit-text-stroke: 1px #ff00ff;">0</div>
+        <!-- <div id="deathCounter" style="font-size: 50px;color: white;font-family:Bangers; font-weight: bold;-webkit-text-stroke: 1px #ff00ff;">Deaths: 0</div> -->
+        <div id="deathType">Deaths:</div>
+        <div id="counter">0</div>
         <script src="/socket.io/socket.io.js"></script>
         <script>
             var socket = io();
-            var x = document.getElementById("deathCounter");
+            var x = document.getElementById("counter");
 
             socket.emit("deathCounterConnection", {});
 
-            socket.on("setDeath", (deaths) => {
-                x.innerHTML = deaths;
+            socket.on("setDeath", deathCounter => {
+                x.innerHTML = deathCounter.deaths;
             });
         </script>
     </body>

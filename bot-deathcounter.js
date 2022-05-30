@@ -24,6 +24,19 @@ async function setup(newApiClient) {
 	);
 
 	if (stream == null) {
+		let channel = await apiClient.channels.getChannelInfoById(
+			process.env.TWITCH_USER_ID
+		);
+
+		gameName = channel.gameName;
+
+		streamDeathCounter = await DeathCounter.findOne(
+			{
+				gameTitle: gameName,
+			},
+			{},
+			{ sort: { streamStartDate: -1 } }
+		).exec();
 	} else {
 		gameName = stream.gameName;
 		streamDate = stream.startDate;
@@ -38,19 +51,18 @@ async function setup(newApiClient) {
 			gameTitle: gameName,
 			streamStartDate: streamDate,
 		}).exec();
-
-		gameDeathCounter = await DeathCounter.find({
-			gameTitle: gameName,
-		}).exec();
-
-		allDeathCounter = await DeathCounter.find({}).exec();
 	}
+
+	gameDeathCounter = await DeathCounter.find({
+		gameTitle: gameName,
+	}).exec();
+
+	allDeathCounter = await DeathCounter.find({}).exec();
 
 	if (streamDeathCounter) {
 		streamDeaths = streamDeathCounter.deaths;
 	}
 
-	console.log(gameDeathCounter.length);
 	if (gameDeathCounter.length > 0) {
 		for (let i = 0; i < gameDeathCounter.length; i++) {
 			gameDeaths = gameDeaths + gameDeathCounter[i].deaths;

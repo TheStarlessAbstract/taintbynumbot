@@ -1,0 +1,24 @@
+#deathType {
+	font-size: 50px;
+	color: white;
+	font-family: Bangers;
+	font-weight: bold;
+	-webkit-text-stroke: 1px #ff00ff;
+	white-space: nowrap;
+	overflow: hidden;
+	width: 30em;
+	animation: linearwipe 3s steps(60, end);
+}
+#counter {
+	font-size: 50px;
+	color: white;
+	font-family: Bangers;
+	font-weight: bold;
+	-webkit-text-stroke: 1px #ff00ff;
+}
+
+@keyframes linearwipe {
+	from {
+		width: 0;
+	}
+}
