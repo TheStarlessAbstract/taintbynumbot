@@ -51,27 +51,27 @@ async function setup(newApiClient) {
 			gameTitle: gameName,
 			streamStartDate: streamDate,
 		}).exec();
-	}
 
-	gameDeathCounter = await DeathCounter.find({
-		gameTitle: gameName,
-	}).exec();
+		gameDeathCounter = await DeathCounter.find({
+			gameTitle: gameName,
+		}).exec();
 
-	allDeathCounter = await DeathCounter.find({}).exec();
+		allDeathCounter = await DeathCounter.find({}).exec();
 
-	if (streamDeathCounter) {
-		streamDeaths = streamDeathCounter.deaths;
-	}
-
-	if (gameDeathCounter.length > 0) {
-		for (let i = 0; i < gameDeathCounter.length; i++) {
-			gameDeaths = gameDeaths + gameDeathCounter[i].deaths;
+		if (streamDeathCounter) {
+			streamDeaths = streamDeathCounter.deaths;
 		}
-	}
 
-	if (allDeathCounter.length > 0) {
-		for (let i = 0; i < allDeathCounter.length; i++) {
-			allDeaths = allDeaths + allDeathCounter[i].deaths;
+		if (gameDeathCounter.length > 0) {
+			for (let i = 0; i < gameDeathCounter.length; i++) {
+				gameDeaths = gameDeaths + gameDeathCounter[i].deaths;
+			}
+		}
+
+		if (allDeathCounter.length > 0) {
+			for (let i = 0; i < allDeathCounter.length; i++) {
+				allDeaths = allDeaths + allDeathCounter[i].deaths;
+			}
 		}
 	}
 

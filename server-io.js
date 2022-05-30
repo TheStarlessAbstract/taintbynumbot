@@ -52,7 +52,8 @@ function setup(newIo) {
 		});
 
 		socket.on("deathCounterConnection", () => {
-			setDeathCounter(deaths);
+			setDeathCounter();
+			deaths = 0;
 			console.log("death");
 		});
 	});
