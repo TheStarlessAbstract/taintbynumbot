@@ -41,11 +41,18 @@ app.post("/playaudio", (req, res) => {
 });
 
 app.post("/deathcounter", (req, res) => {
+	let average;
 	let deaths = req.body.deaths;
 	let gameDeaths = req.body.gameDeaths;
 	let allDeaths = req.body.allDeaths;
 
-	serverIo.setDeaths(deaths, gameDeaths, allDeaths);
+	if (!req.body.average) {
+		average = { hours: 0, minutes: 0, seconds: 0 };
+	} else {
+		average = req.body.average;
+	}
+
+	serverIo.setDeaths(deaths, gameDeaths, allDeaths, average);
 	res.sendStatus(201);
 });
 

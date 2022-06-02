@@ -4,14 +4,16 @@ const http = require("http");
 
 let io;
 let url;
-let min = 600000;
-let max = 900000;
 let interval;
+let deathCounterInterval;
 let lastPlayFinished = true;
 let isLive = false;
 let deaths = 0;
 let gameDeaths = 0;
 let allDeaths = 0;
+let average = { hours: 0, minutes: 0, seconds: 0 };
+let lastDeathType = "";
+let deathCount = 0;
 
 if (process.env.PORT) {
 	url = process.env.BOT_DOMAIN;
@@ -39,12 +41,38 @@ function setup(newIo) {
 			} catch (err) {
 				console.log(err);
 			}
-		}, getRandomBetween());
+		}, getRandomBetween(600000, 900000));
+
+		deathCounterInterval = setInterval(() => {
+			let deathTypes = ["Stream Deaths", "Game Deaths", "Time To Death"];
+			deathType = deathTypes[getRandomBetween(0, deathTypes.length - 1)];
+
+			if (deathType != lastDeathType) {
+				lastDeathType = deathType;
+
+				if (deathType == "Stream Deaths") {
+					deathCount = deaths;
+				} else if (deathType == "Game Deaths") {
+					deathCount = gameDeaths;
+				} else if (deathType == "Time To Death") {
+					deathCount =
+						average.hours +
+						"h " +
+						average.minutes +
+						"m " +
+						average.seconds +
+						"s";
+				}
+
+				io.emit("updateType", { deathType, deathCount });
+			}
+		}, getRandomBetween(300000, 600000));
 
 		socket.on("disconnect", () => {
 			console.log("user disconnected");
 			isLive = false;
 			clearInterval(interval);
+			clearInterval(deathCounterInterval);
 		});
 
 		socket.on("ended", () => {
@@ -52,14 +80,13 @@ function setup(newIo) {
 		});
 
 		socket.on("deathCounterConnection", () => {
-			setDeathCounter();
 			deaths = 0;
-			console.log("death");
+			setDeathCounter();
 		});
 	});
 }
 
-function getRandomBetween() {
+function getRandomBetween(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
@@ -70,10 +97,11 @@ function playAudio(url) {
 	}
 }
 
-function setDeaths(newDeaths, newGameDeaths, newAllDeaths) {
+function setDeaths(newDeaths, newGameDeaths, newAllDeaths, newAverage) {
 	deaths = newDeaths;
 	gameDeaths = newGameDeaths;
 	allDeaths = newAllDeaths;
+	average = newAverage;
 	setDeathCounter();
 }
 

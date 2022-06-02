@@ -515,6 +515,10 @@ const commands = {
 			let pularlity;
 			let gameDeaths = 0;
 			let gameStreams;
+			let timeSinceStartAsMs;
+			let averageToDeathMs;
+			let averageToDeath;
+			let averageString = "";
 
 			try {
 				let stream = await apiClient.streams.getStreamByUserId(
@@ -526,9 +530,13 @@ const commands = {
 						"Starless doesn't seem to be streaming right now, come back later"
 					);
 				} else {
+					let currentTime = new Date();
+
 					gameName = stream.gameName;
 					streamDate = stream.startDate;
-					streamDate = new Date(streamDate);
+
+					timeSinceStartAsMs = Math.floor(currentTime - streamDate);
+
 					streamDate = new Date(
 						streamDate.getFullYear(),
 						streamDate.getMonth(),
@@ -583,6 +591,13 @@ const commands = {
 					totalStreamDeaths++;
 					allTimeStreamDeaths++;
 					gameStreamDeaths.save();
+					averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
+
+					averageToDeath = {
+						hours: Math.floor((averageToDeathMs / (1000 * 60 * 60)) % 24),
+						minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
+						seconds: Math.floor((averageToDeathMs / 1000) % 60),
+					};
 
 					gameStreams = await DeathCounter.find({
 						gameTitle: gameName,
@@ -598,6 +613,7 @@ const commands = {
 						deaths: gameStreamDeaths.deaths,
 						gameDeaths: gameDeaths,
 						allDeaths: allTimeStreamDeaths,
+						average: averageToDeath,
 					});
 
 					deathCounters = await DeathCounter.find({
@@ -606,7 +622,8 @@ const commands = {
 
 					gamesPlayed = deathCounters.length;
 
-					let random = Math.floor(Math.random() * 101);
+					let random = Math.floor(Math.random() * 100) + 1;
+					random = 57;
 					if (random == 1) {
 						pularlity = getPlurality(
 							gameStreamDeaths.deaths,
@@ -634,7 +651,7 @@ const commands = {
 								" this stream"
 						);
 
-						if (random >= 14 && random <= 27) {
+						if (random >= 13 && random <= 23) {
 							pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
 
 							result.push(
@@ -643,7 +660,7 @@ const commands = {
 									" " +
 									pularlity
 							);
-						} else if (gamesPlayed > 1 && random >= 42 && random <= 55) {
+						} else if (gamesPlayed > 1 && random >= 35 && random <= 45) {
 							pularlity = getPlurality(totalStreamDeaths, "time", "times");
 
 							result.push(
@@ -654,7 +671,7 @@ const commands = {
 									" " +
 									pularlity
 							);
-						} else if (random >= 70 && random <= 83) {
+						} else if (random >= 57 && random <= 67) {
 							if (gameDeaths != 0) {
 								pularlity = getPlurality(gameDeaths, "time", "times");
 
@@ -667,6 +684,24 @@ const commands = {
 										gameStreams[0].gameTitle
 								);
 							}
+						} else if (random >= 79 && random <= 89) {
+							pularlity = getPlurality(gameDeaths, "time", "times");
+
+							if (averageToDeath.hours > 0) {
+								averageString = averageToDeath.hours + "h ";
+							}
+							if (averageToDeath.minutes > 0) {
+								averageString = averageString + averageToDeath.minutes + "m ";
+							}
+							if (averageToDeath.seconds > 0) {
+								averageString = averageString + averageToDeath.seconds + "s ";
+							}
+
+							result.push(
+								"Starless is dying/failing on average every " +
+									averageString +
+									"this stream. Don't go getting your hopes up this time"
+							);
 						}
 					}
 				}

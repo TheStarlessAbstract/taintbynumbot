@@ -1,27 +1,46 @@
 <!DOCTYPE html>
 <html>
-    
     <head>
         <title>Death Counter</title>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
         <link rel="stylesheet" href="bot-style.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Bowlby+One&family=Ceviche+One&family=Titan+One&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     </head>
     <body>
-        <!-- <div id="deathCounter" style="font-size: 50px;color: white;font-family:Bangers; font-weight: bold;-webkit-text-stroke: 1px #ff00ff;">Deaths: 0</div> -->
-        <div id="deathType">Deaths:</div>
-        <div id="counter">0</div>
+        <div id="deathType">&nbsp;Stream Deaths:</div>
+        <div id="counter">&nbsp;0</div>
         <script src="/socket.io/socket.io.js"></script>
         <script>
+            const delay = ms => new Promise(res => setTimeout(res, ms));
             var socket = io();
-            var x = document.getElementById("counter");
+            var deathTypeElement = document.getElementById("deathType");
+            var counterElement = document.getElementById("counter");
+            var deaths;
+            var gameDeaths;
+            var allDeaths;
 
             socket.emit("deathCounterConnection", {});
 
             socket.on("setDeath", deathCounter => {
-                x.innerHTML = deathCounter.deaths;
+                deaths = deathCounter.deaths;
+                gameDeaths = deathCounter.gameDeaths;
+                allDeaths = deathCounter.allDeaths;
+
+                counterElement.innerHTML = "&nbsp;" + deaths;
             });
+
+            socket.on("updateType", async (deathUpdate) => {
+                deathTypeElement.classList.toggle('fade');
+                counterElement.classList.toggle('fade');
+                await delay(2000);
+                deathTypeElement.innerHTML = "&nbsp;" + deathUpdate.deathType + ":";
+                counterElement.innerHTML = "&nbsp;" + deathUpdate.deathCount;
+                deathTypeElement.classList.toggle('fade');
+                counterElement.classList.toggle('fade');
+            });
+
         </script>
     </body>
 </html>
