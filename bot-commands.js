@@ -623,7 +623,6 @@ const commands = {
 					gamesPlayed = deathCounters.length;
 
 					let random = Math.floor(Math.random() * 100) + 1;
-					random = 57;
 					if (random == 1) {
 						pularlity = getPlurality(
 							gameStreamDeaths.deaths,
