@@ -8,12 +8,12 @@ let interval;
 let deathCounterInterval;
 let lastPlayFinished = true;
 let isLive = false;
-let deaths = 0;
-let gameDeaths = 0;
+let deaths;
+let gameDeaths;
 let allDeaths = 0;
-let average = { hours: 0, minutes: 0, seconds: 0 };
+let average;
 let lastDeathType = "";
-let deathCount = 0;
+let deathCount;
 
 if (process.env.PORT) {
 	url = process.env.BOT_DOMAIN;
@@ -44,24 +44,31 @@ function setup(newIo) {
 		}, getRandomBetween(600000, 900000));
 
 		deathCounterInterval = setInterval(() => {
-			let deathTypes = ["Stream Deaths", "Game Deaths", "Time To Death"];
+			deathCount = "";
+			let deathTypes = ["Stream Deaths", "Game Deaths", "Avg Time To Death"];
 			deathType = deathTypes[getRandomBetween(0, deathTypes.length - 1)];
 
 			if (deathType != lastDeathType) {
-				lastDeathType = deathType;
-
 				if (deathType == "Stream Deaths") {
 					deathCount = deaths;
-				} else if (deathType == "Game Deaths") {
+					lastDeathType = deathType;
+				} else if (deathType == "Game Deaths" && gameDeaths > 0) {
 					deathCount = gameDeaths;
-				} else if (deathType == "Time To Death") {
-					deathCount =
-						average.hours +
-						"h " +
-						average.minutes +
-						"m " +
-						average.seconds +
-						"s";
+					lastDeathType = deathType;
+				} else if (
+					deathType == "Avg Time To Death" &&
+					average.hours + average.minutes + average.seconds > 0
+				) {
+					if (average.hours > 0) {
+						deathCount = average.hours + "h ";
+					}
+					if (average.minutes > 0) {
+						deathCount = deathCount + average.minutes + "m ";
+					}
+					if (average.seconds > 0) {
+						deathCount = deathCount + average.seconds + "s";
+					}
+					lastDeathType = deathType;
 				}
 
 				io.emit("updateType", { deathType, deathCount });
@@ -80,8 +87,11 @@ function setup(newIo) {
 		});
 
 		socket.on("deathCounterConnection", () => {
+			lastDeathType = "Stream Deaths";
 			deaths = 0;
-			setDeathCounter();
+			gameDeaths = 0;
+			average = { hours: 0, minutes: 0, seconds: 0 };
+			setDeathCounter(lastDeathType);
 		});
 	});
 }
@@ -102,11 +112,29 @@ function setDeaths(newDeaths, newGameDeaths, newAllDeaths, newAverage) {
 	gameDeaths = newGameDeaths;
 	allDeaths = newAllDeaths;
 	average = newAverage;
-	setDeathCounter();
+	setDeathCounter(lastDeathType);
 }
 
-function setDeathCounter() {
-	io.emit("setDeath", { deaths, gameDeaths, allDeaths });
+function setDeathCounter(currentDeathType) {
+	let setDeathCount = "";
+
+	if (currentDeathType == "Stream Deaths") {
+		setDeathCount = deaths;
+	} else if (currentDeathType == "Game Deaths") {
+		setDeathCount = gameDeaths;
+	} else if (currentDeathType == "Avg Time To Death") {
+		if (average.hours > 0) {
+			setDeathCount = average.hours + "h ";
+		}
+		if (average.minutes > 0) {
+			setDeathCount = setDeathCount + average.minutes + "m ";
+		}
+		if (average.seconds > 0) {
+			setDeathCount = setDeathCount + average.seconds + "s";
+		}
+	}
+
+	io.emit("setDeath", setDeathCount);
 }
 
 exports.setup = setup;

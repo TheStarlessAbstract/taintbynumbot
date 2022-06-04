@@ -4,6 +4,7 @@ const axios = require("axios");
 
 const AudioLink = require("./models/audiolink");
 const Deck = require("./models/deck");
+const KingsSaveState = require("./models/kingssavestate");
 
 let audioLinks;
 let lastAudioPlayed;
@@ -274,33 +275,44 @@ async function resetKings() {
 	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
 	let gameTitle = channelInfo.gameName;
 
-	cardsToDraw = [];
-	kingsCount = 0;
+	let saveState = await KingsSaveState.find({}).exec();
 
-	if (!deck || deck.game != gameTitle) {
-		deck = await Deck.findOne({ game: gameTitle });
+	if (saveState.length == 0) {
+		cardsToDraw = [];
+		kingsCount = 0;
+
+		if (!deck || deck.game != gameTitle) {
+			deck = await Deck.findOne({ game: gameTitle });
+		}
+
+		if (!deck) {
+			await createDeck(gameTitle);
+		}
+
+		for (let i = 0; i < deck.cards.length; i++) {
+			cardsToDraw.push({
+				suit: deck.cards[i].suit,
+				value: deck.cards[i].value,
+				rule: deck.cards[i].rule,
+				explanation: deck.cards[i].explanation,
+				isDrawn: false,
+			});
+		}
+
+		shuffle();
+
+		chatClient.say(
+			twitchUsername,
+			"A new game of Kings has been dealt, with " +
+				cardsToDraw.length +
+				" cards!"
+		);
+	} else {
+		deck = await Deck.findById(saveState[0].deckId).exec();
+		cardsToDraw = saveState[0].cardsToDraw;
+		kingsCount = saveState[0].kingsCount;
+		await KingsSaveState.deleteOne({ _id: saveState[0]._id });
 	}
-
-	if (!deck) {
-		await createDeck(gameTitle);
-	}
-
-	for (let i = 0; i < deck.cards.length; i++) {
-		cardsToDraw.push({
-			suit: deck.cards[i].suit,
-			value: deck.cards[i].value,
-			rule: deck.cards[i].rule,
-			explanation: deck.cards[i].explanation,
-			isDrawn: false,
-		});
-	}
-
-	shuffle();
-
-	chatClient.say(
-		twitchUsername,
-		"A new game of Kings has been dealt, with " + cardsToDraw.length + " cards!"
-	);
 }
 
 async function createDeck(gameTitle) {
@@ -371,6 +383,16 @@ async function addKingsRule(value, rule) {
 	return response;
 }
 
+async function saveKingsState() {
+	let saveState = new KingsSaveState({
+		deckId: deck._id,
+		cardsToDraw: cardsToDraw,
+		kingsCount: kingsCount,
+	});
+
+	await saveState.save();
+}
+
 exports.setup = setup;
 exports.setApiClient = setApiClient;
 exports.setChatClient = setChatClient;
@@ -378,6 +400,7 @@ exports.getAudioTimeout = getAudioTimeout;
 exports.setAudioTimeout = setAudioTimeout;
 exports.resetKings = resetKings;
 exports.addKingsRule = addKingsRule;
+exports.saveKingsState = saveKingsState;
 
 // let test = {
 //     channelId: message.channelId,

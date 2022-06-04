@@ -18,15 +18,11 @@
             var deathTypeElement = document.getElementById("deathType");
             var counterElement = document.getElementById("counter");
             var deaths;
-            var gameDeaths;
-            var allDeaths;
 
             socket.emit("deathCounterConnection", {});
 
-            socket.on("setDeath", deathCounter => {
-                deaths = deathCounter.deaths;
-                gameDeaths = deathCounter.gameDeaths;
-                allDeaths = deathCounter.allDeaths;
+            socket.on("setDeath", deathCount => {
+                deaths = deathCount;
 
                 counterElement.innerHTML = "&nbsp;" + deaths;
             });
