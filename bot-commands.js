@@ -27,6 +27,7 @@ let titleTimer;
 let totalStreamDeaths = 0;
 let quoteTimer;
 let chatCommands;
+let fLastUseTime = "";
 
 const commands = {
 	// card: {
@@ -532,175 +533,187 @@ const commands = {
 				} else {
 					let currentTime = new Date();
 
-					gameName = stream.gameName;
-					streamDate = stream.startDate;
+					if (currentTime - fLastUseTime > 5000) {
+						console.log(currentTime - fLastUseTime);
+						fLastUseTime = currentTime;
+						gameName = stream.gameName;
+						streamDate = stream.startDate;
 
-					timeSinceStartAsMs = Math.floor(currentTime - streamDate);
+						timeSinceStartAsMs = Math.floor(currentTime - streamDate);
 
-					streamDate = new Date(
-						streamDate.getFullYear(),
-						streamDate.getMonth(),
-						streamDate.getDate()
-					);
+						streamDate = new Date(
+							streamDate.getFullYear(),
+							streamDate.getMonth(),
+							streamDate.getDate()
+						);
 
-					if (!gameStreamDeaths) {
+						if (!gameStreamDeaths) {
+							deathCounters = await DeathCounter.find({
+								streamStartDate: streamDate,
+							}).exec();
+
+							if (deathCounters.length == 0) {
+								gameStreamDeaths = await createDeathCounter(
+									gameName,
+									streamDate
+								);
+							} else {
+								for (let i = 0; i < deathCounters.length; i++) {
+									totalStreamDeaths =
+										totalStreamDeaths + deathCounters[i].deaths;
+								}
+
+								deathCounters = await DeathCounter.findOne({
+									gameTitle: gameName,
+									streamStartDate: streamDate,
+								}).exec();
+
+								if (deathCounters) {
+									gameStreamDeaths = deathCounters;
+								} else {
+									gameStreamDeaths = await createDeathCounter(
+										gameName,
+										streamDate
+									);
+								}
+							}
+						} else {
+							if (gameStreamDeaths.gameTitle != gameName) {
+								deathCounters = await DeathCounter.findOne({
+									gameTitle: gameName,
+									streamStartDate: streamDate,
+								}).exec();
+
+								if (deathCounters) {
+									gameStreamDeaths = deathCounters;
+								} else {
+									gameStreamDeaths = await createDeathCounter(
+										gameName,
+										streamDate
+									);
+								}
+							}
+						}
+
+						gameStreamDeaths.deaths++;
+						totalStreamDeaths++;
+						allTimeStreamDeaths++;
+						gameStreamDeaths.save();
+						averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
+
+						averageToDeath = {
+							hours: Math.floor((averageToDeathMs / (1000 * 60 * 60)) % 24),
+							minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
+							seconds: Math.floor((averageToDeathMs / 1000) % 60),
+						};
+
+						gameStreams = await DeathCounter.find({
+							gameTitle: gameName,
+						}).exec();
+
+						if (gameStreams.length > 1) {
+							for (let i = 0; i < gameStreams.length; i++) {
+								gameDeaths = gameDeaths + gameStreams[i].deaths;
+							}
+						}
+
+						resp = await axios.post(url + "/deathcounter", {
+							deaths: gameStreamDeaths.deaths,
+							gameDeaths: gameDeaths,
+							allDeaths: allTimeStreamDeaths,
+							average: averageToDeath,
+						});
+
 						deathCounters = await DeathCounter.find({
 							streamStartDate: streamDate,
 						}).exec();
 
-						if (deathCounters.length == 0) {
-							gameStreamDeaths = await createDeathCounter(gameName, streamDate);
+						gamesPlayed = deathCounters.length;
+
+						let random = Math.floor(Math.random() * 100) + 1;
+						if (random == 1) {
+							pularlity = getPlurality(
+								gameStreamDeaths.deaths,
+								"death/fail",
+								"deaths/fails"
+							);
+
+							result.push(
+								"ThisIsFine ThisIsFine ThisIsFine it's only " +
+									gameStreamDeaths.deaths +
+									" " +
+									pularlity +
+									" ThisIsFine ThisIsFine ThisIsFine"
+							);
 						} else {
-							for (let i = 0; i < deathCounters.length; i++) {
-								totalStreamDeaths = totalStreamDeaths + deathCounters[i].deaths;
-							}
-
-							deathCounters = await DeathCounter.findOne({
-								gameTitle: gameName,
-								streamStartDate: streamDate,
-							}).exec();
-
-							if (deathCounters) {
-								gameStreamDeaths = deathCounters;
-							} else {
-								gameStreamDeaths = await createDeathCounter(
-									gameName,
-									streamDate
-								);
-							}
-						}
-					} else {
-						if (gameStreamDeaths.gameTitle != gameName) {
-							deathCounters = await DeathCounter.findOne({
-								gameTitle: gameName,
-								streamStartDate: streamDate,
-							}).exec();
-
-							if (deathCounters) {
-								gameStreamDeaths = deathCounters;
-							} else {
-								gameStreamDeaths = await createDeathCounter(
-									gameName,
-									streamDate
-								);
-							}
-						}
-					}
-
-					gameStreamDeaths.deaths++;
-					totalStreamDeaths++;
-					allTimeStreamDeaths++;
-					gameStreamDeaths.save();
-					averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
-
-					averageToDeath = {
-						hours: Math.floor((averageToDeathMs / (1000 * 60 * 60)) % 24),
-						minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
-						seconds: Math.floor((averageToDeathMs / 1000) % 60),
-					};
-
-					gameStreams = await DeathCounter.find({
-						gameTitle: gameName,
-					}).exec();
-
-					if (gameStreams.length > 1) {
-						for (let i = 0; i < gameStreams.length; i++) {
-							gameDeaths = gameDeaths + gameStreams[i].deaths;
-						}
-					}
-
-					resp = await axios.post(url + "/deathcounter", {
-						deaths: gameStreamDeaths.deaths,
-						gameDeaths: gameDeaths,
-						allDeaths: allTimeStreamDeaths,
-						average: averageToDeath,
-					});
-
-					deathCounters = await DeathCounter.find({
-						streamStartDate: streamDate,
-					}).exec();
-
-					gamesPlayed = deathCounters.length;
-
-					let random = Math.floor(Math.random() * 100) + 1;
-					if (random == 1) {
-						pularlity = getPlurality(
-							gameStreamDeaths.deaths,
-							"death/fail",
-							"deaths/fails"
-						);
-
-						result.push(
-							"ThisIsFine ThisIsFine ThisIsFine it's only " +
-								gameStreamDeaths.deaths +
-								" " +
-								pularlity +
-								" ThisIsFine ThisIsFine ThisIsFine"
-						);
-					} else {
-						pularlity = getPlurality(gameStreamDeaths.deaths, "time", "times");
-
-						result.push(
-							"Starless has now died/failed " +
-								gameStreamDeaths.deaths +
-								" " +
-								pularlity +
-								" while playing " +
-								gameStreamDeaths.gameTitle +
-								" this stream"
-						);
-
-						if (random >= 13 && random <= 23) {
-							pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
+							pularlity = getPlurality(
+								gameStreamDeaths.deaths,
+								"time",
+								"times"
+							);
 
 							result.push(
-								"Since records have started, Starless has died/failed a grand total of " +
-									allTimeStreamDeaths +
+								"Starless has now died/failed " +
+									gameStreamDeaths.deaths +
 									" " +
-									pularlity
+									pularlity +
+									" while playing " +
+									gameStreamDeaths.gameTitle +
+									" this stream"
 							);
-						} else if (gamesPlayed > 1 && random >= 35 && random <= 45) {
-							pularlity = getPlurality(totalStreamDeaths, "time", "times");
 
-							result.push(
-								"Starless has played " +
-									gamesPlayed +
-									" games this stream, and has died/failed about " +
-									totalStreamDeaths +
-									" " +
-									pularlity
-							);
-						} else if (random >= 57 && random <= 67) {
-							if (gameDeaths != 0) {
-								pularlity = getPlurality(gameDeaths, "time", "times");
+							if (random >= 13 && random <= 23) {
+								pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
 
 								result.push(
-									"Starless has died/failed at least " +
-										gameDeaths +
+									"Since records have started, Starless has died/failed a grand total of " +
+										allTimeStreamDeaths +
 										" " +
-										pularlity +
-										", across all streams while playing " +
-										gameStreams[0].gameTitle
+										pularlity
+								);
+							} else if (gamesPlayed > 1 && random >= 35 && random <= 45) {
+								pularlity = getPlurality(totalStreamDeaths, "time", "times");
+
+								result.push(
+									"Starless has played " +
+										gamesPlayed +
+										" games this stream, and has died/failed about " +
+										totalStreamDeaths +
+										" " +
+										pularlity
+								);
+							} else if (random >= 57 && random <= 67) {
+								if (gameDeaths != 0) {
+									pularlity = getPlurality(gameDeaths, "time", "times");
+
+									result.push(
+										"Starless has died/failed at least " +
+											gameDeaths +
+											" " +
+											pularlity +
+											", across all streams while playing " +
+											gameStreams[0].gameTitle
+									);
+								}
+							} else if (random >= 79 && random <= 89) {
+								pularlity = getPlurality(gameDeaths, "time", "times");
+
+								if (averageToDeath.hours > 0) {
+									averageString = averageToDeath.hours + "h ";
+								}
+								if (averageToDeath.minutes > 0) {
+									averageString = averageString + averageToDeath.minutes + "m ";
+								}
+								if (averageToDeath.seconds > 0) {
+									averageString = averageString + averageToDeath.seconds + "s ";
+								}
+
+								result.push(
+									"Starless is dying/failing on average every " +
+										averageString +
+										"this stream. Don't go getting your hopes up this time"
 								);
 							}
-						} else if (random >= 79 && random <= 89) {
-							pularlity = getPlurality(gameDeaths, "time", "times");
-
-							if (averageToDeath.hours > 0) {
-								averageString = averageToDeath.hours + "h ";
-							}
-							if (averageToDeath.minutes > 0) {
-								averageString = averageString + averageToDeath.minutes + "m ";
-							}
-							if (averageToDeath.seconds > 0) {
-								averageString = averageString + averageToDeath.seconds + "s ";
-							}
-
-							result.push(
-								"Starless is dying/failing on average every " +
-									averageString +
-									"this stream. Don't go getting your hopes up this time"
-							);
 						}
 					}
 				}
@@ -1008,6 +1021,8 @@ async function setup() {
 	for (let i = 0; i < chatCommands.length; i++) {
 		commands[chatCommands[i].name] = { response: chatCommands[i].text };
 	}
+
+	fLastUseTime = new Date();
 }
 
 function getNextIndex(array) {

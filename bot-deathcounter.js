@@ -30,13 +30,23 @@ async function setup(newApiClient) {
 
 		gameName = channel.gameName;
 
-		streamDeathCounter = await DeathCounter.findOne(
-			{
-				gameTitle: gameName,
-			},
-			{},
-			{ sort: { streamStartDate: -1 } }
-		).exec();
+		streamDeathCounter = await DeathCounter.find({
+			gameTitle: gameName,
+		}).exec();
+
+		if (streamDeathCounter.length > 0) {
+			for (let i = 0; i < streamDeathCounter.length; i++) {
+				gameDeaths = gameDeaths + streamDeathCounter[i].deaths;
+			}
+		}
+
+		allDeathCounter = await DeathCounter.find({}).exec();
+
+		if (allDeathCounter.length > 0) {
+			for (let i = 0; i < allDeathCounter.length; i++) {
+				allDeaths = allDeaths + allDeathCounter[i].deaths;
+			}
+		}
 	} else {
 		gameName = stream.gameName;
 		streamDate = stream.startDate;

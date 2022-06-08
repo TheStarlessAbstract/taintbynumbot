@@ -24,75 +24,91 @@ if (process.env.PORT) {
 function setup(newIo) {
 	io = newIo;
 	io.on("connection", (socket) => {
-		console.log("a user connected");
-		isLive = true;
+		if (socket.handshake.headers.referer.includes("channelpointoverlay")) {
+			console.log("/channelpointoverlay connected");
 
-		interval = setInterval(() => {
-			try {
-				if (process.env.PORT) {
-					https.get(url, (res) => {
-						// do nothing
-					});
-				} else {
-					http.get(url, (res) => {
-						// do nothing
-					});
+			isLive = true;
+
+			interval = setInterval(() => {
+				try {
+					if (process.env.PORT) {
+						https.get(url, (res) => {
+							// do nothing
+						});
+					} else {
+						http.get(url, (res) => {
+							// do nothing
+						});
+					}
+				} catch (err) {
+					console.log(err);
 				}
-			} catch (err) {
-				console.log(err);
-			}
-		}, getRandomBetween(600000, 900000));
+			}, getRandomBetween(600000, 900000));
 
-		deathCounterInterval = setInterval(() => {
-			deathCount = "";
-			let deathTypes = ["Stream Deaths", "Game Deaths", "Avg Time To Death"];
-			deathType = deathTypes[getRandomBetween(0, deathTypes.length - 1)];
+			socket.on("disconnect", () => {
+				console.log("/channelpointoverlay disconnected");
+				isLive = false;
+				clearInterval(interval);
+			});
 
-			if (deathType != lastDeathType) {
-				if (deathType == "Stream Deaths") {
-					deathCount = deaths;
-					lastDeathType = deathType;
-				} else if (deathType == "Game Deaths" && gameDeaths > 0) {
-					deathCount = gameDeaths;
-					lastDeathType = deathType;
-				} else if (
-					deathType == "Avg Time To Death" &&
-					average.hours + average.minutes + average.seconds > 0
-				) {
-					if (average.hours > 0) {
-						deathCount = average.hours + "h ";
-					}
-					if (average.minutes > 0) {
-						deathCount = deathCount + average.minutes + "m ";
-					}
-					if (average.seconds > 0) {
-						deathCount = deathCount + average.seconds + "s";
-					}
-					lastDeathType = deathType;
-				}
+			socket.on("ended", () => {
+				lastPlayFinished = true;
+			});
+		}
 
-				io.emit("updateType", { deathType, deathCount });
-			}
-		}, getRandomBetween(300000, 600000));
+		if (socket.handshake.headers.referer.includes("deathcounteroverlay")) {
+			console.log("/deathcounteroverlay connected");
 
-		socket.on("disconnect", () => {
-			console.log("user disconnected");
-			isLive = false;
-			clearInterval(interval);
-			clearInterval(deathCounterInterval);
-		});
-
-		socket.on("ended", () => {
-			lastPlayFinished = true;
-		});
-
-		socket.on("deathCounterConnection", () => {
 			lastDeathType = "Stream Deaths";
 			deaths = 0;
 			gameDeaths = 0;
 			average = { hours: 0, minutes: 0, seconds: 0 };
 			setDeathCounter(lastDeathType);
-		});
+
+			deathCounterInterval = setInterval(() => {
+				let deathTypes = ["Stream Deaths", "Game Deaths", "Avg Time To Death"];
+				let emitFlag = false;
+				deathCount = 0;
+				deathType = deathTypes[getRandomBetween(0, deathTypes.length - 1)];
+
+				if (deathType != lastDeathType) {
+					if (deathType == "Stream Deaths") {
+						deathCount = deaths;
+						lastDeathType = deathType;
+						emitFlag = true;
+					} else if (deathType == "Game Deaths" && gameDeaths > 0) {
+						deathCount = gameDeaths;
+						lastDeathType = deathType;
+						emitFlag = true;
+					} else if (
+						deathType == "Avg Time To Death" &&
+						average.hours + average.minutes + average.seconds > 0
+					) {
+						deathCount = "";
+						if (average.hours > 0) {
+							deathCount = average.hours + "h ";
+						}
+						if (average.minutes > 0) {
+							deathCount = deathCount + average.minutes + "m ";
+						}
+						if (average.seconds > 0) {
+							deathCount = deathCount + average.seconds + "s";
+						}
+						lastDeathType = deathType;
+						emitFlag = true;
+					}
+
+					if (emitFlag) {
+						io.emit("updateType", { deathType, deathCount });
+					}
+				}
+			}, getRandomBetween(10000, 15000));
+
+			socket.on("disconnect", () => {
+				console.log("/deathcounteroverlay disconnected");
+				clearInterval(deathCounterInterval);
+			});
+		}
 	});
 }
 
