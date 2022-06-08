@@ -102,7 +102,7 @@ function setup(newIo) {
 						io.emit("updateType", { deathType, deathCount });
 					}
 				}
-			}, getRandomBetween(10000, 15000));
+			}, getRandomBetween(300000, 600000));
 
 			socket.on("disconnect", () => {
 				console.log("/deathcounteroverlay disconnected");
