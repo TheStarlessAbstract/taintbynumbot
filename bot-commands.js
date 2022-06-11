@@ -7,7 +7,9 @@ const Tinder = require("./models/tinder");
 const Title = require("./models/title");
 const Quote = require("./models/quote");
 const Deck = require("./models/deck");
+const AudioLink = require("./models/audiolink");
 
+const audio = require("./bot-audio");
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
 
@@ -18,6 +20,8 @@ const QUOTECOOLDOWN = 30000;
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
 
+let audioLink;
+let deathAudioLinks;
 let allTimeStreamDeaths = 0;
 let apiClient;
 let gameStreamDeaths;
@@ -378,20 +382,20 @@ const commands = {
 
 			if (config.isModUp) {
 				if (config.argument && !isNaN(config.argument)) {
-					redemptions.setAudioTimeout(config.argument);
+					audio.setAudioTimeout(config.argument);
 					result.push([
-						"Reward audio timeout has been started, and set to " +
+						"Bot audio timeout has been started, and set to " +
 							config.argument +
 							" seconds",
 					]);
 				} else if (config.argument && isNaN(config.argument)) {
 					result.push([
-						"To set the reward audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10",
+						"To set the bot audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10",
 					]);
 				} else {
-					redemptions.setAudioTimeout();
-					let status = redemptions.getAudioTimeout() ? "started" : "stopped";
-					result.push(["Reward audio timeout has been turned " + status]);
+					audio.setAudioTimeout();
+					let status = audio.getAudioTimeout() ? "started" : "stopped";
+					result.push(["Bot audio timeout has been " + status]);
 				}
 			} else if (!config.isModUp) {
 				result.push(["!audiotimeout command is for Mods only"]);
@@ -534,7 +538,6 @@ const commands = {
 					let currentTime = new Date();
 
 					if (currentTime - fLastUseTime > 5000) {
-						console.log(currentTime - fLastUseTime);
 						fLastUseTime = currentTime;
 						gameName = stream.gameName;
 						streamDate = stream.startDate;
@@ -617,6 +620,10 @@ const commands = {
 							}
 						}
 
+						if (getRandomBetween(7, 1)) {
+							audioLink = getRandom(deathAudioLinks);
+							audio.play(audioLink);
+						}
 						resp = await axios.post(url + "/deathcounter", {
 							deaths: gameStreamDeaths.deaths,
 							gameDeaths: gameDeaths,
@@ -1017,6 +1024,7 @@ const commands = {
 
 async function setup() {
 	chatCommands = await Command.find({});
+	deathAudioLinks = await AudioLink.find({ command: "f" }).exec();
 
 	for (let i = 0; i < chatCommands.length; i++) {
 		commands[chatCommands[i].name] = { response: chatCommands[i].text };
@@ -1052,6 +1060,10 @@ async function setAllTimeStreamDeaths() {
 
 function getRandom(array) {
 	return array[Math.floor(Math.random() * array.length)];
+}
+
+function getRandomBetween(max, min) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function setApiClient(newApiClient) {

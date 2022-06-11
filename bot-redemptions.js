@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+const audio = require("./bot-audio");
+
 const axios = require("axios");
 
 const AudioLink = require("./models/audiolink");
@@ -35,25 +37,7 @@ async function setup(pubSubClient, userId) {
 		);
 
 		if (audioLink) {
-			if (audioTimeout) {
-				if (new Date().getTime() - lastAudioPlayed >= audioTimeoutPeriod) {
-					audioTimeoutActive = false;
-				} else {
-					audioTimeoutActive = true;
-				}
-			} else {
-				audioTimeoutActive = false;
-			}
-
-			if (!audioTimeoutActive) {
-				lastAudioPlayed = new Date().getTime();
-
-				audioLink = audioLinks.find(
-					(element) => element.channelPointRedeem == message.rewardTitle
-				);
-
-				let resp = await axios.post(url + "/playaudio", { url: audioLink.url });
-			}
+			audio.play(audioLink);
 		} else if (message.rewardTitle.includes("Higher or Lower")) {
 			let latestPredictions = await apiClient.predictions
 				.getPredictionsPaginated(twitchId)
@@ -206,6 +190,13 @@ async function setup(pubSubClient, userId) {
 						twitchUsername,
 						"Rule: This card doesn't really have a rule || Hydrate you fools"
 					);
+
+					if (cardDrawn.bonusJager) {
+						chatClient.say(
+							twitchUsername,
+							"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
+						);
+					}
 				}
 			} else {
 				chatClient.say(
@@ -271,9 +262,15 @@ function getRandom() {
 	return Math.floor(Math.random() * 100) + 1;
 }
 
+function getRandomBetween(max, min) {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 async function resetKings() {
 	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
 	let gameTitle = channelInfo.gameName;
+	let jagerBonus = [];
+	let jagerIndex;
 
 	let saveState = await KingsSaveState.find({}).exec();
 
@@ -290,13 +287,23 @@ async function resetKings() {
 		}
 
 		for (let i = 0; i < deck.cards.length; i++) {
+			if (deck.cards[i].explanation === "") {
+				jagerBonus.push(i);
+			}
 			cardsToDraw.push({
 				suit: deck.cards[i].suit,
 				value: deck.cards[i].value,
 				rule: deck.cards[i].rule,
 				explanation: deck.cards[i].explanation,
 				isDrawn: false,
+				bonusJager: false,
 			});
+		}
+
+		for (let i = 0; i < 2; i++) {
+			jagerIndex = getRandomBetween(jagerBonus.length - 1, 0);
+			cardsToDraw[jagerBonus[jagerIndex]].bonusJager = true;
+			jagerBonus.splice(jagerIndex);
 		}
 
 		shuffle();

@@ -19,14 +19,10 @@ let allDeaths = 0;
 async function setup(newApiClient) {
 	const apiClient = newApiClient;
 
-	let stream = await apiClient.streams.getStreamByUserId(
-		process.env.TWITCH_USER_ID
-	);
+	let stream = await apiClient.streams.getStreamByUserId(twitchId);
 
 	if (stream == null) {
-		let channel = await apiClient.channels.getChannelInfoById(
-			process.env.TWITCH_USER_ID
-		);
+		let channel = await apiClient.channels.getChannelInfoById(twitchId);
 
 		gameName = channel.gameName;
 

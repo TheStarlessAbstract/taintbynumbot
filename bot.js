@@ -9,6 +9,7 @@ const redemptions = require("./bot-redemptions");
 const uri = process.env.MONGO_URI;
 
 process.on("SIGTERM", handle);
+process.on("SIGINT", handle);
 
 mongoose.connect(uri, {
 	useNewUrlParser: true,
@@ -24,6 +25,10 @@ async function init() {
 
 async function handle(signal) {
 	if (signal == "SIGTERM") {
+		console.log(test);
+		await redemptions.saveKingsState();
+		process.exit(0);
+	} else if (signal == "SIGINT") {
 		await redemptions.saveKingsState();
 		process.exit(0);
 	}
