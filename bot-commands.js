@@ -620,10 +620,9 @@ const commands = {
 							}
 						}
 
-						if (getRandomBetween(7, 1) == 7) {
-							audioLink = getRandom(deathAudioLinks);
-							audio.play(audioLink);
-						}
+						audioLink = getRandom(deathAudioLinks);
+						audio.play(audioLink);
+
 						resp = await axios.post(url + "/deathcounter", {
 							deaths: gameStreamDeaths.deaths,
 							gameDeaths: gameDeaths,
