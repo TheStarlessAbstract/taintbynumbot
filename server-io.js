@@ -2,6 +2,8 @@ require("dotenv").config();
 const https = require("https");
 const http = require("http");
 
+const DeathSaveState = require("./models/deathsavestate");
+
 let io;
 let url;
 let interval;
@@ -12,7 +14,7 @@ let deaths;
 let gameDeaths;
 let allDeaths = 0;
 let average;
-let lastDeathType = "";
+let lastDeathType = "Stream Deaths";
 let deathCount;
 
 if (process.env.PORT) {
@@ -21,9 +23,9 @@ if (process.env.PORT) {
 	url = "http://localhost:5000/";
 }
 
-function setup(newIo) {
+async function setup(newIo) {
 	io = newIo;
-	io.on("connection", (socket) => {
+	io.on("connection", async (socket) => {
 		if (socket.handshake.headers.referer.includes("channelpointoverlay")) {
 			console.log("/channelpointoverlay connected");
 
@@ -59,11 +61,19 @@ function setup(newIo) {
 		if (socket.handshake.headers.referer.includes("deathcounteroverlay")) {
 			console.log("/deathcounteroverlay connected");
 
-			lastDeathType = "Stream Deaths";
-			deaths = 0;
-			gameDeaths = 0;
-			average = { hours: 0, minutes: 0, seconds: 0 };
-			setDeathCounter(lastDeathType);
+			let saveState = await DeathSaveState.find({}).exec();
+
+			if (saveState.length == 0) {
+				deaths = 0;
+				gameDeaths = 0;
+				average = { hours: 0, minutes: 0, seconds: 0 };
+				setDeathCounter(lastDeathType);
+			} else {
+				deaths = saveState[0].deaths;
+				gameDeaths = saveState[0].gameDeaths;
+				average = saveState[0].average;
+				await DeathSaveState.deleteOne({ _id: saveState[0]._id });
+			}
 
 			deathCounterInterval = setInterval(() => {
 				let deathTypes = ["Stream Deaths", "Game Deaths", "Avg Time To Death"];
@@ -153,6 +163,18 @@ function setDeathCounter(currentDeathType) {
 	io.emit("setDeath", setDeathCount);
 }
 
+async function saveDeathState() {
+	let saveState = new DeathSaveState({
+		deaths: newDeaths,
+		gameDeaths: newGameDeaths,
+		allDeaths: newAllDeaths,
+		average: newAverage,
+	});
+
+	await saveState.save();
+}
+
 exports.setup = setup;
 exports.playAudio = playAudio;
 exports.setDeaths = setDeaths;
+exports.saveDeathState = saveDeathState;

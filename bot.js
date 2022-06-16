@@ -25,7 +25,6 @@ async function init() {
 
 async function handle(signal) {
 	if (signal == "SIGTERM") {
-		console.log(test);
 		await redemptions.saveKingsState();
 		process.exit(0);
 	} else if (signal == "SIGINT") {

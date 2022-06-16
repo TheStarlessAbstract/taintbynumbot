@@ -17,6 +17,9 @@ const uri = process.env.MONGO_URI;
 app.use(express.json());
 app.use(express.static(__dirname + "/public"));
 
+process.on("SIGTERM", handle);
+process.on("SIGINT", handle);
+
 mongoose.connect(uri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
@@ -70,4 +73,14 @@ async function init() {
 	} catch (err) {}
 
 	serverIo.setup(io);
+}
+
+async function handle(signal) {
+	if (signal == "SIGTERM") {
+		await serverIo.saveDeathState();
+		process.exit(0);
+	} else if (signal == "SIGINT") {
+		await serverIo.saveDeathState();
+		process.exit(0);
+	}
 }

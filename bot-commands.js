@@ -595,6 +595,20 @@ const commands = {
 										streamDate
 									);
 								}
+							} else if (gameStreamDeaths.streamStartDate != streamDate) {
+								deathCounters = await DeathCounter.findOne({
+									gameTitle: gameName,
+									streamStartDate: streamDate,
+								}).exec();
+
+								if (deathCounters) {
+									gameStreamDeaths = deathCounters;
+								} else {
+									gameStreamDeaths = await createDeathCounter(
+										gameName,
+										streamDate
+									);
+								}
 							}
 						}
 
