@@ -5,7 +5,11 @@ let DeathSaveStateSchema = new Schema({
 	deaths: Number,
 	gameDeaths: Number,
 	allDeaths: Number,
-	average: Number,
+	average: {
+		hours: Number,
+		minutes: Number,
+		seconds: Number,
+	},
 });
 
 module.exports = mongoose.model("DeathSaveState", DeathSaveStateSchema);
