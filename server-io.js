@@ -165,10 +165,10 @@ function setDeathCounter(currentDeathType) {
 
 async function saveDeathState() {
 	let saveState = new DeathSaveState({
-		deaths: newDeaths,
-		gameDeaths: newGameDeaths,
-		allDeaths: newAllDeaths,
-		average: newAverage,
+		deaths: deaths,
+		gameDeaths: gameDeaths,
+		allDeaths: allDeaths,
+		average: average,
 	});
 
 	await saveState.save();
