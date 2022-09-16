@@ -8,8 +8,8 @@ let CardSchema = new Schema({
 	explanation: String,
 });
 
-let DeckSchema = new Schema({
+let NewDeckSchema = new Schema({
 	cards: [CardSchema],
 });
 
-module.exports = mongoose.model("Deck", DeckSchema);
+module.exports = mongoose.model("NewDeck", NewDeckSchema);

@@ -4,6 +4,8 @@ const http = require("http");
 
 const DeathSaveState = require("./models/deathsavestate");
 
+let clientId = process.env.TWITCH_CLIENT_ID;
+
 let io;
 let url;
 let interval;
@@ -118,6 +120,12 @@ async function setup(newIo) {
 				console.log("/deathcounteroverlay disconnected");
 				clearInterval(deathCounterInterval);
 			});
+		}
+
+		if (socket.handshake.headers.referer.includes("auth")) {
+			console.log("/auth connected");
+
+			io.emit("setClientId", clientId);
 		}
 	});
 }

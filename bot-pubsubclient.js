@@ -7,6 +7,7 @@ const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 const Token = require("./models/token");
 
 const redemptions = require("./bot-redemptions");
+const loyalty = require("./bot-loyalty");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
@@ -69,6 +70,7 @@ async function setup() {
 		const userId = await pubSubClient.registerUserListener(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 		redemptions.setApiClient(apiClient);
+		loyalty.setup(apiClient);
 		const listener = await redemptions.setup(pubSubClient, userId); // check io
 	}
 }

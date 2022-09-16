@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 const chatClient = require("./bot-chatclient");
 const pubSubClient = require("./bot-pubsubclient");
-const redemptions = require("./bot-redemptions");
+const commands = require("./bot-commands");
 
 const uri = process.env.MONGO_URI;
 
@@ -25,10 +25,10 @@ async function init() {
 
 async function handle(signal) {
 	if (signal == "SIGTERM") {
-		await redemptions.saveKingsState();
+		await commands.saveKingsState();
 		process.exit(0);
 	} else if (signal == "SIGINT") {
-		await redemptions.saveKingsState();
+		await commands.saveKingsState();
 		process.exit(0);
 	}
 }

@@ -10,11 +10,13 @@ const commands = require("./bot-commands");
 const deathCounter = require("./bot-deathcounter");
 const messages = require("./bot-messages");
 const redemptions = require("./bot-redemptions");
+const loyalty = require("./bot-loyalty");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let username = process.env.TWITCH_USERNAME;
 let botUsername = process.env.TWITCH_BOT_USERNAME;
+let userId = process.env.TWITCH_USER_ID;
 
 let token;
 let tokenData;
@@ -90,7 +92,10 @@ async function setup() {
 		chatClient.onRegister(async () => {
 			connected();
 			checkLive();
+
 			commands.setApiClient(apiClient);
+			commands.resetKings();
+			commands.setChatClient(chatClient);
 			redemptions.setChatClient(chatClient);
 			await deathCounter.setup(apiClient);
 		});
@@ -118,6 +123,7 @@ async function setup() {
 
 					if (typeof response === "function") {
 						let result = await response({
+							isBroadcaster: isBroadcaster,
 							isModUp: isModUp,
 							userInfo: userInfo,
 							argument: argument,
@@ -151,6 +157,7 @@ function checkLive() {
 				isLive = true;
 			} else if ((await !isStreamLive()) && isLive) {
 				clearInterval(interval);
+				loyalty.stop();
 				isLive = false;
 			}
 		} catch (error) {}
@@ -187,9 +194,7 @@ async function isStreamLive() {
 	let isLive;
 
 	try {
-		let stream = await apiClient.streams.getStreamByUserId(
-			process.env.TWITCH_USER_ID
-		);
+		let stream = await apiClient.streams.getStreamByUserId(userId);
 
 		if (stream == null) {
 			isLive = false;

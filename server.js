@@ -38,6 +38,10 @@ app.get("/deathcounteroverlay", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-deathCounterOverlay.html");
 });
 
+app.get("/auth", (req, res) => {
+	res.sendFile(__dirname + "/public/bot-auth.html");
+});
+
 app.post("/playaudio", (req, res) => {
 	serverIo.playAudio(req.body.url);
 	res.sendStatus(201);

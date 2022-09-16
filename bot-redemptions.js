@@ -5,8 +5,6 @@ const audio = require("./bot-audio");
 const axios = require("axios");
 
 const AudioLink = require("./models/audiolink");
-const Deck = require("./models/deck");
-const KingsSaveState = require("./models/kingssavestate");
 
 let audioLinks;
 let lastAudioPlayed;
@@ -21,9 +19,6 @@ let chatClient;
 let audioTimeout = false;
 let audioTimeoutPeriod = 10000;
 let audioTimeoutActive = false;
-let deck;
-let cardsToDraw = [];
-let kingsCount;
 let redeemUser;
 
 async function setup(pubSubClient, userId) {
@@ -103,113 +98,6 @@ async function setup(pubSubClient, userId) {
 						" there is already a prediction ongoing, try again later"
 				);
 			}
-		} else if (message.rewardTitle.includes("Kings: Draw a card")) {
-			let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
-			let gameTitle = channelInfo.gameName;
-
-			if (deck.game != gameTitle) {
-				deck = await Deck.findOne({ game: gameTitle });
-
-				if (!deck) {
-					createDeck(gameTitle);
-				}
-
-				for (let i = 0; i < cardsToDraw.length; i++) {
-					for (let j = 0; j < deck.cards.length; j++) {
-						if (
-							cardsToDraw[i].suit == deck.cards[j].suit &&
-							cardsToDraw[i].value == deck.cards[j].value
-						) {
-							cardsToDraw[i].rule = deck.cards[j].rule;
-							cardsToDraw[i].explanation = deck.cards[j].explanation;
-						}
-					}
-				}
-
-				let newCards = deck.cards.filter((card) => {
-					let isNotIncluded = true;
-					for (let i = 0; i < cardsToDraw.length; i++) {
-						if (
-							card.suit == cardsToDraw[i].suit &&
-							card.value == cardsToDraw[i].value
-						) {
-							isNotIncluded = false;
-						}
-					}
-
-					if (isNotIncluded && card.rule == "") {
-						isNotIncluded = false;
-					}
-					return isNotIncluded;
-				});
-
-				cardsToDraw = cardsToDraw.filter((card) => card.rule != "");
-
-				if (newCards.length > 0) {
-					newCards.forEach((card, index) => {
-						newCards[index] = {
-							suit: card.suit,
-							value: card.value,
-							rule: card.rule,
-							explanation: card.explanation,
-							isDrawn: false,
-						};
-					});
-
-					cardsToDraw = cardsToDraw.concat(newCards);
-					shuffle();
-				}
-			}
-
-			let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
-			let cardDrawn = drawFrom[Math.floor(Math.random() * drawFrom.length)];
-			cardDrawn.isDrawn = true;
-
-			if (cardDrawn.value == "King") {
-				kingsCount++;
-			}
-
-			chatClient.say(
-				twitchUsername,
-				"@" +
-					redeemUser +
-					" You have drawn the " +
-					cardDrawn.value +
-					" of " +
-					cardDrawn.suit
-			);
-
-			if (kingsCount != 4) {
-				if (cardDrawn.rule != "") {
-					chatClient.say(
-						twitchUsername,
-						"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
-					);
-				} else {
-					chatClient.say(
-						twitchUsername,
-						"Rule: This card doesn't really have a rule || Hydrate you fools"
-					);
-
-					if (cardDrawn.bonusJager) {
-						chatClient.say(
-							twitchUsername,
-							"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
-						);
-					}
-				}
-			} else {
-				chatClient.say(
-					twitchUsername,
-					"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
-				);
-
-				kingsCount = 0;
-			}
-
-			if (cardsToDraw.filter((card) => card.isDrawn == false).length == 0) {
-				resetKings();
-			}
 		}
 	});
 
@@ -218,8 +106,6 @@ async function setup(pubSubClient, userId) {
 	await apiClient.channelPoints.updateCustomReward(twitchId, reward.id, {
 		title: "Higher or Lower: " + higherLower,
 	});
-
-	resetKings();
 
 	return listener;
 }
@@ -266,148 +152,11 @@ function getRandomBetween(max, min) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-async function resetKings() {
-	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
-	let gameTitle = channelInfo.gameName;
-	let jagerBonus = [];
-	let jagerIndex;
-
-	let saveState = await KingsSaveState.find({}).exec();
-
-	if (saveState.length == 0) {
-		cardsToDraw = [];
-		kingsCount = 0;
-
-		if (!deck || deck.game != gameTitle) {
-			deck = await Deck.findOne({ game: gameTitle });
-		}
-
-		if (!deck) {
-			await createDeck(gameTitle);
-		}
-
-		for (let i = 0; i < deck.cards.length; i++) {
-			if (deck.cards[i].explanation === "") {
-				jagerBonus.push(i);
-			}
-			cardsToDraw.push({
-				suit: deck.cards[i].suit,
-				value: deck.cards[i].value,
-				rule: deck.cards[i].rule,
-				explanation: deck.cards[i].explanation,
-				isDrawn: false,
-				bonusJager: false,
-			});
-		}
-
-		for (let i = 0; i < 2; i++) {
-			jagerIndex = getRandomBetween(jagerBonus.length - 1, 0);
-			cardsToDraw[jagerBonus[jagerIndex]].bonusJager = true;
-			jagerBonus.splice(jagerIndex);
-		}
-
-		shuffle();
-
-		chatClient.say(
-			twitchUsername,
-			"A new game of Kings has been dealt, with " +
-				cardsToDraw.length +
-				" cards!"
-		);
-	} else {
-		deck = await Deck.findById(saveState[0].deckId).exec();
-		cardsToDraw = saveState[0].cardsToDraw;
-		kingsCount = saveState[0].kingsCount;
-		await KingsSaveState.deleteOne({ _id: saveState[0]._id });
-	}
-}
-
-async function createDeck(gameTitle) {
-	deck = new Deck({ game: gameTitle, cards: [] });
-
-	let baseDeck = await Deck.findOne({ game: "base deck" });
-
-	for (let i = 0; i < baseDeck.cards.length; i++) {
-		deck.cards.push({
-			suit: baseDeck.cards[i].suit,
-			value: baseDeck.cards[i].value,
-			rule: baseDeck.cards[i].rule,
-			explanation: baseDeck.cards[i].explanation,
-		});
-	}
-
-	await deck.save();
-}
-
-function shuffle() {
-	let m = cardsToDraw.length,
-		t,
-		i;
-
-	while (m) {
-		i = Math.floor(Math.random() * m--);
-
-		t = cardsToDraw[m];
-		cardsToDraw[m] = cardsToDraw[i];
-		cardsToDraw[i] = t;
-	}
-}
-
-async function addKingsRule(value, rule) {
-	let channelInfo = await apiClient.channels.getChannelInfo(twitchId);
-	let gameTitle = channelInfo.gameName;
-	let response;
-
-	if (deck.game != gameTitle) {
-		deck = await Deck.findOne({ game: gameTitle });
-	}
-
-	if (!deck) {
-		createDeck(gameTitle);
-	}
-
-	for (let i = 0; i < deck.cards.length; i++) {
-		if (value == deck.cards[i].value && deck.cards[i].rule == "") {
-			deck.cards[i].rule = rule;
-			cardsToDraw.push({
-				suit: deck.cards[i].suit,
-				value: deck.cards[i].value,
-				rule: deck.cards[i].rule,
-				explanation: deck.cards[i].explanation,
-				isDrawn: false,
-			});
-
-			shuffle();
-
-			await deck.save();
-			reponse = true;
-		} else if (value == deck.cards[i].value && deck.cards[i].rule != "") {
-			reponse = false;
-		} else {
-			response = false;
-		}
-	}
-	return response;
-}
-
-async function saveKingsState() {
-	let saveState = new KingsSaveState({
-		deckId: deck._id,
-		cardsToDraw: cardsToDraw,
-		kingsCount: kingsCount,
-	});
-
-	await saveState.save();
-}
-
 exports.setup = setup;
 exports.setApiClient = setApiClient;
 exports.setChatClient = setChatClient;
 exports.getAudioTimeout = getAudioTimeout;
 exports.setAudioTimeout = setAudioTimeout;
-exports.resetKings = resetKings;
-exports.addKingsRule = addKingsRule;
-exports.saveKingsState = saveKingsState;
 
 // let test = {
 //     channelId: message.channelId,

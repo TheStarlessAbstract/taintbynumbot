@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    </head>
+    <body>
+        <button type="button"><a href="" id="twitchurl">Connect with Twitch</a></button>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            var x = document.getElementById("twitchurl"); 
+
+            var response = "response_type=code"
+            var client_id = ""
+            var redirect_uri = "&redirect_uri=http://localhost:5000"
+            var scope = "&scope=channel%3Amanage%3Apolls+channel%3Aread%3Apolls"
+            var url = "https://id.twitch.tv/oauth2/authorize?"
+
+            socket.on("setClientId", clientId => {
+                client_id = "&client_id="+clientId;
+                x.href=url+response+client_id+redirect_uri+scope
+            });
+        </script>
+    </body>
+</html>
+
+
+<!-- https://id.twitch.tv/oauth2/authorize
+    ?response_type=code
+    &client_id=hof5gwx0su6owfnys0nyan9c87zr6t
+    &redirect_uri=http://localhost:3000
+    &scope=channel%3Amanage%3Apolls+channel%3Aread%3Apolls
+    &state=c3ab8aa609ea11e793ae92361f002671 -->

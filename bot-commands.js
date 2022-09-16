@@ -8,10 +8,11 @@ const Title = require("./models/title");
 const Quote = require("./models/quote");
 const Deck = require("./models/deck");
 const AudioLink = require("./models/audiolink");
+const LoyaltyPoint = require("./models/loyaltypoint");
+const KingsSaveState = require("./models/kingssavestate");
 
 const audio = require("./bot-audio");
 const messages = require("./bot-messages");
-const redemptions = require("./bot-redemptions");
 
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
@@ -19,9 +20,11 @@ const QUOTECOOLDOWN = 30000;
 
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
+let twitchUsername = process.env.TWITCH_USERNAME;
 
 let audioLink;
 let deathAudioLinks;
+let drinkBitchAudioLinks;
 let allTimeStreamDeaths = 0;
 let apiClient;
 let gameStreamDeaths;
@@ -32,81 +35,17 @@ let totalStreamDeaths = 0;
 let quoteTimer;
 let chatCommands;
 let fLastUseTime = "";
+let drinkBitchLastUseTime = "";
+let kingsLastUseTime = "";
+let kingsRemainLastUseTime = "";
+let pointsLastUseTime = "";
+let chugLastUseTime = "";
+let deck;
+let cardsToDraw = [];
+let kingsCount;
+let chatClient;
 
 const commands = {
-	// card: {
-	// 	response: async (config) => {
-	// 		let result = [];
-	// 		let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
-	// 		let values = [
-	// 			{ value: "Ace", rule: "Musketeers: All for one and one for all", explanation: "Everybody drinks" },
-	// 			{
-	// 				value: "2",
-	// 				rule: "Fuck you!",
-	// 				explanation:
-	// 					"Choose someone to take a drink...but fuck Starless mainly amirite?!",
-	// 			},
-	// 			{
-	// 				value: "3",
-	// 				rule: "Fuck me!",
-	// 				explanation: "You drew this card, so you drink!",
-	// 			},
-	// 			{ value: "4", rule: "", explanation: "" },
-	// 			{ value: "5", rule: "", explanation: "" },
-	// 			{ value: "6", rule: "", explanation: "" },
-	// 			{ value: "7", rule: "", explanation: "" },
-	// 			{
-	// 				value: "8",
-	// 				rule: "Pick a mate!",
-	// 				explanation:
-	// 					"You and a person of your choosing takes a drink...tell us why it is Starless",
-	// 			},
-	// 			{
-	// 				value: "9",
-	// 				rule: "Bust a rhyme!",
-	// 				explanation:
-	// 					"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
-	// 			},
-	// 			{
-	// 				value: "10",
-	// 				rule: "Make a rule!",
-	// 				explanation:
-	// 					"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
-	// 			},
-	// 			{ value: "Jack", rule: "", explanation: "" },
-	// 			{
-	// 				value: "Queen",
-	// 				rule: "Ask a question!",
-	// 				explanation:
-	// 					"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
-	// 			},
-	// 			{
-	// 				value: "King",
-	// 				rule: "Kings!",
-	// 				explanation:
-	// 					"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
-	// 			},
-	// 		];
-
-	// 		let baseDeck = new Deck({ game: "base deck", cards: [] });
-
-	// 		for (let i = 0; i < suits.length; i++) {
-	// 			for (let j = 0; j < values.length; j++) {
-	// 				baseDeck.cards.push({
-	// 					suit: suits[i],
-	// 					value: values[j].value,
-	// 					rule: values[j].rule,
-	// 					explanation: values[j].explanation,
-	// 				});
-	// 			}
-	// 		}
-
-	// 		await baseDeck.save();
-	// 		console.log(baseDeck);
-
-	// 		return result;
-	// 	},
-	// },
 	addcomm: {
 		response: async (config) => {
 			let result = [];
@@ -159,39 +98,6 @@ const commands = {
 				result.push([
 					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
 				]);
-			}
-
-			return result;
-		},
-	},
-	addkings: {
-		response: async (config) => {
-			time = new Date();
-			let result = [];
-			let cardValue;
-			let cardRule;
-
-			if (config.isModUp && config.argument) {
-				cardValue = config.argument.substring(0, config.argument.indexOf(" "));
-				cardRule = config.argument.substring(config.argument.indexOf(" ") + 1);
-
-				if (cardValue == cardRule) {
-					result.push(
-						"Looks like you are missing the rule or card, try again. !addkings Ace Some rule that will make Starless drink"
-					);
-				} else if (cardRule) {
-					let response = await redemptions.addKingsRule(cardValue, cardRule);
-
-					if (response) {
-						result.push("New rule as been added");
-					} else {
-						result.push("These cards already have a rule, womp womp");
-					}
-				} else {
-					result.push(
-						"Something went wrong, I think. Try again !addkings 4 Some rule that will make Starless drink"
-					);
-				}
 			}
 
 			return result;
@@ -406,6 +312,102 @@ const commands = {
 	},
 	booty: {
 		response: "Who loves the booty?",
+	},
+	buhhs: {
+		response:
+			"buhhsbot is a super amazing bot made by the super amazing @asfdWENDYfdsa. Go to https://www.twitch.tv/buhhsbot, and type !join in chat to have buhhsbot bootify your chat",
+	},
+	// chug: {
+	// 	response: async (config) => {
+	// 		let result = [];
+	// 		let cost = 5000;
+
+	// 		let currentTime = new Date();
+	// 		// limit per stream, limit per user
+	// 		if (currentTime - chugLastUseTime > 5000) {
+	// 			chugLastUseTime = currentTime;
+
+	// 			user = await LoyaltyPoint.findOne({
+	// 				userId: config.userInfo.userId,
+	// 			});
+
+	// 			if (user) {
+	// 				if (user.points >= cost) {
+	// 					user.points -= cost;
+
+	// 					user.save();
+
+	// 					// audio.play(getRandom(drinkBitchAudioLinks));
+
+	// 					result.push("@TheStarlessAbstract chug, chug, chug!");
+	// 				} else {
+	// 					result.push(
+	// 						"@" +
+	// 							config.userInfo.displayName +
+	// 							" you do not have power within you, the power to make Starless chug, please try again later, or you know, don't"
+	// 					);
+	// 				}
+	// 			} else {
+	// 				result.push(
+	// 					"@" +
+	// 						config.userInfo.displayName +
+	// 						" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !chug"
+	// 				);
+	// 			}
+	// 		}
+
+	// 		return result;
+	// 	},
+	// },
+	drinkbitch: {
+		response: async (config) => {
+			let result = [];
+			let cost = 500;
+
+			let currentTime = new Date();
+
+			if (currentTime - drinkBitchLastUseTime > 5000) {
+				drinkBitchLastUseTime = currentTime;
+
+				user = await LoyaltyPoint.findOne({
+					userId: config.userInfo.userId,
+				});
+
+				if (user) {
+					if (user.points >= cost) {
+						user.points -= cost;
+
+						user.save();
+
+						audio.play(getRandom(drinkBitchAudioLinks));
+
+						result.push("@TheStarlessAbstract drink, bitch!");
+					} else if (getRandomBetween(100, 1) == 100) {
+						audio.play(getRandom(drinkBitchAudioLinks));
+
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
+						);
+					} else {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
+						);
+					}
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
+					);
+				}
+			}
+
+			return result;
+		},
 	},
 	editcomm: {
 		response: async (config) => {
@@ -781,13 +783,109 @@ const commands = {
 			return result;
 		},
 	},
+	kings: {
+		response: async (config) => {
+			let result = [];
+			let cost = 100;
+			let redeemUser = config.userInfo.userName;
+			let cardDrawn;
+
+			let currentTime = new Date();
+
+			if (currentTime - kingsLastUseTime > 5000) {
+				kingsLastUseTime = currentTime;
+
+				// get user by userId
+				user = await LoyaltyPoint.findOne({
+					userId: config.userInfo.userId,
+				});
+
+				if (user.points >= cost) {
+					user.points -= cost;
+
+					let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
+
+					if (drawFrom.length == 1) {
+						cardDrawn = drawFrom[0];
+					} else {
+						cardDrawn = drawFrom[getRandomBetween(drawFrom.length, 0)];
+					}
+
+					cardDrawn.isDrawn = true;
+
+					if (cardDrawn.value == "King") {
+						kingsCount++;
+					}
+
+					result.push([
+						"@" +
+							redeemUser +
+							" You have drawn the " +
+							cardDrawn.value +
+							" of " +
+							cardDrawn.suit,
+					]);
+
+					if (kingsCount != 4) {
+						result.push([
+							"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
+						]);
+
+						if (cardDrawn.rule == "This card doesn't really have a rule") {
+							if (cardDrawn.bonusJager) {
+								result.push([
+									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
+								]);
+							}
+						}
+					} else {
+						result.push([
+							"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
+						]);
+
+						kingsCount = 0;
+					}
+
+					// checks if card drawn is last card
+					if (drawFrom.length == 1) {
+						resetKings();
+					}
+
+					user.save();
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
+					);
+				}
+			}
+			return result;
+		},
+	},
+	kingsremain: {
+		response: async (config) => {
+			let result = [];
+			let currentTime = new Date();
+
+			if (currentTime - kingsRemainLastUseTime > 5000) {
+				kingsRemainLastUseTime = currentTime;
+
+				let cardsRemain = cardsToDraw.filter((card) => {
+					return card.isDrawn == false;
+				});
+
+				result.push("Cards remaing in this game " + cardsRemain.length);
+			}
+			return result;
+		},
+	},
 	kingsreset: {
 		response: async (config) => {
-			time = new Date();
 			let result = [];
 
 			if (config.isModUp) {
-				redemptions.resetKings();
+				resetKings();
 				result.push("Kings has been reset");
 			}
 
@@ -802,6 +900,78 @@ const commands = {
 				config.userInfo.displayName +
 					" finds a comfortable spot behind the bushes to perv on the stream"
 			);
+
+			return result;
+		},
+	},
+	points: {
+		response: async (config) => {
+			let result = [];
+			let user;
+
+			let currentTime = new Date();
+
+			if (currentTime - pointsLastUseTime > 5000) {
+				pointsLastUseTime = currentTime;
+
+				if (!config.argument) {
+					user = await LoyaltyPoint.findOne({
+						userId: config.userInfo.userId,
+					});
+
+					if (user) {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" has " +
+								user.points +
+								" Tainty Points"
+						);
+					}
+				} else if (config.isBroadcaster && isNaN(config.argument)) {
+					let username;
+					if (config.argument.startsWith("@")) {
+						username = config.argument.substring(1).split(" ");
+					} else {
+						username = config.argument.split(" ");
+					}
+					if (username.length == 2) {
+						let newPoints = username[1];
+						username = username[0];
+
+						user = await apiClient.users.getUserByName(username.toLowerCase());
+
+						user = await LoyaltyPoint.findOne({
+							userId: user.id,
+						});
+
+						user.points += Number(newPoints);
+						await user.save();
+
+						result.push(
+							"Our glorious leader Starless, has given @" +
+								username +
+								" " +
+								newPoints +
+								" Tainty Points"
+						);
+					} else {
+						result.push(
+							"@TheStarlessAbstract it's not that hard, just !points username number"
+						);
+					}
+				} else if (config.isBroadcaster && !isNaN(config.argument)) {
+					result.push(
+						"@TheStarlessAbstract you used the command wrong, you utter swine"
+					);
+				} else if (!config.isBroadcaster && config.argument) {
+					result.push(
+						"@" +
+							config.userInfo.userId +
+							" you aren't allowed to this command like that"
+					);
+				}
+			}
 
 			return result;
 		},
@@ -1038,12 +1208,18 @@ const commands = {
 async function setup() {
 	chatCommands = await Command.find({});
 	deathAudioLinks = await AudioLink.find({ command: "f" }).exec();
+	drinkBitchAudioLinks = await AudioLink.find({ command: "drinkbitch" }).exec();
 
 	for (let i = 0; i < chatCommands.length; i++) {
 		commands[chatCommands[i].name] = { response: chatCommands[i].text };
 	}
 
 	fLastUseTime = new Date();
+	chugLastUseTime = new Date();
+	kingsLastUseTime = new Date();
+	pointsLastUseTime = new Date();
+	drinkBitchLastUseTime = new Date();
+	kingsRemainLastUseTime = new Date();
 }
 
 function getNextIndex(array) {
@@ -1150,7 +1326,185 @@ function getFollowLength(followTime) {
 	return followString;
 }
 
+async function resetKings() {
+	let jagerBonus = [];
+	let jagerIndex;
+
+	// checks for Kings save state
+	let saveState = await KingsSaveState.findOne({});
+
+	if (!deck) {
+		deck = await Deck.findOne({});
+		if (!deck) {
+			await createDeck();
+		}
+	}
+
+	if (!saveState) {
+		cardsToDraw = [];
+		kingsCount = 0;
+
+		for (let i = 0; i < deck.cards.length; i++) {
+			// adds hydrate cards to array for possible jagerbombs
+			if (deck.cards[i].explanation === "Hydrate you fools") {
+				jagerBonus.push(i);
+			}
+
+			// cards used in play
+			cardsToDraw.push({
+				suit: deck.cards[i].suit,
+				value: deck.cards[i].value,
+				rule: deck.cards[i].rule,
+				explanation: deck.cards[i].explanation,
+				isDrawn: false,
+				bonusJager: false,
+			});
+		}
+
+		// sets two jagerbomb cards
+		for (let i = 0; i < 2; i++) {
+			jagerIndex = getRandomBetween(jagerBonus.length - 1, 0);
+			cardsToDraw[jagerBonus[jagerIndex]].bonusJager = true;
+			jagerBonus.splice(jagerIndex);
+		}
+
+		shuffle();
+
+		chatClient.say(
+			twitchUsername,
+			"A new game of Kings has been dealt, with " +
+				cardsToDraw.length +
+				" cards!"
+		);
+	} else {
+		cardsToDraw = saveState.cardsToDraw;
+		kingsCount = saveState.kingsCount;
+		await KingsSaveState.deleteOne({ _id: saveState._id });
+	}
+}
+
+async function saveKingsState() {
+	let saveState = new KingsSaveState({
+		cardsToDraw: cardsToDraw,
+		kingsCount: kingsCount,
+	});
+
+	await saveState.save();
+}
+
+function shuffle() {
+	let m = cardsToDraw.length,
+		t,
+		i;
+
+	while (m) {
+		i = Math.floor(Math.random() * m--);
+
+		t = cardsToDraw[m];
+		cardsToDraw[m] = cardsToDraw[i];
+		cardsToDraw[i] = t;
+	}
+}
+
+function setChatClient(newChatClient) {
+	chatClient = newChatClient;
+}
+
+async function createDeck() {
+	let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
+	let values = [
+		{
+			value: "Ace",
+			rule: "Musketeers: All for one and one for all",
+			explanation: "Everybody drinks",
+		},
+		{
+			value: "2",
+			rule: "Fuck you!",
+			explanation:
+				"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+		},
+		{
+			value: "3",
+			rule: "Fuck me!",
+			explanation: "You drew this card, so you drink!",
+		},
+		{
+			value: "4",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		},
+		{
+			value: "5",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		},
+		{
+			value: "6",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		},
+		{
+			value: "7",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		},
+		{
+			value: "8",
+			rule: "Pick a mate!",
+			explanation:
+				"You and a person of your choosing takes a drink...tell us why it is Starless",
+		},
+		{
+			value: "9",
+			rule: "Bust a rhyme!",
+			explanation:
+				"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
+		},
+		{
+			value: "10",
+			rule: "Make a rule!",
+			explanation:
+				"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
+		},
+		{
+			value: "Jack",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		},
+		{
+			value: "Queen",
+			rule: "Ask a question!",
+			explanation:
+				"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
+		},
+		{
+			value: "King",
+			rule: "Kings!",
+			explanation:
+				"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
+		},
+	];
+
+	deck = new Deck({ cards: [] });
+	for (let i = 0; i < suits.length; i++) {
+		for (let j = 0; j < values.length; j++) {
+			deck.cards.push({
+				suit: suits[i],
+				value: values[j].value,
+				rule: values[j].rule,
+				explanation: values[j].explanation,
+			});
+		}
+	}
+
+	await deck.save();
+}
+
 exports.list = commands;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setApiClient = setApiClient;
 exports.setup = setup;
+exports.saveKingsState = saveKingsState;
+exports.resetKings = resetKings;
+exports.setChatClient = setChatClient;
