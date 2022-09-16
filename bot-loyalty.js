@@ -77,7 +77,7 @@ function chatInterval() {
 
 			await existingUsers[i].save();
 		}
-	}, 20000);
+	}, 300000);
 }
 
 async function createUser(array) {
