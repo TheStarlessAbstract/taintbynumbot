@@ -911,7 +911,7 @@ const commands = {
 
 			let currentTime = new Date();
 
-			if (currentTime - pointsLastUseTime > 5000) {
+			if (currentTime - pointsLastUseTime > 5000 || config.isModUp) {
 				pointsLastUseTime = currentTime;
 
 				if (!config.argument) {
@@ -926,6 +926,12 @@ const commands = {
 								" has " +
 								user.points +
 								" Tainty Points"
+						);
+					} else {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hangaround a bit long tp get your self some Tainty Points."
 						);
 					}
 				} else if (config.isBroadcaster && isNaN(config.argument)) {
