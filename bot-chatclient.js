@@ -161,7 +161,6 @@ async function checkLive() {
 				loyalty.stop();
 				isLive = false;
 			}
-			console.log("da");
 		} catch (error) {}
 	}, 20000);
 }
