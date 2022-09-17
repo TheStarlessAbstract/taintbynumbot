@@ -973,7 +973,7 @@ const commands = {
 				} else if (!config.isBroadcaster && config.argument) {
 					result.push(
 						"@" +
-							config.userInfo.userId +
+							config.userInfo.displayName +
 							" you aren't allowed to this command like that"
 					);
 				}
