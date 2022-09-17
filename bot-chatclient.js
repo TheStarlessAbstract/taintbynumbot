@@ -149,19 +149,21 @@ async function connected() {
 	console.log(" * Connected to Twitch chat * ");
 }
 
-function checkLive() {
+async function checkLive() {
+	let streamStatus = await isStreamLive();
 	setInterval(async () => {
 		try {
-			if ((await isStreamLive()) && !isLive) {
+			if (streamStatus && !isLive) {
 				setTimedMessages();
 				isLive = true;
-			} else if ((await !isStreamLive()) && isLive) {
+			} else if (!streamStatus && isLive) {
 				clearInterval(interval);
 				loyalty.stop();
 				isLive = false;
 			}
+			console.log("da");
 		} catch (error) {}
-	}, 900000);
+	}, 20000);
 }
 
 async function setTimedMessages() {
@@ -191,21 +193,21 @@ function messageUpdate(update) {
 }
 
 async function isStreamLive() {
-	let isLive;
+	let streamStatus;
 
 	try {
 		let stream = await apiClient.streams.getStreamByUserId(userId);
 
 		if (stream == null) {
-			isLive = false;
+			streamStatus = false;
 		} else {
-			isLive = true;
+			streamStatus = true;
 		}
 	} catch {
-		isLive = false;
+		streamStatus = false;
 	}
 
-	return true;
+	return streamStatus;
 }
 
 exports.setup = setup;
