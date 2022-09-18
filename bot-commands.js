@@ -72,7 +72,7 @@ const commands = {
 							})
 						) {
 							let newCommand = new Command({
-								name: commandName,
+								name: commandName.toLowerCase(),
 								text: commandText,
 								createdBy: config.userInfo.displayName,
 							});
@@ -377,11 +377,11 @@ const commands = {
 					if (user.points >= cost) {
 						user.points -= cost;
 
-						user.save();
-
 						audio.play(getRandom(drinkBitchAudioLinks));
 
 						result.push("@TheStarlessAbstract drink, bitch!");
+
+						user.save();
 					} else if (getRandomBetween(100, 1) == 100) {
 						audio.play(getRandom(drinkBitchAudioLinks));
 
@@ -800,63 +800,71 @@ const commands = {
 					userId: config.userInfo.userId,
 				});
 
-				if (user.points >= cost) {
-					user.points -= cost;
+				if (user) {
+					if (user.points >= cost) {
+						user.points -= cost;
 
-					let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
+						let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
 
-					if (drawFrom.length == 1) {
-						cardDrawn = drawFrom[0];
-					} else {
-						cardDrawn = drawFrom[getRandomBetween(drawFrom.length, 0)];
-					}
-
-					cardDrawn.isDrawn = true;
-
-					if (cardDrawn.value == "King") {
-						kingsCount++;
-					}
-
-					result.push([
-						"@" +
-							redeemUser +
-							" You have drawn the " +
-							cardDrawn.value +
-							" of " +
-							cardDrawn.suit,
-					]);
-
-					if (kingsCount != 4) {
-						result.push([
-							"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
-						]);
-
-						if (cardDrawn.rule == "This card doesn't really have a rule") {
-							if (cardDrawn.bonusJager) {
-								result.push([
-									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
-								]);
-							}
+						if (drawFrom.length == 1) {
+							cardDrawn = drawFrom[0];
+						} else {
+							cardDrawn = drawFrom[getRandomBetween(drawFrom.length - 1, 0)];
 						}
-					} else {
+
+						cardDrawn.isDrawn = true;
+
+						if (cardDrawn.value == "King") {
+							kingsCount++;
+						}
+
 						result.push([
-							"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
+							"@" +
+								redeemUser +
+								" You have drawn the " +
+								cardDrawn.value +
+								" of " +
+								cardDrawn.suit,
 						]);
 
-						kingsCount = 0;
-					}
+						if (kingsCount != 4) {
+							result.push([
+								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
+							]);
 
-					// checks if card drawn is last card
-					if (drawFrom.length == 1) {
-						resetKings();
-					}
+							if (cardDrawn.rule == "This card doesn't really have a rule") {
+								if (cardDrawn.bonusJager) {
+									result.push([
+										"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
+									]);
+								}
+							}
+						} else {
+							result.push([
+								"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
+							]);
 
-					user.save();
+							kingsCount = 0;
+						}
+
+						// checks if card drawn is last card
+						if (drawFrom.length == 1) {
+							resetKings();
+						}
+
+						user.save();
+					} else {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
+						);
+					}
 				} else {
 					result.push(
 						"@" +
 							config.userInfo.displayName +
-							" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
+							" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
 					);
 				}
 			}
@@ -931,7 +939,7 @@ const commands = {
 						result.push(
 							"@" +
 								config.userInfo.displayName +
-								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hangaround a bit long tp get your self some Tainty Points."
+								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
 						);
 					}
 				} else if (config.isBroadcaster && isNaN(config.argument)) {
