@@ -54,11 +54,13 @@ const commands = {
 
 			if (config.isModUp && config.argument) {
 				if (config.argument.startsWith("!")) {
-					commandName = config.argument.split(/\s(.+)/)[0].slice(1);
+					commandName = config.argument
+						.split(/\s(.+)/)[0]
+						.slice(1)
+						.toLowerCase();
 					commandText = config.argument.split(/\s(.+)/)[1];
 
-					const { response } =
-						(await commands[commandName.toLowerCase()]) || {};
+					const { response } = (await commands[commandName]) || {};
 
 					if (!commandText) {
 						result.push([
@@ -72,13 +74,15 @@ const commands = {
 							})
 						) {
 							let newCommand = new Command({
-								name: commandName.toLowerCase(),
+								name: commandName,
 								text: commandText,
 								createdBy: config.userInfo.displayName,
 							});
+
 							commands[commandName] = {
 								response: commandText,
 							};
+
 							chatCommands.push(newCommand);
 							await newCommand.save();
 
