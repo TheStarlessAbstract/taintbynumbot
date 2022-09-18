@@ -60,7 +60,7 @@ const commands = {
 						.toLowerCase();
 					commandText = config.argument.split(/\s(.+)/)[1];
 
-					const { response } = (await commands[commandName]) || {};
+					const { response } = commands[commandName] || {};
 
 					if (!commandText) {
 						result.push([
@@ -319,7 +319,7 @@ const commands = {
 	},
 	buhhs: {
 		response:
-			"buhhsbot is a super amazing bot made by the super amazing @asfdWENDYfdsa. Go to https://www.twitch.tv/buhhsbot, and type !join in chat to have buhhsbot bootify your chat",
+			"buhhsbot is a super amazing bot made by the super amazing @asdfWENDYfdsa. Go to https://www.twitch.tv/buhhsbot, and type !join in chat to have buhhsbot bootify your chat",
 	},
 	// chug: {
 	// 	response: async (config) => {

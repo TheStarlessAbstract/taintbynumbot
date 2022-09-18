@@ -63,18 +63,18 @@ async function setup(newIo) {
 		if (socket.handshake.headers.referer.includes("deathcounteroverlay")) {
 			console.log("/deathcounteroverlay connected");
 
-			let saveState = await DeathSaveState.find({}).exec();
+			let saveState = await DeathSaveState.findOne({}).exec();
 
-			if (saveState.length == 0) {
+			if (!saveState) {
 				deaths = 0;
 				gameDeaths = 0;
 				average = { hours: 0, minutes: 0, seconds: 0 };
 				setDeathCounter(lastDeathType);
 			} else {
-				deaths = saveState[0].deaths;
-				gameDeaths = saveState[0].gameDeaths;
-				average = saveState[0].average;
-				await DeathSaveState.deleteOne({ _id: saveState[0]._id });
+				deaths = saveState.deaths;
+				gameDeaths = saveState.gameDeaths;
+				average = saveState.average;
+				await DeathSaveState.deleteOne({ _id: saveState._id });
 			}
 
 			deathCounterInterval = setInterval(() => {
