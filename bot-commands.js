@@ -421,11 +421,13 @@ const commands = {
 
 			if (config.isModUp && config.argument) {
 				if (config.argument.startsWith("!")) {
-					commandName = config.argument.split(/\s(.+)/)[0].slice(1);
+					commandName = config.argument
+						.split(/\s(.+)/)[0]
+						.slice(1)
+						.toLowerCase();
 					commandText = config.argument.split(/\s(.+)/)[1];
 
-					const { response } =
-						(await commands[commandName.toLowerCase()]) || {};
+					const { response } = (await commands[commandName]) || {};
 
 					if (!commandText) {
 						result.push([
