@@ -642,7 +642,12 @@ const commands = {
 							}
 						}
 
-						audioLink = getRandom(deathAudioLinks);
+						if (gameDeaths == 666) {
+							audioLink = await AudioLink.findOne({ name: "666" });
+						} else {
+							audioLink = getRandom(deathAudioLinks);
+						}
+
 						audio.play(audioLink);
 
 						resp = await axios.post(url + "/deathcounter", {
