@@ -155,11 +155,7 @@ async function checkLive() {
 	setInterval(async () => {
 		streamStatus = await isStreamLive();
 
-		streamStatus = true;
-		isLive = false;
 		try {
-			console.log(streamStatus);
-			console.log(isLive);
 			if (streamStatus && !isLive) {
 				setTimedMessages();
 				isLive = true;
@@ -174,7 +170,6 @@ async function checkLive() {
 
 async function setTimedMessages() {
 	intervalMessages = messages.get();
-	console.log(1);
 
 	interval = setInterval(async () => {
 		if (messageCount >= 25) {
