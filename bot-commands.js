@@ -13,6 +13,7 @@ const KingsSaveState = require("./models/kingssavestate");
 
 const audio = require("./bot-audio");
 const messages = require("./bot-messages");
+const discord = require("./bot-discord");
 
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
@@ -67,12 +68,7 @@ const commands = {
 							"To add a Command, you must include the Command name, and follwed by the Command output, new Command must start with '!' '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
 						]);
 					} else {
-						if (
-							!response &&
-							!chatCommands.find((obj) => {
-								return obj.name === commandName;
-							})
-						) {
+						if (!response) {
 							let newCommand = new Command({
 								name: commandName,
 								text: commandText,
@@ -87,6 +83,12 @@ const commands = {
 							await newCommand.save();
 
 							result.push(["!" + commandName + " has been created!"]);
+							discord.updateCommands("add", {
+								name: commandName,
+								description: commandText,
+								usage: "!" + commandName,
+								usableBy: "users",
+							});
 						} else {
 							result.push(["!" + commandName + " already exists"]);
 						}
@@ -106,6 +108,13 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Creates a new command",
+				usage: "!addcomm !newcommand This is what a new command looks like",
+				usableBy: "mods",
+			},
+		],
 	},
 	addmessage: {
 		response: async (config) => {
@@ -123,15 +132,22 @@ const commands = {
 
 				result.push(["Added new message"]);
 			} else if (!config.isModUp) {
-				result.push(["!addTinder command is for Mods only"]);
+				result.push(["!addmessage command is for Mods only"]);
 			} else if (!config.argument) {
 				result.push([
-					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
+					"To add a timed message for the bot to say intermittently, you must include the message after the command: '!addmessage DM @design_by_rose for all your dick graphic needs'",
 				]);
 			}
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Creates a new timed message",
+				usage: "!addmessage This is what a new message looks like",
+				usableBy: "mods",
+			},
+		],
 	},
 	addtinder: {
 		response: async (config) => {
@@ -183,6 +199,14 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "To save Starless' new Tinder bio",
+				usage:
+					"!addtinder As long as my face is around, you will always have some place to sit",
+				usableBy: "mods",
+			},
+		],
 	},
 	addtitle: {
 		response: async (config) => {
@@ -257,6 +281,15 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
+				usage:
+					"!addtitle Streamer barely plays game, probably in the menu right now",
+				usableBy: "mods",
+			},
+		],
 	},
 	addquote: {
 		response: async (config) => {
@@ -285,6 +318,13 @@ const commands = {
 				];
 			}
 		},
+		versions: [
+			{
+				description: "Saves a new, and totally out of context quote",
+				usage: "!addquote Fuck fuck fuck fuck fuck",
+				usableBy: "mods",
+			},
+		],
 	},
 	audiotimeout: {
 		response: async (config) => {
@@ -313,13 +353,30 @@ const commands = {
 
 			return result;
 		},
-	},
-	booty: {
-		response: "Who loves the booty?",
+		versions: [
+			{
+				description:
+					"Sets audio timeout for bot alerts to default length, or turns off the audio timeout",
+				usage: "!audiotimeout",
+				usableBy: "mods",
+			},
+			{
+				description: "Sets the audio timeout to the specified about of seconds",
+				usage: "!audiotimeout 3",
+				usableBy: "mods",
+			},
+		],
 	},
 	buhhs: {
 		response:
 			"buhhsbot is a super amazing bot made by the super amazing @asdfWENDYfdsa. Go to https://www.twitch.tv/buhhsbot, and type !join in chat to have buhhsbot bootify your chat",
+		versions: [
+			{
+				description: "For the glory of buhhs",
+				usage: "!buhhs",
+				usableBy: "users",
+			},
+		],
 	},
 	// chug: {
 	// 	response: async (config) => {
@@ -363,6 +420,66 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
+	delcomm: {
+		response: async (config) => {
+			let result = [];
+			let commandToDelete;
+			let commandName;
+			let deletion;
+
+			if (config.isModUp && config.argument) {
+				if (config.argument.startsWith("!")) {
+					commandName = config.argument.slice(1).toLowerCase();
+
+					commandToDelete = await Command.findOne({ name: commandName });
+
+					if (commandToDelete) {
+						deletion = await Command.deleteOne({ name: commandName });
+
+						if (deletion.deletedCount > 0) {
+							delete commands[commandName];
+							discord.updateCommands("delete", {
+								name: commandName,
+								description: commandToDelete.Text,
+								usage: "!" + commandName,
+								usableBy: "users",
+							});
+							result.push("!" + commandName + " has been deleted");
+						} else {
+							result.push(
+								"!" + commandName + " has not been deleted, database says no?!"
+							);
+						}
+					} else {
+						result.push([
+							"!" +
+								commandName +
+								" doesn't look to be a command, are you sure you spelt it right, dummy?!",
+						]);
+					}
+				} else {
+					result.push([
+						"To specify the command to delete, include '!' at the start !delcomm !oldcommand",
+					]);
+				}
+			} else if (!config.isModUp) {
+				result.push(["!delcomm command is for Mods only"]);
+			} else if (!config.argument) {
+				result.push([
+					"To delete a command, you must include the command name, command being deleted must start with '!' : '!delcomm !oldcommand",
+				]);
+			}
+
+			return result;
+		},
+		versions: [
+			{
+				description: "Deletes a command",
+				usage: "!delcomm !oldcommand",
+				usableBy: "mods",
+			},
+		],
+	},
 	drinkbitch: {
 		response: async (config) => {
 			let result = [];
@@ -412,6 +529,14 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Makes Starless drink booze",
+				usage: "!drinkbitch",
+				usableBy: "users",
+				cost: "500 Tainty Points",
+			},
+		],
 	},
 	editcomm: {
 		response: async (config) => {
@@ -455,6 +580,12 @@ const commands = {
 
 							editCommand.text = commandText;
 							await editCommand.save();
+							discord.updateCommands("edit", {
+								name: commandName,
+								description: commandText,
+								usage: "!" + commandName,
+								usableBy: "users",
+							});
 
 							result.push(["!" + commandName + " has been edited!"]);
 						} else {
@@ -480,6 +611,13 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Edits an existing command",
+				usage: "!editcomm !newCommand This is an edited command",
+				usableBy: "mods",
+			},
+		],
 	},
 	edittinderauthor: {
 		response: async (config) => {
@@ -517,6 +655,14 @@ const commands = {
 			}
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"Updates the author of a Tinder bio, using the bio number and @user",
+				usage: "!edittinderauthor 69 @design_by_rose",
+				usableBy: "mods",
+			},
+		],
 	},
 	f: {
 		response: async ({}) => {
@@ -759,6 +905,14 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"To keep track of my many, many, many, many, many deaths/failures",
+				usage: "!f",
+				usableBy: "users",
+			},
+		],
 	},
 	followage: {
 		response: async (config) => {
@@ -793,6 +947,14 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"How long has it been since you last unfollowed, and then refollowed",
+				usage: "!followage",
+				usableBy: "users",
+			},
+		],
 	},
 	kings: {
 		response: async (config) => {
@@ -881,6 +1043,14 @@ const commands = {
 			}
 			return result;
 		},
+		versions: [
+			{
+				description: "Draw a card in the Kings game",
+				usage: "!kings",
+				usableBy: "users",
+				cost: "100 Tainty Points",
+			},
+		],
 	},
 	kingsremain: {
 		response: async (config) => {
@@ -898,6 +1068,14 @@ const commands = {
 			}
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"Checks how many cards remaining in the deck for the current game of !kings",
+				usage: "!kingsremain",
+				usableBy: "users",
+			},
+		],
 	},
 	kingsreset: {
 		response: async (config) => {
@@ -910,6 +1088,13 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Resets !kings to a brand new deck",
+				usage: "!kingsreset",
+				usableBy: "mods",
+			},
+		],
 	},
 	lurk: {
 		response: async (config) => {
@@ -922,6 +1107,14 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"Let the stream know you are going to lurk for a while...please come back",
+				usage: "!lurk",
+				usableBy: "users",
+			},
+		],
 	},
 	points: {
 		response: async (config) => {
@@ -1000,6 +1193,19 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description:
+					"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
+				usage: "!points",
+				usableBy: "users",
+			},
+			{
+				description: "Give points to a user",
+				usage: "!points 2000 @buhhsbot",
+				usableBy: "streamer",
+			},
+		],
 	},
 	so: {
 		response: async (config) => {
@@ -1049,6 +1255,13 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Gives a shoutout to some wonderful user",
+				usage: "!so @buhhsbot",
+				usableBy: "mods",
+			},
+		],
 	},
 	tinderquote: {
 		response: async (config) => {
@@ -1103,6 +1316,24 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Gets a random Tinder Bio",
+				usage: "!tinderquote",
+				usableBy: "users",
+			},
+			{
+				description: "Gets Tinder Bio number 69",
+				usage: "!tinderquote 69",
+				usableBy: "users",
+			},
+			{
+				description:
+					"Gets a random Tinder Bio that includes the string 'sit on my face' uwu",
+				usage: "!tinderquote sit on my face",
+				usableBy: "users",
+			},
+		],
 	},
 	titleharassment: {
 		response: async (config) => {
@@ -1150,7 +1381,7 @@ const commands = {
 					}
 				} else {
 					if (!isNaN(config.argument)) {
-						reject = "There is no Tinder bio number " + config.argument;
+						reject = "There is no title number " + config.argument;
 					}
 					result.push(reject);
 				}
@@ -1158,6 +1389,24 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Gets a random title",
+				usage: "!titleharassment",
+				usableBy: "users",
+			},
+			{
+				description: "Gets title number 69",
+				usage: "!titleharassment 69",
+				usableBy: "users",
+			},
+			{
+				description:
+					"Gets a random title that includes the string 'sit on my face' uwu",
+				usage: "!titleharassment sit on my face",
+				usableBy: "users",
+			},
+		],
 	},
 	quote: {
 		response: async (config) => {
@@ -1206,6 +1455,24 @@ const commands = {
 			}
 			return result;
 		},
+		versions: [
+			{
+				description: "Gets a random quote",
+				usage: "!quote",
+				usableBy: "users",
+			},
+			{
+				description: "Gets quote number 69",
+				usage: "!quote 69",
+				usableBy: "users",
+			},
+			{
+				description:
+					"Gets a random quote that includes the string 'sit on my face' uwu",
+				usage: "!quote sit on my face",
+				usableBy: "users",
+			},
+		],
 	},
 	updatemessages: {
 		response: async (config) => {
@@ -1227,6 +1494,13 @@ const commands = {
 
 			return result;
 		},
+		versions: [
+			{
+				description: "Updates random bot message list",
+				usage: "!updatemessages",
+				usableBy: "mods",
+			},
+		],
 	},
 };
 
@@ -1274,6 +1548,33 @@ async function setAllTimeStreamDeaths() {
 
 function getRandom(array) {
 	return array[Math.floor(Math.random() * array.length)];
+}
+
+function getCommands() {
+	let commandList = [];
+
+	for (const [key, value] of Object.entries(commands)) {
+		if (value.versions) {
+			commandList.push({ name: key, versions: value.versions });
+		} else {
+			commandList.push({
+				name: key,
+				versions: [
+					{
+						description: value.response,
+						usage: "!" + key,
+						usableBy: "users",
+					},
+				],
+			});
+		}
+
+		commandList.sort((a, b) =>
+			a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+		);
+	}
+
+	return commandList;
 }
 
 function getRandomBetween(max, min) {
@@ -1361,7 +1662,7 @@ async function resetKings() {
 	if (!deck) {
 		deck = await Deck.findOne({});
 		if (!deck) {
-			await createDeck();
+			deck = await createDeck();
 		}
 	}
 
@@ -1436,6 +1737,7 @@ function setChatClient(newChatClient) {
 }
 
 async function createDeck() {
+	let newDeck = [];
 	let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
 	let values = [
 		{
@@ -1511,10 +1813,10 @@ async function createDeck() {
 		},
 	];
 
-	deck = new Deck({ cards: [] });
+	newDeck = new Deck({ cards: [] });
 	for (let i = 0; i < suits.length; i++) {
 		for (let j = 0; j < values.length; j++) {
-			deck.cards.push({
+			newDeck.cards.push({
 				suit: suits[i],
 				value: values[j].value,
 				rule: values[j].rule,
@@ -1523,7 +1825,8 @@ async function createDeck() {
 		}
 	}
 
-	await deck.save();
+	await newDeck.save();
+	return newDeck;
 }
 
 exports.list = commands;
@@ -1533,3 +1836,4 @@ exports.setup = setup;
 exports.saveKingsState = saveKingsState;
 exports.resetKings = resetKings;
 exports.setChatClient = setChatClient;
+exports.getCommands = getCommands;

@@ -91,7 +91,7 @@ async function setup() {
 		await chatClient.connect(chatClient);
 		chatClient.onRegister(async () => {
 			connected();
-			checkLive();
+			checkLive(apiClient);
 
 			commands.setApiClient(apiClient);
 			commands.resetKings();
@@ -114,11 +114,12 @@ async function setup() {
 				return;
 			} else {
 				messageCount++;
+
 				if (message.startsWith("!")) {
 					let command = message.split(/\s(.+)/)[0].slice(1);
 					let argument = message.split(/\s(.+)/)[1];
 
-					const { response } =
+					const { response, details } =
 						(await commands.list[command.toLowerCase()]) || {};
 
 					if (typeof response === "function") {
@@ -149,11 +150,11 @@ async function connected() {
 	console.log(" * Connected to Twitch chat * ");
 }
 
-async function checkLive() {
+async function checkLive(apiClient) {
 	let streamStatus;
 
 	setInterval(async () => {
-		streamStatus = await isStreamLive();
+		streamStatus = await isStreamLive(apiClient);
 
 		try {
 			if (streamStatus && !isLive) {
@@ -194,7 +195,7 @@ function messageUpdate(update) {
 	intervalMessages = update;
 }
 
-async function isStreamLive() {
+async function isStreamLive(apiClient) {
 	let streamStatus;
 
 	try {
