@@ -44,23 +44,27 @@ function createCommands() {
 		for (let i = 0; i < chatCommands.length; i++) {
 			contentLine = "";
 
-			contentLine = "**Name:** " + chatCommands[i].name + "\n";
+			contentLine = "`!" + chatCommands[i].name + "`\n";
 
 			for (let j = 0; j < chatCommands[i].versions.length; j++) {
 				if (chatCommands[i].versions.length > 1) {
-					contentLine += "**Option: " + (j + 1) + "**\n";
+					contentLine += "__**Option: " + (j + 1) + "**__\n";
 				}
 
 				contentLine +=
-					"**Description:** " +
+					"*Description:* " +
 					chatCommands[i].versions[j].description +
 					"\n" +
-					"**Usage:** " +
+					"*Usage:* " +
 					chatCommands[i].versions[j].usage +
 					"\n" +
-					"**Usable by:** " +
+					"*Usable by:* " +
 					chatCommands[i].versions[j].usableBy +
 					"\n";
+
+				if (j == chatCommands[i].versions.length - 1) {
+					contentLine += "=======\n";
+				}
 			}
 
 			if (contentComment.length + contentLine.length > 2000) {
@@ -101,16 +105,16 @@ async function updateCommands(action, updateCommand) {
 		}
 
 		contentLine +=
-			"**Name:** " +
+			"`!" +
 			updateCommand.name +
-			"\n" +
-			"**Description:** " +
+			"`\n" +
+			"*Description:* " +
 			updateCommand.description +
 			"\n" +
-			"**Usage:** " +
+			"*Usage:* " +
 			updateCommand.usage +
 			"\n" +
-			"**Usable by:** " +
+			"*Usable by:* " +
 			updateCommand.usableBy +
 			"\n";
 

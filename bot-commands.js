@@ -1007,6 +1007,8 @@ const commands = {
 
 							if (cardDrawn.rule == "This card doesn't really have a rule") {
 								if (cardDrawn.bonusJager) {
+									audioLink = await AudioLink.findOne({ name: "jager" });
+									audio.play(audioLink);
 									result.push([
 										"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
 									]);
