@@ -42,9 +42,83 @@ let kingsRemainLastUseTime = "";
 let pointsLastUseTime = "";
 let chugLastUseTime = "";
 let deck;
-let cardsToDraw = [];
+let cardsToDraw;
 let kingsCount;
 let chatClient;
+let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
+let values = [
+	{
+		value: "Ace",
+		rule: "Musketeers: All for one and one for all",
+		explanation: "Everybody drinks",
+	},
+	{
+		value: "2",
+		rule: "Fuck you!",
+		explanation:
+			"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+	},
+	{
+		value: "3",
+		rule: "Fuck me!",
+		explanation: "You drew this card, so you drink!",
+	},
+	{
+		value: "4",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		value: "5",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		value: "6",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		value: "7",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		value: "8",
+		rule: "Pick a mate!",
+		explanation:
+			"You and a person of your choosing takes a drink...tell us why it is Starless",
+	},
+	{
+		value: "9",
+		rule: "Bust a rhyme!",
+		explanation:
+			"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
+	},
+	{
+		value: "10",
+		rule: "Make a rule!",
+		explanation:
+			"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
+	},
+	{
+		value: "Jack",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		value: "Queen",
+		rule: "Ask a question!",
+		explanation:
+			"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
+	},
+	{
+		value: "King",
+		rule: "Kings!",
+		explanation:
+			"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
+	},
+];
 
 const commands = {
 	addcomm: {
@@ -53,56 +127,69 @@ const commands = {
 			let commandName;
 			let commandText;
 
-			if (config.isModUp && config.argument) {
-				if (config.argument.startsWith("!")) {
-					commandName = config.argument
-						.split(/\s(.+)/)[0]
-						.slice(1)
-						.toLowerCase();
-					commandText = config.argument.split(/\s(.+)/)[1];
+			// Check if user has privileges and argument is correct format
+			if (
+				config.isModUp &&
+				config.argument &&
+				config.argument.startsWith("!")
+			) {
+				// Extract command name and text from argument
+				commandName = config.argument
+					.split(/\s(.+)/)[0]
+					.slice(1)
+					.toLowerCase();
+				commandText = config.argument.split(/\s(.+)/)[1];
 
-					const { response } = commands[commandName] || {};
+				// Check if command already exists
+				const { response, details } = commands[commandName] || {};
 
-					if (!commandText) {
-						result.push([
-							"To add a Command, you must include the Command name, and follwed by the Command output, new Command must start with '!' '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
-						]);
-					} else {
-						if (!response) {
-							let newCommand = new Command({
-								name: commandName,
-								text: commandText,
-								createdBy: config.userInfo.displayName,
-							});
+				// Check if text is included
+				if (!response && commandText) {
+					// Create new Command object and save to database
+					let newCommand = new Command({
+						name: commandName,
+						text: commandText,
+						createdBy: config.userInfo.displayName,
+					});
 
-							commands[commandName] = {
-								response: commandText,
-							};
+					// Save new command
+					await newCommand.save();
+					// Update list of commands
+					commands[commandName] = {
+						response: commandText,
+					};
+					chatCommands.push(newCommand);
 
-							chatCommands.push(newCommand);
-							await newCommand.save();
+					// Return confirmation command was created
+					result.push(["!" + commandName + " has been created!"]);
 
-							result.push(["!" + commandName + " has been created!"]);
-							discord.updateCommands("add", {
-								name: commandName,
-								description: commandText,
-								usage: "!" + commandName,
-								usableBy: "users",
-							});
-						} else {
-							result.push(["!" + commandName + " already exists"]);
-						}
-					}
-				} else {
+					discord.updateCommands("add", {
+						name: commandName,
+						description: commandText,
+						usage: "!" + commandName,
+						usableBy: "users",
+					});
+				} else if (response) {
+					// Return message if command already exists
+					result.push(["!" + commandName + " already exists"]);
+				} else if (!commandText) {
+					// Return message if no command text included
 					result.push([
-						"New command must start with '!' !addcomm !newcommand this is what a new command looks like",
+						"To add a Command, you must include the Command text: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
 					]);
 				}
 			} else if (!config.isModUp) {
+				// Return error message if user does not have privileges
 				result.push(["!addComm command is for Mods only"]);
 			} else if (!config.argument) {
+				// Return error message if argument is not provided
 				result.push([
 					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'",
+				]);
+			} else if (!config.argument.startsWith("!")) {
+				// Return error message if new command didn't start with an '!'
+				result.push([
+					"New command must start with '!' !addcomm !newcommand this is what a new command looks like",
 				]);
 			}
 
@@ -144,7 +231,7 @@ const commands = {
 		versions: [
 			{
 				description: "Creates a new timed message",
-				usage: "!addmessage This is what a new message looks like",
+				usage: "!addmessage DM @design_by_rose for all your dick graphic needs",
 				usableBy: "mods",
 			},
 		],
@@ -153,17 +240,14 @@ const commands = {
 		response: async (config) => {
 			let message;
 			let user;
-			let quoteIndex;
 			let result = [];
 
 			if (config.isModUp && config.argument) {
-				let quoteEntries = await Tinder.find({});
+				let tinderEntries = await Tinder.find({});
 
-				if (quoteEntries != 0) {
-					quoteIndex = getNextIndex(quoteEntries);
-				} else {
-					quoteIndex = 1;
-				}
+				const tinderIndex = tinderEntries.length
+					? getNextIndex(tinderEntries)
+					: 1;
 
 				if (config.argument.includes("@")) {
 					config.argument = config.argument.split("@");
@@ -175,17 +259,17 @@ const commands = {
 				}
 
 				await Tinder.create({
-					index: quoteIndex,
+					index: tinderIndex,
 					user: user,
 					text: message,
 					addedBy: config.userInfo.displayName,
 				});
 				result.push(["Added new Tinder bio"]);
 
-				if (user == "") {
+				if (!user) {
 					result.push([
-						"To add the name of the author of this Tinder bio !edittinderauthor " +
-							quoteIndex +
+						"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
+							tinderIndex +
 							" @USERNAME",
 					]);
 				}
@@ -212,24 +296,17 @@ const commands = {
 		response: async (config) => {
 			let message;
 			let user;
-			let quoteIndex;
 			let result = [];
 			let created;
 
 			if (config.isModUp) {
-				let quoteEntries = await Title.find({});
+				let titleEntries = await Title.find({});
 
-				if (quoteEntries != 0) {
-					quoteIndex = getNextIndex(quoteEntries);
-				} else {
-					quoteIndex = 1;
-				}
+				const titleIndex = titleEntries.length ? getNextIndex(titleEntries) : 1;
 
 				if (!config.argument) {
 					try {
-						let channel = await apiClient.channels.getChannelInfo(
-							process.env.TWITCH_USER_ID
-						);
+						let channel = await apiClient.channels.getChannelInfo(twitchId);
 
 						if (channel == null) {
 							result.push(
@@ -255,7 +332,7 @@ const commands = {
 				if (result.length == 0) {
 					try {
 						created = await Title.create({
-							index: quoteIndex,
+							index: titleIndex,
 							text: message,
 							user: user,
 							addedBy: config.userInfo.displayName,
@@ -293,16 +370,10 @@ const commands = {
 	},
 	addquote: {
 		response: async (config) => {
-			let quoteIndex;
-
 			if (config.isModUp && config.argument) {
 				let quoteEntries = await Quote.find({});
 
-				if (quoteEntries != 0) {
-					quoteIndex = getNextIndex(quoteEntries);
-				} else {
-					quoteIndex = 1;
-				}
+				const quoteIndex = quoteEntries.length ? getNextIndex(quoteEntries) : 1;
 
 				await Quote.create({
 					index: quoteIndex,
@@ -331,12 +402,18 @@ const commands = {
 			let result = [];
 
 			if (config.isModUp) {
-				if (config.argument && !isNaN(config.argument)) {
+				// check if argument is a positive number
+				if (!isNaN(config.argument) && config.argument > 0) {
 					audio.setAudioTimeout(config.argument);
 					result.push([
 						"Bot audio timeout has been started, and set to " +
 							config.argument +
 							" seconds",
+					]);
+				} // check if argument is a negative number
+				else if (!isNaN(config.argument) && config.argument < 1) {
+					result.push([
+						"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10",
 					]);
 				} else if (config.argument && isNaN(config.argument)) {
 					result.push([
@@ -398,7 +475,7 @@ const commands = {
 
 	// 					user.save();
 
-	// 					// audio.play(getRandom(drinkBitchAudioLinks));
+	// 					// audio.play(getRandomBetweenExclusiveMax(0, drinkBitchAudioLinks.length));
 
 	// 					result.push("@TheStarlessAbstract chug, chug, chug!");
 	// 				} else {
@@ -483,28 +560,52 @@ const commands = {
 	drinkbitch: {
 		response: async (config) => {
 			let result = [];
-			let cost = 500;
+			let pointsRequired = 500;
 
 			let currentTime = new Date();
 
-			if (currentTime - drinkBitchLastUseTime > 5000) {
-				drinkBitchLastUseTime = currentTime;
-
-				user = await LoyaltyPoint.findOne({
+			try {
+				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
 				});
 
-				if (user) {
-					if (user.points >= cost) {
-						user.points -= cost;
+				if (!user) {
+					throw new Error("No user found");
+				}
 
-						audio.play(getRandom(drinkBitchAudioLinks));
+				if (user.points < pointsRequired) {
+					throw new Error("Not enough points");
+				}
 
-						result.push("@TheStarlessAbstract drink, bitch!");
+				if (currentTime - drinkBitchLastUseTime < 5000) {
+					throw new Error("Wait longer");
+				}
 
-						user.save();
-					} else if (getRandomBetween(100, 1) == 100) {
-						audio.play(getRandom(drinkBitchAudioLinks));
+				drinkBitchLastUseTime = currentTime;
+
+				audio.play(
+					drinkBitchAudioLinks[
+						getRandomBetweenExclusiveMax(0, drinkBitchAudioLinks.length)
+					]
+				);
+
+				result.push("@TheStarlessAbstract drink, bitch!");
+				user.points -= pointsRequired;
+				user.save();
+			} catch (error) {
+				if (error == "No user found") {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
+					);
+				} else if (error == "Not enough points") {
+					if (getRandomBetweenInclusiveMax(1, 100) == 100) {
+						audio.play(
+							drinkBitchAudioLinks[
+								getRandomBetweenExclusiveMax(0, drinkBitchAudioLinks.length)
+							]
+						);
 
 						result.push(
 							"@" +
@@ -518,12 +619,6 @@ const commands = {
 								" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
 						);
 					}
-				} else {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
-					);
 				}
 			}
 
@@ -667,22 +762,12 @@ const commands = {
 	f: {
 		response: async ({}) => {
 			let result = [];
-			let gameName;
-			let streamDate;
-			let deathCounters;
 			let gamesPlayed;
 			let pularlity;
-			let gameDeaths = 0;
-			let gameStreams;
-			let timeSinceStartAsMs;
-			let averageToDeathMs;
-			let averageToDeath;
 			let averageString = "";
 
 			try {
-				let stream = await apiClient.streams.getStreamByUserId(
-					process.env.TWITCH_USER_ID
-				);
+				let stream = await apiClient.streams.getStreamByUserId(twitchId);
 
 				if (stream == null) {
 					result.push(
@@ -693,10 +778,9 @@ const commands = {
 
 					if (currentTime - fLastUseTime > 5000) {
 						fLastUseTime = currentTime;
-						gameName = stream.gameName;
-						streamDate = stream.startDate;
-
-						timeSinceStartAsMs = Math.floor(currentTime - streamDate);
+						let gameName = stream.gameName;
+						let streamDate = stream.startDate;
+						let timeSinceStartAsMs = Math.floor(currentTime - streamDate);
 
 						streamDate = new Date(
 							streamDate.getFullYear(),
@@ -704,95 +788,51 @@ const commands = {
 							streamDate.getDate()
 						);
 
-						if (!gameStreamDeaths) {
-							deathCounters = await DeathCounter.find({
-								streamStartDate: streamDate,
-							}).exec();
+						let deathCounters = await DeathCounter.find({
+							streamStartDate: streamDate,
+						}).exec();
 
-							if (deathCounters.length == 0) {
-								gameStreamDeaths = await createDeathCounter(
-									gameName,
-									streamDate
-								);
-							} else {
-								for (let i = 0; i < deathCounters.length; i++) {
-									totalStreamDeaths =
-										totalStreamDeaths + deathCounters[i].deaths;
-								}
+						// This function checks if there is currently a stored gameStreamDeaths object
+						// if the gameTitle, and streamStartDate match with the current stream, then that object is passed back as gameStreamDeaths
+						// if the gameTitle or streamStartDate don't match, then the deathCounters array is seatched to find an object with that gameTitle
+						// if the game is found, is is passed back as gameDeathCounter
+						// if the game is not found, a new DeathCounter is created, using createDeathCounter, passing in the gameName, and streamDate
+						gameStreamDeaths = await getDeathCounter(
+							gameName,
+							streamDate,
+							gameStreamDeaths,
+							deathCounters
+						);
 
-								deathCounters = await DeathCounter.findOne({
-									gameTitle: gameName,
-									streamStartDate: streamDate,
-								}).exec();
-
-								if (deathCounters) {
-									gameStreamDeaths = deathCounters;
-								} else {
-									gameStreamDeaths = await createDeathCounter(
-										gameName,
-										streamDate
-									);
-								}
-							}
-						} else {
-							if (gameStreamDeaths.gameTitle != gameName) {
-								deathCounters = await DeathCounter.findOne({
-									gameTitle: gameName,
-									streamStartDate: streamDate,
-								}).exec();
-
-								if (deathCounters) {
-									gameStreamDeaths = deathCounters;
-								} else {
-									gameStreamDeaths = await createDeathCounter(
-										gameName,
-										streamDate
-									);
-								}
-							} else if (gameStreamDeaths.streamStartDate != streamDate) {
-								deathCounters = await DeathCounter.findOne({
-									gameTitle: gameName,
-									streamStartDate: streamDate,
-								}).exec();
-
-								if (deathCounters) {
-									gameStreamDeaths = deathCounters;
-								} else {
-									gameStreamDeaths = await createDeathCounter(
-										gameName,
-										streamDate
-									);
-								}
-							}
+						for (let i = 0; i < deathCounters.length; i++) {
+							totalStreamDeaths += deathCounters[i].deaths;
 						}
 
 						gameStreamDeaths.deaths++;
 						totalStreamDeaths++;
 						allTimeStreamDeaths++;
 						gameStreamDeaths.save();
-						averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
+						let averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
 
-						averageToDeath = {
-							hours: Math.floor((averageToDeathMs / (1000 * 60 * 60)) % 24),
+						let averageToDeath = {
+							hours: Math.floor(averageToDeathMs / (1000 * 60 * 60)),
 							minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
 							seconds: Math.floor((averageToDeathMs / 1000) % 60),
 						};
 
-						gameStreams = await DeathCounter.find({
+						let gameStreams = await DeathCounter.find({
 							gameTitle: gameName,
 						}).exec();
 
-						if (gameStreams.length > 1) {
-							for (let i = 0; i < gameStreams.length; i++) {
-								gameDeaths = gameDeaths + gameStreams[i].deaths;
-							}
-						}
+						let gameDeaths = gameStreams.reduce(
+							(total, stream) => total + stream.deaths,
+							0
+						);
 
-						if (gameDeaths == 666) {
-							audioLink = await AudioLink.findOne({ name: "666" });
-						} else {
-							audioLink = getRandom(deathAudioLinks);
-						}
+						audioLink =
+							gameDeaths == 666
+								? await AudioLink.findOne({ name: "666" })
+								: getRandomBetweenExclusiveMax(0, deathAudioLinks.length);
 
 						audio.play(audioLink);
 
@@ -982,7 +1022,8 @@ const commands = {
 						if (drawFrom.length == 1) {
 							cardDrawn = drawFrom[0];
 						} else {
-							cardDrawn = drawFrom[getRandomBetween(drawFrom.length - 1, 0)];
+							cardDrawn =
+								drawFrom[getRandomBetweenInclusiveMax(0, drawFrom.length - 1)];
 						}
 
 						cardDrawn.isDrawn = true;
@@ -1085,7 +1126,11 @@ const commands = {
 
 			if (config.isModUp) {
 				resetKings();
-				result.push("Kings has been reset");
+				result.push(
+					"A new game of Kings has been dealt, with " +
+						cardsToDraw.length +
+						" cards!"
+				);
 			}
 
 			return result;
@@ -1294,7 +1339,7 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandom(quoteEntries);
+					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
 				} else if (isNaN(config.argument)) {
 					reject = "No Tinder bio found mentioning: " + config.argument;
 				} else if (!config.argument) {
@@ -1366,7 +1411,7 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandom(quoteEntries);
+					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
 				} else if (isNaN(config.argument)) {
 					reject = "No Title found mentioning: " + config.argument;
 				} else if (!config.argument) {
@@ -1439,7 +1484,7 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandom(quoteEntries);
+					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
 				} else if (isNaN(config.argument)) {
 					reject = "No Starless quote found mentioning: " + config.argument;
 				} else if (!config.argument) {
@@ -1511,16 +1556,17 @@ async function setup() {
 	deathAudioLinks = await AudioLink.find({ command: "f" }).exec();
 	drinkBitchAudioLinks = await AudioLink.find({ command: "drinkbitch" }).exec();
 
-	for (let i = 0; i < chatCommands.length; i++) {
-		commands[chatCommands[i].name] = { response: chatCommands[i].text };
+	for (const command of chatCommands) {
+		commands[command.name] = { response: command.text };
 	}
 
-	fLastUseTime = new Date();
-	chugLastUseTime = new Date();
-	kingsLastUseTime = new Date();
-	pointsLastUseTime = new Date();
-	drinkBitchLastUseTime = new Date();
-	kingsRemainLastUseTime = new Date();
+	const currentDateTime = new Date();
+	fLastUseTime = currentDateTime;
+	chugLastUseTime = currentDateTime;
+	kingsLastUseTime = currentDateTime;
+	pointsLastUseTime = currentDateTime;
+	drinkBitchLastUseTime = currentDateTime;
+	kingsRemainLastUseTime = currentDateTime;
 }
 
 function getNextIndex(array) {
@@ -1528,187 +1574,162 @@ function getNextIndex(array) {
 }
 
 async function createDeathCounter(game, date) {
-	let deathCounter = await DeathCounter.create({
+	return await DeathCounter.create({
 		deaths: 0,
 		gameTitle: game,
 		streamStartDate: date,
 	});
-
-	return deathCounter;
 }
 
 async function setAllTimeStreamDeaths() {
 	let deathCounters = await DeathCounter.find({}).exec();
-	if (deathCounters.length > 0) {
-		for (let i = 0; i < deathCounters.length; i++) {
-			allTimeStreamDeaths = allTimeStreamDeaths + deathCounters[i].deaths;
-		}
-	} else {
-		allTimeStreamDeaths = 0;
-	}
+	allTimeStreamDeaths = deathCounters.reduce(
+		(total, counter) => total + counter.deaths,
+		0
+	);
 }
 
-function getRandom(array) {
-	return array[Math.floor(Math.random() * array.length)];
+function getRandomBetweenExclusiveMax(min, max) {
+	return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function getCommands() {
-	let commandList = [];
-
-	for (const [key, value] of Object.entries(commands)) {
-		if (value.versions) {
-			commandList.push({ name: key, versions: value.versions });
-		} else {
-			commandList.push({
-				name: key,
-				versions: [
-					{
-						description: value.response,
-						usage: "!" + key,
-						usableBy: "users",
-					},
-				],
-			});
-		}
-
-		commandList.sort((a, b) =>
-			a.name > b.name ? 1 : b.name > a.name ? -1 : 0
-		);
-	}
-
-	return commandList;
-}
-
-function getRandomBetween(max, min) {
+function getRandomBetweenInclusiveMax(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function setApiClient(newApiClient) {
-	apiClient = newApiClient;
-}
+function getCommands() {
+	// Create the commandList array using the Array.map() method
+	const commandList = Object.entries(commands).map(([key, value]) => {
+		// Use a ternary operator to check for the existence of the versions property
+		return value.versions
+			? // If the versions property exists, return an object with the command name and versions
+			  { name: key, versions: value.versions }
+			: // If the versions property does not exist, return an object with the command name and default version information
+			  {
+					name: key,
+					versions: [
+						{
+							description: value.response,
+							usage: "!" + key,
+							usableBy: "users",
+						},
+					],
+			  };
+	});
 
-function getPlurality(value, singular, plural) {
-	let result;
-
-	if (value > 1) {
-		result = plural;
-	} else {
-		result = singular;
-	}
-
-	return result;
+	// Use the Array.sort() method to sort the commandList array alphabetically by command name
+	commandList.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+	return commandList;
 }
 
 function getFollowLength(followTime) {
-	let year, month, week, day, hour, minute, second;
-	let followString = "";
-
-	second = Math.floor(followTime / 1000);
-	minute = Math.floor(second / 60);
+	// Convert the followTime timestamp into individual time units
+	let second = Math.floor(followTime / 1000);
+	let minute = Math.floor(second / 60);
 	second = second % 60;
-	hour = Math.floor(minute / 60);
+	let hour = Math.floor(minute / 60);
 	minute = minute % 60;
-	day = Math.floor(hour / 24);
+	let day = Math.floor(hour / 24);
 	hour = hour % 24;
-	year = Math.floor(day / 365);
+	let year = Math.floor(day / 365);
 	day = day % 365;
-	month = Math.floor(day / 30);
+	let month = Math.floor(day / 30);
 	day = day % 30;
-	week = Math.floor(day / 7);
+	let week = Math.floor(day / 7);
 	day = day % 7;
 
-	if (year > 0) {
-		followString = followString.concat(
-			year + " " + getPlurality(year, "year", "years") + ", "
-		);
+	// Create an array of time unit objects, each with a value and a name
+	const timeUnits = [
+		{ value: year, name: "year" },
+		{ value: month, name: "month" },
+		{ value: week, name: "week" },
+		{ value: day, name: "day" },
+		{ value: hour, name: "hour" },
+		{ value: minute, name: "minute" },
+		{ value: second, name: "second" },
+	];
+
+	// Use a for loop to iterate over the timeUnits array and construct the final string
+	let followString = "";
+	for (const timeUnit of timeUnits) {
+		if (timeUnit.value > 0) {
+			followString +=
+				timeUnit.value +
+				" " +
+				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name);
+			(", ");
+		}
 	}
-	if (month > 0) {
-		followString = followString.concat(
-			month + " " + getPlurality(month, "month", "months") + ", "
-		);
-	}
-	if (week > 0) {
-		followString = followString.concat(
-			week + " " + getPlurality(week, "week", "weeks") + ", "
-		);
-	}
-	if (day > 0) {
-		followString = followString.concat(
-			day + " " + getPlurality(day, "day", "days") + ", "
-		);
-	}
-	if (hour > 0) {
-		followString = followString.concat(
-			hour + " " + getPlurality(hour, "hour", "hours") + ", "
-		);
-	}
-	if (minute > 0) {
-		followString = followString.concat(
-			minute + " " + getPlurality(minute, "minute", "minutes") + ", "
-		);
-	}
-	followString = followString.concat(
-		second + " " + getPlurality(second, "second", "seconds") + ". "
-	);
+
+	// Remove the final comma and space from the string
+	followString = followString.slice(0, -2);
+	followString += ".";
 
 	return followString;
 }
 
 async function resetKings() {
-	let jagerBonus = [];
-	let jagerIndex;
+	// Reset the game of Kings to its initial state.
+	// If a save state is found, restore the game from that state.
 
-	// checks for Kings save state
-	let saveState = await KingsSaveState.findOne({});
+	// Find the current save state for the game of Kings.
+	let gameState = await KingsSaveState.findOne({});
+
+	// If there is no save state, initialize the game.
+	if (!gameState) {
+		// Initialize the game state.
+		await initializeGameState();
+	} else {
+		// Restore the game state from the save state.
+		restoreGameState(gameState);
+
+		// Delete the save state.
+		await KingsSaveState.deleteOne({ _id: gameState._id });
+	}
+}
+
+async function initializeGameState() {
+	// This array will hold the indices of the "Hydrate you fools" cards,
+	// which will be eligible for the Jagerbomb bonus.
+	let jagerBonusCards = [];
+	let jagerCardIndex;
+
+	// Create the array of cards to draw.
+	cardsToDraw = [];
+	kingsCount = 0;
 
 	if (!deck) {
-		deck = await Deck.findOne({});
-		if (!deck) {
-			deck = await createDeck();
-		}
+		deck = await createDeck(suits, values);
 	}
 
-	if (!saveState) {
-		cardsToDraw = [];
-		kingsCount = 0;
-
-		for (let i = 0; i < deck.cards.length; i++) {
-			// adds hydrate cards to array for possible jagerbombs
-			if (deck.cards[i].explanation === "Hydrate you fools") {
-				jagerBonus.push(i);
-			}
-
-			// cards used in play
-			cardsToDraw.push({
-				suit: deck.cards[i].suit,
-				value: deck.cards[i].value,
-				rule: deck.cards[i].rule,
-				explanation: deck.cards[i].explanation,
-				isDrawn: false,
-				bonusJager: false,
-			});
+	// Loop through the cards in the deck.
+	for (let i = 0; i < deck.cards.length; i++) {
+		// Add the "Hydrate you fools" cards to the array of cards eligible
+		// for the Jagerbomb bonus.
+		if (deck.cards[i].explanation === "Hydrate you fools") {
+			jagerBonusCards.push(i);
 		}
 
-		// sets two jagerbomb cards
-		for (let i = 0; i < 2; i++) {
-			jagerIndex = getRandomBetween(jagerBonus.length - 1, 0);
-			cardsToDraw[jagerBonus[jagerIndex]].bonusJager = true;
-			jagerBonus.splice(jagerIndex);
-		}
-
-		shuffle();
-
-		chatClient.say(
-			twitchUsername,
-			"A new game of Kings has been dealt, with " +
-				cardsToDraw.length +
-				" cards!"
-		);
-	} else {
-		cardsToDraw = saveState.cardsToDraw;
-		kingsCount = saveState.kingsCount;
-		await KingsSaveState.deleteOne({ _id: saveState._id });
+		// cards used in play
+		cardsToDraw.push({
+			suit: deck.cards[i].suit,
+			value: deck.cards[i].value,
+			rule: deck.cards[i].rule,
+			explanation: deck.cards[i].explanation,
+			isDrawn: false,
+			bonusJager: false,
+		});
 	}
+
+	// Choose two of the "Hydrate you fools" cards to be Jagerbomb cards.
+	for (let i = 0; i < 2; i++) {
+		jagerCardIndex = getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
+		cardsToDraw[jagerBonusCards[jagerCardIndex]].bonusJager = true;
+		jagerBonusCards.splice(jagerCardIndex);
+	}
+
+	// Shuffle the cards to draw.
+	shuffle();
 }
 
 async function saveKingsState() {
@@ -1720,115 +1741,88 @@ async function saveKingsState() {
 	await saveState.save();
 }
 
+// The shuffle function takes an array of items and shuffles them in place.
 function shuffle() {
+	// Get the number of items in the array.
 	let m = cardsToDraw.length,
+		// Temporary variable for swapping items.
 		t,
+		// Loop variable.
 		i;
 
+	// While there are items to shuffle…
 	while (m) {
+		// Pick a random item from the array.
 		i = Math.floor(Math.random() * m--);
 
+		// Swap the last item in the array yet to be shuffled with the random item.
 		t = cardsToDraw[m];
 		cardsToDraw[m] = cardsToDraw[i];
 		cardsToDraw[i] = t;
 	}
 }
 
+async function createDeck(suits, values) {
+	let newDeck = await Deck.findOne({});
+
+	if (!newDeck) {
+		newDeck = new Deck({ cards: [] });
+
+		// Add cards to the deck for each suit and value.
+		suits.forEach((suit) => {
+			values.forEach((value) => {
+				newDeck.cards.push({
+					suit: suit,
+					value: value.value,
+					rule: value.rule,
+					explanation: value.explanation,
+				});
+			});
+		});
+
+		// Save the deck to the database and return it.
+		await newDeck.save();
+	}
+
+	return newDeck;
+}
+
+const getDeathCounter = async (
+	gameName,
+	streamDate,
+	gameStreamDeaths,
+	deathCounters
+) => {
+	let gameDeathCounter;
+
+	if (
+		gameStreamDeaths.gameTitle === gameName &&
+		gameStreamDeaths.streamStartDate === streamDate
+	) {
+		gameDeathCounter = gameStreamDeaths;
+	} else {
+		gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
+
+		if (!gameDeathCounter) {
+			gameDeathCounter = createDeathCounter(gameName, streamDate);
+		}
+	}
+
+	return gameDeathCounter;
+};
+
+// Restore the game state from the given save state.
+function restoreGameState(gameState) {
+	cardsToDraw = gameState.cardsToDraw;
+	kingsCount = gameState.kingsCount;
+}
+
 function setChatClient(newChatClient) {
 	chatClient = newChatClient;
 }
 
-async function createDeck() {
-	let newDeck = [];
-	let suits = ["Clubs", "Diamonds", "Hearts", "Spades"];
-	let values = [
-		{
-			value: "Ace",
-			rule: "Musketeers: All for one and one for all",
-			explanation: "Everybody drinks",
-		},
-		{
-			value: "2",
-			rule: "Fuck you!",
-			explanation:
-				"Choose someone to take a drink...but fuck Starless mainly amirite?!",
-		},
-		{
-			value: "3",
-			rule: "Fuck me!",
-			explanation: "You drew this card, so you drink!",
-		},
-		{
-			value: "4",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "5",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "6",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "7",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "8",
-			rule: "Pick a mate!",
-			explanation:
-				"You and a person of your choosing takes a drink...tell us why it is Starless",
-		},
-		{
-			value: "9",
-			rule: "Bust a rhyme!",
-			explanation:
-				"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
-		},
-		{
-			value: "10",
-			rule: "Make a rule!",
-			explanation:
-				"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
-		},
-		{
-			value: "Jack",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "Queen",
-			rule: "Ask a question!",
-			explanation:
-				"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
-		},
-		{
-			value: "King",
-			rule: "Kings!",
-			explanation:
-				"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
-		},
-	];
-
-	newDeck = new Deck({ cards: [] });
-	for (let i = 0; i < suits.length; i++) {
-		for (let j = 0; j < values.length; j++) {
-			newDeck.cards.push({
-				suit: suits[i],
-				value: values[j].value,
-				rule: values[j].rule,
-				explanation: values[j].explanation,
-			});
-		}
-	}
-
-	await newDeck.save();
-	return newDeck;
+function setApiClient(newApiClient) {
+	apiClient = newApiClient;
 }
 
 exports.list = commands;

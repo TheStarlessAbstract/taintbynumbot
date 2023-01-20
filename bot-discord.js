@@ -19,6 +19,7 @@ client.login(token);
 
 async function setup() {
 	const channel = client.channels.cache.get("1043599646724980816");
+
 	let twitchCommands = [];
 
 	let messages = await channel.messages.fetch();

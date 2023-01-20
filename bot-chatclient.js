@@ -1,7 +1,6 @@
 require("dotenv").config();
 const ApiClient = require("@twurple/api").ApiClient;
 const ChatClient = require("@twurple/chat").ChatClient;
-const fs = require("fs").promises;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 
 const Token = require("./models/token");
@@ -19,128 +18,31 @@ let botUsername = process.env.TWITCH_BOT_USERNAME;
 let userId = process.env.TWITCH_USER_ID;
 
 let token;
-let tokenData;
-let interval;
+let timedMessagesInterval;
 let intervalMessages;
-let chatClient;
 let isLive = false;
 let messageCount = 0;
 
 async function setup() {
+	// Initialize the commands and messages modules
 	await commands.setup();
 	await messages.setup();
 
-	try {
-		token = await Token.findOne({ name: "chatClient" });
-		await fs.mkdir("./files", { recursive: true });
-		tokenData = JSON.parse(
-			await fs.readFile("./files/chatToken.json", "UTF-8")
-		);
-	} catch (error) {
-		if (token) {
-			tokenData = {
-				accessToken: token.accessToken,
-				refreshToken: token.refreshToken,
-				scope: token.scope,
-				expiresIn: 0,
-				obtainmentTimestamp: 0,
-			};
+	// Check if the token exists in the database
+	token = await Token.findOne({ name: "chatClient" });
 
-			await fs.writeFile(
-				"./files/chatToken.json",
-				JSON.stringify(tokenData, null, 4),
-				"UTF-8"
-			);
-		}
-	}
+	if (token) {
+		// If the token exists, create the tokenData object
+		const tokenData = initializeTokenData(token);
 
-	if (tokenData) {
-		if (!token) {
-			token = new Token({ name: "chatClient" });
-		}
-
-		const authProvider = new RefreshingAuthProvider(
-			{
-				clientId,
-				clientSecret,
-				onRefresh: async (newTokenData) => {
-					await fs.writeFile(
-						"./files/chatToken.json",
-						JSON.stringify(newTokenData, null, 4),
-						"UTF-8"
-					);
-					token.accessToken = newTokenData.accessToken;
-					token.refreshToken = newTokenData.refreshToken;
-					token.scope = newTokenData.scope;
-					token.expiresIn = newTokenData.expiresIn;
-					token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
-
-					await token.save();
-				},
-			},
-			tokenData
-		);
-		chatClient = new ChatClient({
-			authProvider,
-			channels: [username],
-			requestMembershipEvents: true,
-		});
-
+		// Create the authProvider, chatClient and apiClient objects
+		const authProvider = createAuthProvider(tokenData);
+		const chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 
 		await chatClient.connect(chatClient);
-		chatClient.onRegister(async () => {
-			connected();
-			checkLive(apiClient);
 
-			commands.setApiClient(apiClient);
-			commands.resetKings();
-			commands.setChatClient(chatClient);
-			redemptions.setChatClient(chatClient);
-			await deathCounter.setup(apiClient);
-		});
-
-		await chatClient.onMessage(async (channel, user, message, msg) => {
-			let userInfo = msg.userInfo;
-			const isBroadcaster = userInfo.isBroadcaster;
-			const isMod = userInfo.isMod;
-			const isVip = userInfo.isVip;
-			const isSub = userInfo.isSub;
-			const isModUp = isBroadcaster || isMod;
-			const isNotBot = user != botUsername;
-			const isNotBuhhs = user != "buhhsbot";
-
-			if (!isNotBot || !isNotBuhhs) {
-				return;
-			} else {
-				messageCount++;
-
-				if (message.startsWith("!")) {
-					let command = message.split(/\s(.+)/)[0].slice(1);
-					let argument = message.split(/\s(.+)/)[1];
-
-					const { response, details } =
-						(await commands.list[command.toLowerCase()]) || {};
-
-					if (typeof response === "function") {
-						let result = await response({
-							isBroadcaster: isBroadcaster,
-							isModUp: isModUp,
-							userInfo: userInfo,
-							argument: argument,
-						});
-
-						if (result) {
-							for (let i = 0; i < result.length; i++) {
-								chatClient.say(channel, result[i]);
-							}
-						}
-					} else if (typeof response === "string") {
-						chatClient.say(channel, response);
-					}
-				}
-			}
-		});
+		setupChatClientListeners(apiClient, chatClient);
 
 		commands.setAllTimeStreamDeaths();
 	}
@@ -150,49 +52,152 @@ async function connected() {
 	console.log(" * Connected to Twitch chat * ");
 }
 
-async function checkLive(apiClient) {
-	let streamStatus;
+async function setupChatClientListeners(apiClient, chatClient) {
+	chatClient.onRegister(async () => {
+		connected();
+		checkLive(apiClient, chatClient);
 
-	setInterval(async () => {
-		streamStatus = await isStreamLive(apiClient);
+		commands.setApiClient(apiClient);
+		commands.resetKings();
+		commands.setChatClient(chatClient);
+		redemptions.setChatClient(chatClient);
+		await deathCounter.setup(apiClient);
+	});
 
-		try {
-			if (streamStatus && !isLive) {
-				setTimedMessages();
-				isLive = true;
-			} else if (!streamStatus && isLive) {
-				clearInterval(interval);
-				loyalty.stop();
-				isLive = false;
+	await chatClient.onMessage(async (channel, user, message, msg) => {
+		// increments messageCount for each message not by the bot, or buhhsbot
+		messageCount++;
+
+		// check for messages to be ignored
+		if (shouldIgnoreMessage(user, botUsername, message)) return;
+
+		const userInfo = msg.userInfo;
+		const { isBroadcaster, isMod, isVip, isSub } = userInfo;
+		const isModUp = isBroadcaster || isMod;
+
+		// dropping the leading !, then spliting the message into command and argument, with command being the first word, and argument being the remaining words
+		let [command, argument] = message.slice(1).split(/\s(.+)/);
+
+		const { response, details } =
+			(await commands.list[command.toLowerCase()]) || {};
+
+		if (typeof response === "function") {
+			let result = await response({
+				isBroadcaster,
+				isModUp,
+				userInfo,
+				argument,
+			});
+
+			if (result) {
+				for (let i = 0; i < result.length; i++) {
+					chatClient.say(channel, result[i]);
+				}
 			}
-		} catch (error) {}
-	}, 300000);
+		} else if (typeof response === "string") {
+			chatClient.say(channel, response);
+		}
+	});
 }
 
-async function setTimedMessages() {
+function shouldIgnoreMessage(user, botUsername, message) {
+	return (
+		user === botUsername || user === "buhhsbot" || !message.startsWith("!")
+	);
+}
+
+async function checkLive(apiClient, chatClient) {
+	// Create an interval that will run every 5 minutes
+	setInterval(async () => {
+		// Check if the stream is live
+		let streamLiveFlag = await isStreamLive(apiClient);
+
+		// Check if streamLiveFlag is true and the isLive variable is false
+		if (streamLiveFlag && !isLive) {
+			// If the streamLiveFlag is tueand isLive is false, call setTimedMessages()
+			// and set isLive to true
+			setTimedMessages(chatClient);
+			isLive = true;
+		} else if (!streamLiveFlag && isLive) {
+			// If the streamLiveFlag is false and isLive is true, clear the interval,
+			// call loyalty.stop(), and set isLive to false
+			clearInterval(timedMessagesInterval);
+			loyalty.stop();
+			isLive = false;
+		}
+	}, 5 * 60 * 1000);
+}
+
+async function setTimedMessages(chatClient) {
+	// Get the timed messages
 	intervalMessages = messages.get();
 
-	interval = setInterval(async () => {
+	// Initialize the interval for sending timed messages
+	timedMessagesInterval = setInterval(() => {
 		if (messageCount >= 25) {
-			let message = getRandom(intervalMessages);
+			// Get a random timed message and remove it from the array
+			const [message] = intervalMessages.splice(
+				getRandomBetween(0, intervalMessages.length),
+				1
+			);
 
-			intervalMessages = intervalMessages.filter((e) => e !== message);
-			if (intervalMessages.length == 0) {
+			// Send the message text to the chat
+			chatClient.say(apiClient.channelId, message.text);
+
+			// Reset the message count
+			messageCount = 0;
+
+			// If the intervalMessages array is empty, get a new array of messages
+			if (intervalMessages.length === 0) {
 				intervalMessages = messages.get();
 			}
-
-			await chatClient.say(username, message.text);
-			messageCount = 0;
 		}
-	}, 600000);
+	}, 10 * 60 * 1000);
 }
 
-function getRandom(array) {
-	return array[Math.floor(Math.random() * array.length)];
+function getRandomBetween(min, max) {
+	return Math.floor(Math.random() * (max - min)) + min;
 }
 
 function messageUpdate(update) {
 	intervalMessages = update;
+}
+
+function initializeTokenData(token) {
+	return {
+		accessToken: token.accessToken,
+		refreshToken: token.refreshToken,
+		scope: token.scope,
+		expiresIn: 0,
+		obtainmentTimestamp: 0,
+	};
+}
+
+function createAuthProvider(tokenData) {
+	return new RefreshingAuthProvider(
+		{
+			clientId,
+			clientSecret,
+			onRefresh: async (newTokenData) => {
+				token.accessToken = newTokenData.accessToken;
+				token.refreshToken = newTokenData.refreshToken;
+				token.scope = newTokenData.scope;
+				token.expiresIn = newTokenData.expiresIn;
+				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
+
+				await token.save();
+			},
+		},
+		tokenData
+	);
+}
+
+function createChatClient(authProvider) {
+	return new ChatClient({
+		authProvider,
+		channels: [username],
+		requestMembershipEvents: true,
+	});
 }
 
 async function isStreamLive(apiClient) {
