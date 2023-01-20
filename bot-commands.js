@@ -18,6 +18,7 @@ const discord = require("./bot-discord");
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
 const QUOTECOOLDOWN = 30000;
+const KINGSCOOLDOWN = 5000;
 
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
@@ -209,15 +210,26 @@ const commands = {
 
 			if (config.isModUp && config.argument) {
 				let messagesList = await messages.get();
+				try {
+					let message = await Message.create({
+						text: config.argument,
+						addedBy: config.userInfo.displayName,
+					});
 
-				let message = await Message.create({
-					text: config.argument,
-					addedBy: config.userInfo.displayName,
-				});
-				messagesList.push(message);
-				messages.update(messagesList);
+					messagesList.push(message);
+					messages.update(messagesList);
 
-				result.push(["Added new message"]);
+					result.push(["Added new message"]);
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This message has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this message, and Starless should really sort this shit out."
+						);
+					}
+				}
 			} else if (!config.isModUp) {
 				result.push(["!addmessage command is for Mods only"]);
 			} else if (!config.argument) {
@@ -258,20 +270,31 @@ const commands = {
 					user = "";
 				}
 
-				await Tinder.create({
-					index: tinderIndex,
-					user: user,
-					text: message,
-					addedBy: config.userInfo.displayName,
-				});
-				result.push(["Added new Tinder bio"]);
+				try {
+					await Tinder.create({
+						index: tinderIndex,
+						user: user,
+						text: message,
+						addedBy: config.userInfo.displayName,
+					});
+					result.push(["Added new Tinder bio"]);
 
-				if (!user) {
-					result.push([
-						"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
-							tinderIndex +
-							" @USERNAME",
-					]);
+					if (!user) {
+						result.push([
+							"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
+								tinderIndex +
+								" @USERNAME",
+						]);
+					}
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This Tinder bio has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this Tinder bio, and Starless should really sort this shit out."
+						);
+					}
 				}
 			} else if (!config.isModUp) {
 				result.push(["!addTinder command is for Mods only"]);
@@ -370,24 +393,39 @@ const commands = {
 	},
 	addquote: {
 		response: async (config) => {
+			let result = [];
+
 			if (config.isModUp && config.argument) {
 				let quoteEntries = await Quote.find({});
 
 				const quoteIndex = quoteEntries.length ? getNextIndex(quoteEntries) : 1;
 
-				await Quote.create({
-					index: quoteIndex,
-					text: config.argument,
-					addedBy: config.userInfo.displayName,
-				});
-				return ["Quote added"];
+				try {
+					await Quote.create({
+						index: quoteIndex,
+						text: config.argument,
+						addedBy: config.userInfo.displayName,
+					});
+					result.push(["Quote added"]);
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This quote has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this quote, and Starless should really sort this shit out."
+						);
+					}
+				}
 			} else if (!config.isModUp) {
-				return ["!addquote command is for Mods only"];
+				result.push(["!addquote command is for Mods only"]);
 			} else if (!config.argument) {
-				return [
+				result.push([
 					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
-				];
+				]);
 			}
+
+			return result;
 		},
 		versions: [
 			{
@@ -1005,7 +1043,7 @@ const commands = {
 
 			let currentTime = new Date();
 
-			if (currentTime - kingsLastUseTime > 5000) {
+			if (currentTime - kingsLastUseTime > KINGSCOOLDOWN) {
 				kingsLastUseTime = currentTime;
 
 				// get user by userId
@@ -1046,14 +1084,24 @@ const commands = {
 								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
 							]);
 
-							if (cardDrawn.rule == "This card doesn't really have a rule") {
-								if (cardDrawn.bonusJager) {
-									audioLink = await AudioLink.findOne({ name: "jager" });
-									audio.play(audioLink);
-									result.push([
-										"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
-									]);
-								}
+							if (cardDrawn.bonusJager) {
+								audioLink = await AudioLink.findOne({ name: "jager" });
+								audio.play(audioLink);
+								result.push([
+									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
+								]);
+							}
+
+							if (cardDrawn.value == "Queen") {
+								audioLink = await AudioLink.findOne({
+									name: "Check out the big brain Brad",
+								});
+								audio.play(audioLink);
+							} else if (cardDrawn.value == "Ace") {
+								audioLink = await AudioLink.findOne({
+									name: "The Greater Good",
+								});
+								audio.play(audioLink);
 							}
 						} else {
 							result.push([

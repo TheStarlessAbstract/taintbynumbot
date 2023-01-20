@@ -1,7 +1,7 @@
 let mongoose = require("mongoose"),
 	Schema = mongoose.Schema;
 
-let QuoteSchema = new Schema({
+let TempTinderSchema = new Schema({
 	index: {
 		type: Number,
 	},
@@ -9,7 +9,8 @@ let QuoteSchema = new Schema({
 		type: String,
 		unique: true,
 	},
+	user: String,
 	addedBy: String,
 });
 
-module.exports = mongoose.model("Quote", QuoteSchema);
+module.exports = mongoose.model("TempTinder", TempTinderSchema);
