@@ -80,6 +80,11 @@ function chatInterval() {
 	}, 300000);
 }
 
+module.exports = { DoesUserExist };
+function DoesUserExist() {
+	return 1;
+}
+
 async function createUser(array) {
 	// if broadcaster ignore, remove from array earlier
 	let newUser;
