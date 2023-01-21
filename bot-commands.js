@@ -18,6 +18,7 @@ const discord = require("./bot-discord");
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
 const QUOTECOOLDOWN = 30000;
+const KINGSCOOLDOWN = 5000;
 
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
@@ -209,15 +210,26 @@ const commands = {
 
 			if (config.isModUp && config.argument) {
 				let messagesList = await messages.get();
+				try {
+					let message = await Message.create({
+						text: config.argument,
+						addedBy: config.userInfo.displayName,
+					});
 
-				let message = await Message.create({
-					text: config.argument,
-					addedBy: config.userInfo.displayName,
-				});
-				messagesList.push(message);
-				messages.update(messagesList);
+					messagesList.push(message);
+					messages.update(messagesList);
 
-				result.push(["Added new message"]);
+					result.push(["Added new message"]);
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This message has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this message, and Starless should really sort this shit out."
+						);
+					}
+				}
 			} else if (!config.isModUp) {
 				result.push(["!addmessage command is for Mods only"]);
 			} else if (!config.argument) {
@@ -258,20 +270,31 @@ const commands = {
 					user = "";
 				}
 
-				await Tinder.create({
-					index: tinderIndex,
-					user: user,
-					text: message,
-					addedBy: config.userInfo.displayName,
-				});
-				result.push(["Added new Tinder bio"]);
+				try {
+					await Tinder.create({
+						index: tinderIndex,
+						user: user,
+						text: message,
+						addedBy: config.userInfo.displayName,
+					});
+					result.push(["Added new Tinder bio"]);
 
-				if (!user) {
-					result.push([
-						"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
-							tinderIndex +
-							" @USERNAME",
-					]);
+					if (!user) {
+						result.push([
+							"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
+								tinderIndex +
+								" @USERNAME",
+						]);
+					}
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This Tinder bio has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this Tinder bio, and Starless should really sort this shit out."
+						);
+					}
 				}
 			} else if (!config.isModUp) {
 				result.push(["!addTinder command is for Mods only"]);
@@ -370,24 +393,39 @@ const commands = {
 	},
 	addquote: {
 		response: async (config) => {
+			let result = [];
+
 			if (config.isModUp && config.argument) {
 				let quoteEntries = await Quote.find({});
 
 				const quoteIndex = quoteEntries.length ? getNextIndex(quoteEntries) : 1;
 
-				await Quote.create({
-					index: quoteIndex,
-					text: config.argument,
-					addedBy: config.userInfo.displayName,
-				});
-				return ["Quote added"];
+				try {
+					await Quote.create({
+						index: quoteIndex,
+						text: config.argument,
+						addedBy: config.userInfo.displayName,
+					});
+					result.push(["Quote added"]);
+				} catch (err) {
+					if (err.code == 11000) {
+						result.push("This quote has already been added");
+					} else {
+						console.log(err);
+						result.push(
+							"There was some problem adding this quote, and Starless should really sort this shit out."
+						);
+					}
+				}
 			} else if (!config.isModUp) {
-				return ["!addquote command is for Mods only"];
+				result.push(["!addquote command is for Mods only"]);
 			} else if (!config.argument) {
-				return [
+				result.push([
 					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
-				];
+				]);
 			}
+
+			return result;
 		},
 		versions: [
 			{
@@ -497,6 +535,43 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
+	deaths: {
+		response: async (config) => {
+			let result = [];
+
+			try {
+				let channel = await apiClient.channels.getChannelInfoById(twitchId);
+
+				let deathCounters = await DeathCounter.find({
+					gameTitle: channel.gameName,
+				});
+
+				let gameDeaths = deathCounters.reduce(
+					(total, counter) => total + counter.deaths,
+					0
+				);
+
+				result.push(
+					"Starless has died a grand total of " +
+						gameDeaths +
+						" times, while ✨playing✨ " +
+						channel.gameName
+				);
+			} catch (err) {
+				result.push(
+					"Twitch isn't being very helpful right now, try again later"
+				);
+			}
+			return result;
+		},
+		versions: [
+			{
+				description: "Gets total deaths for current game",
+				usage: "!deaths",
+				usableBy: "users",
+			},
+		],
+	},
 	delcomm: {
 		response: async (config) => {
 			let result = [];
@@ -792,11 +867,6 @@ const commands = {
 							streamStartDate: streamDate,
 						}).exec();
 
-						// This function checks if there is currently a stored gameStreamDeaths object
-						// if the gameTitle, and streamStartDate match with the current stream, then that object is passed back as gameStreamDeaths
-						// if the gameTitle or streamStartDate don't match, then the deathCounters array is seatched to find an object with that gameTitle
-						// if the game is found, is is passed back as gameDeathCounter
-						// if the game is not found, a new DeathCounter is created, using createDeathCounter, passing in the gameName, and streamDate
 						gameStreamDeaths = await getDeathCounter(
 							gameName,
 							streamDate,
@@ -1005,7 +1075,7 @@ const commands = {
 
 			let currentTime = new Date();
 
-			if (currentTime - kingsLastUseTime > 5000) {
+			if (currentTime - kingsLastUseTime > KINGSCOOLDOWN) {
 				kingsLastUseTime = currentTime;
 
 				// get user by userId
@@ -1046,14 +1116,19 @@ const commands = {
 								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
 							]);
 
-							if (cardDrawn.rule == "This card doesn't really have a rule") {
-								if (cardDrawn.bonusJager) {
-									audioLink = await AudioLink.findOne({ name: "jager" });
-									audio.play(audioLink);
-									result.push([
-										"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
-									]);
-								}
+							if (cardDrawn.bonusJager) {
+								playAudio("jager");
+								result.push([
+									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
+								]);
+							}
+
+							switch (cardDrawn.value) {
+								case "Queen":
+									playAudio("Check out the big brain Brad");
+									break;
+								case "Ace":
+									playAudio("The Greater Good");
 							}
 						} else {
 							result.push([
@@ -1598,14 +1673,10 @@ function getRandomBetweenInclusiveMax(min, max) {
 }
 
 function getCommands() {
-	// Create the commandList array using the Array.map() method
 	const commandList = Object.entries(commands).map(([key, value]) => {
-		// Use a ternary operator to check for the existence of the versions property
 		return value.versions
-			? // If the versions property exists, return an object with the command name and versions
-			  { name: key, versions: value.versions }
-			: // If the versions property does not exist, return an object with the command name and default version information
-			  {
+			? { name: key, versions: value.versions }
+			: {
 					name: key,
 					versions: [
 						{
@@ -1796,13 +1867,14 @@ const getDeathCounter = async (
 	let gameDeathCounter;
 
 	if (
-		gameStreamDeaths.gameTitle === gameName &&
+		gameStreamDeaths?.gameTitle === gameName &&
 		gameStreamDeaths.streamStartDate === streamDate
 	) {
 		gameDeathCounter = gameStreamDeaths;
 	} else {
-		gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
-
+		if (deathCounters) {
+			gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
+		}
 		if (!gameDeathCounter) {
 			gameDeathCounter = createDeathCounter(gameName, streamDate);
 		}
@@ -1810,6 +1882,25 @@ const getDeathCounter = async (
 
 	return gameDeathCounter;
 };
+
+function getPlurality(value, singular, plural) {
+	let result;
+
+	if (value > 1) {
+		result = plural;
+	} else {
+		result = singular;
+	}
+
+	return result;
+}
+
+async function playAudio(audioName) {
+	audioLink = await AudioLink.findOne({
+		name: audioName,
+	});
+	audio.play(audioLink);
+}
 
 // Restore the game state from the given save state.
 function restoreGameState(gameState) {

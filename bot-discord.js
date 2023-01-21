@@ -7,6 +7,8 @@ const commands = require("./bot-commands");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+const discordChannelId = process.env.DISCORD_CHANNEL;
+
 client.commands = new Collection();
 
 // When the client is ready, run this code (only once)
@@ -18,7 +20,7 @@ client.once(Events.ClientReady, (c) => {
 client.login(token);
 
 async function setup() {
-	const channel = client.channels.cache.get("1043599646724980816");
+	const channel = client.channels.cache.get(discordChannelId);
 
 	let twitchCommands = [];
 
@@ -86,7 +88,7 @@ function createCommands() {
 }
 
 async function updateCommands(action, updateCommand) {
-	const channel = client.channels.cache.get("1043599646724980816");
+	const channel = client.channels.cache.get(discordChannelId);
 	let twitchCommands = [];
 	let contentLine = "";
 

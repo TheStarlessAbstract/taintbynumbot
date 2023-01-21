@@ -5,7 +5,10 @@ let TinderSchema = new Schema({
 	index: {
 		type: Number,
 	},
-	text: String,
+	text: {
+		type: String,
+		unique: true,
+	},
 	user: String,
 	addedBy: String,
 });
