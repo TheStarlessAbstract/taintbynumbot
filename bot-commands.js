@@ -1122,7 +1122,6 @@ const commands = {
 									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
 								]);
 							}
-							playAudio("The Greater Good");
 
 							switch (cardDrawn.value) {
 								case "Queen":
