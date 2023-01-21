@@ -1391,22 +1391,25 @@ const commands = {
 			let result = [];
 			let quoteEntries = [];
 			let quote;
-			let reject;
+			let index;
 
-			if (
-				!tinderTimer ||
-				(tinderTimer && time.getTime() >= tinderTimer + TINDERCOOLDOWN)
-			) {
+			let currentTime = new Date();
+
+			if (currentTime - tinderTimer > TINDERCOOLDOWN) {
 				tinderTimer = time.getTime();
 
 				if (!config.argument) {
+					// get all Tinder bios
 					quoteEntries = await Tinder.find({});
 				} else {
 					if (!isNaN(config.argument)) {
+						// find the Tinder bio with this index
 						quote = await Tinder.findOne({ index: config.argument });
-						if (!quote) {
+						if (quote) {
+							quoteEntries.push(quote);
 						}
 					} else {
+						// find all Tinder bios that contain config.argument
 						quoteEntries = await Tinder.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
@@ -1414,25 +1417,23 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
-				} else if (isNaN(config.argument)) {
-					reject = "No Tinder bio found mentioning: " + config.argument;
-				} else if (!config.argument) {
-					reject = "Nobody has ever created Tinder bio for Starless";
-				}
+					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
 
-				if (quote) {
-					result.push(quote.index + `. ` + quote.text);
-					if (quote.user != "") {
+					result.push(
+						quoteEntries[index].index + `. ` + quoteEntries[index].text
+					);
+
+					if (quoteEntries[index].user != "") {
 						result.push(
-							`This Tinder bio was brought to you by the glorious, and taint-filled @${quote.user}`
+							`This Tinder bio was brought to you by the glorious, and taint-filled @${quoteEntries[index].user}`
 						);
 					}
-				} else {
-					if (!isNaN(config.argument)) {
-						reject = "There is no Tinder bio number " + config.argument;
-					}
-					result.push(reject);
+				} else if (isNaN(config.argument)) {
+					result.push("No Tinder bio found mentioning: " + config.argument);
+				} else if (!config.argument) {
+					result.push("Nobody has ever created Tinder bio for Starless");
+				} else if (!isNaN(config.argument)) {
+					result.push("There is no Tinder bio number " + config.argument);
 				}
 			}
 
@@ -1463,22 +1464,25 @@ const commands = {
 			let result = [];
 			let quoteEntries = [];
 			let quote;
-			let reject;
+			let index;
 
-			if (
-				!titleTimer ||
-				(titleTimer && time.getTime() >= titleTimer + TITLECOOLDOWN)
-			) {
+			let currentTime = new Date();
+
+			if (currentTime - titleTimer > TITLECOOLDOWN) {
 				titleTimer = time.getTime();
 
 				if (!config.argument) {
+					// get all titles
 					quoteEntries = await Title.find({});
 				} else {
 					if (!isNaN(config.argument)) {
+						// find the title with this index
 						quote = await Title.findOne({ index: config.argument });
-						if (!quote) {
+						if (quote) {
+							quoteEntries.push(quote);
 						}
 					} else {
+						// find all title that contain config.argument
 						quoteEntries = await Title.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
@@ -1486,29 +1490,27 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
-				} else if (isNaN(config.argument)) {
-					reject = "No Title found mentioning: " + config.argument;
-				} else if (!config.argument) {
-					reject =
-						"The mods don't seem to have been very abusive lately...with titles";
-				}
+					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
 
-				if (quote) {
-					result.push(quote.index + `. ` + quote.text);
+					result.push(
+						quoteEntries[index].index + `. ` + quoteEntries[index].text
+					);
+
 					if (quote.user != "") {
 						result.push(
-							`This possible streamer harassment was brought to you by the glorious, and taint-filled @${quote.user}`
+							`This possible streamer harassment was brought to you by the glorious, and taint-filled @${quoteEntries[index].user}`
 						);
 					}
-				} else {
-					if (!isNaN(config.argument)) {
-						reject = "There is no title number " + config.argument;
-					}
-					result.push(reject);
+				} else if (isNaN(config.argument)) {
+					result.push("No Title found mentioning: " + config.argument);
+				} else if (!config.argument) {
+					result.push(
+						"The mods don't seem to have been very abusive lately...with titles"
+					);
+				} else if (!isNaN(config.argument)) {
+					result.push("There is no title number " + config.argument);
 				}
 			}
-
 			return result;
 		},
 		versions: [
@@ -1536,7 +1538,6 @@ const commands = {
 			let result = [];
 			let quoteEntries = [];
 			let quote;
-			let reject;
 			let index;
 
 			let currentTime = new Date();
@@ -1545,13 +1546,17 @@ const commands = {
 				quoteTimer = time.getTime();
 
 				if (!config.argument) {
+					// get all quotes
 					quoteEntries = await Quote.find({});
 				} else {
 					if (!isNaN(config.argument)) {
+						// find the quote with this index
 						quote = await Quote.findOne({ index: config.argument });
-						if (!quote) {
+						if (quote) {
+							quoteEntries.push(quote);
 						}
 					} else {
+						// find all quotes that contain config.argument
 						quoteEntries = await Quote.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
@@ -1567,10 +1572,8 @@ const commands = {
 				} else if (isNaN(config.argument)) {
 					result.push("No Starless quote found mentioning: " + config.argument);
 				} else if (!config.argument) {
-					result.push("Starless has never said anything of note0");
-				}
-
-				if (!isNaN(config.argument)) {
+					result.push("Starless has never said anything of note");
+				} else if (!isNaN(config.argument)) {
 					result.push("There is no Starless quote number " + config.argument);
 				}
 			}
