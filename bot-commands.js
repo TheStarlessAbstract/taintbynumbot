@@ -535,11 +535,15 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
-	// deaths: {
-	// 	response: async (config) => {
-	// 		let result = [];
-	// 	},
-	// },
+	deaths: {
+		response: async (config) => {
+			let result = [];
+
+			try {
+				let stream = await apiClient.streams.getStreamByUserId(twitchId);
+			} catch (err) {}
+		},
+	},
 	delcomm: {
 		response: async (config) => {
 			let result = [];
@@ -835,11 +839,6 @@ const commands = {
 							streamStartDate: streamDate,
 						}).exec();
 
-						// This function checks if there is currently a stored gameStreamDeaths object
-						// if the gameTitle, and streamStartDate match with the current stream, then that object is passed back as gameStreamDeaths
-						// if the gameTitle or streamStartDate don't match, then the deathCounters array is seatched to find an object with that gameTitle
-						// if the game is found, is is passed back as gameDeathCounter
-						// if the game is not found, a new DeathCounter is created, using createDeathCounter, passing in the gameName, and streamDate
 						gameStreamDeaths = await getDeathCounter(
 							gameName,
 							streamDate,
