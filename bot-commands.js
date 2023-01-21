@@ -17,7 +17,7 @@ const discord = require("./bot-discord");
 
 const TINDERCOOLDOWN = 30000;
 const TITLECOOLDOWN = 30000;
-const QUOTECOOLDOWN = 30000;
+const QUOTECOOLDOWN = 0;
 const KINGSCOOLDOWN = 5000;
 
 let twitchId = process.env.TWITCH_USER_ID;
@@ -1537,11 +1537,11 @@ const commands = {
 			let quoteEntries = [];
 			let quote;
 			let reject;
+			let index;
 
-			if (
-				!quoteTimer ||
-				(quoteTimer && time.getTime() >= quoteTimer + QUOTECOOLDOWN)
-			) {
+			let currentTime = new Date();
+
+			if (currentTime - quoteTimer > QUOTECOOLDOWN) {
 				quoteTimer = time.getTime();
 
 				if (!config.argument) {
@@ -1559,20 +1559,19 @@ const commands = {
 				}
 
 				if (quoteEntries.length > 0) {
-					quote = getRandomBetweenExclusiveMax(0, quoteEntries.length);
+					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
+
+					result.push(
+						quoteEntries[index].index + `. ` + quoteEntries[index].text
+					);
 				} else if (isNaN(config.argument)) {
-					reject = "No Starless quote found mentioning: " + config.argument;
+					result.push("No Starless quote found mentioning: " + config.argument);
 				} else if (!config.argument) {
-					reject = "Starless has never said anything of note";
+					result.push("Starless has never said anything of note0");
 				}
 
-				if (quote) {
-					result.push(quote.index + `. ` + quote.text);
-				} else {
-					if (!isNaN(config.argument)) {
-						reject = "There is no Starless quote number " + config.argument;
-					}
-					result.push(reject);
+				if (!isNaN(config.argument)) {
+					result.push("There is no Starless quote number " + config.argument);
 				}
 			}
 			return result;
@@ -1636,6 +1635,7 @@ async function setup() {
 	}
 
 	const currentDateTime = new Date();
+	quoteTimer = currentDateTime;
 	fLastUseTime = currentDateTime;
 	chugLastUseTime = currentDateTime;
 	kingsLastUseTime = currentDateTime;
