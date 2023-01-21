@@ -22,6 +22,7 @@ let timedMessagesInterval;
 let intervalMessages;
 let isLive = false;
 let messageCount = 0;
+let tempchannel;
 
 async function setup() {
 	// Initialize the commands and messages modules
@@ -65,6 +66,7 @@ async function setupChatClientListeners(apiClient, chatClient) {
 	});
 
 	await chatClient.onMessage(async (channel, user, message, msg) => {
+		tempchannel = this.channel;
 		// increments messageCount for each message not by the bot, or buhhsbot
 		messageCount++;
 
@@ -133,7 +135,7 @@ async function setTimedMessages(chatClient) {
 	intervalMessages = messages.get();
 
 	// Initialize the interval for sending timed messages
-	timedMessagesInterval = setInterval(() => {
+	timedMessagesInterval = setInterval(async () => {
 		if (messageCount >= 25) {
 			// Get a random timed message and remove it from the array
 			const [message] = intervalMessages.splice(
@@ -142,7 +144,7 @@ async function setTimedMessages(chatClient) {
 			);
 
 			// Send the message text to the chat
-			chatClient.say(apiClient.channelId, message.text);
+			chatClient.say(tempchannel, message.text);
 
 			// Reset the message count
 			messageCount = 0;
