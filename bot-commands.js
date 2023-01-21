@@ -540,9 +540,37 @@ const commands = {
 			let result = [];
 
 			try {
-				let stream = await apiClient.streams.getStreamByUserId(twitchId);
-			} catch (err) {}
+				let channel = await apiClient.channels.getChannelInfoById(twitchId);
+
+				let deathCounters = await DeathCounter.find({
+					gameTitle: channel.gameName,
+				});
+
+				let gameDeaths = deathCounters.reduce(
+					(total, counter) => total + counter.deaths,
+					0
+				);
+
+				result.push(
+					"Starless has died a grand total of " +
+						gameDeaths +
+						" times, while ✨playing✨ " +
+						channel.gameName
+				);
+			} catch (err) {
+				result.push(
+					"Twitch isn't being very helpful right now, try again later"
+				);
+			}
+			return result;
 		},
+		versions: [
+			{
+				description: "Gets total deaths for current game",
+				usage: "!deaths",
+				usableBy: "users",
+			},
+		],
 	},
 	delcomm: {
 		response: async (config) => {
@@ -1839,13 +1867,14 @@ const getDeathCounter = async (
 	let gameDeathCounter;
 
 	if (
-		gameStreamDeaths.gameTitle === gameName &&
+		gameStreamDeaths?.gameTitle === gameName &&
 		gameStreamDeaths.streamStartDate === streamDate
 	) {
 		gameDeathCounter = gameStreamDeaths;
 	} else {
-		gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
-
+		if (deathCounters) {
+			gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
+		}
 		if (!gameDeathCounter) {
 			gameDeathCounter = createDeathCounter(gameName, streamDate);
 		}
@@ -1853,6 +1882,18 @@ const getDeathCounter = async (
 
 	return gameDeathCounter;
 };
+
+function getPlurality(value, singular, plural) {
+	let result;
+
+	if (value > 1) {
+		result = plural;
+	} else {
+		result = singular;
+	}
+
+	return result;
+}
 
 async function playAudio(audioName) {
 	audioLink = await AudioLink.findOne({
