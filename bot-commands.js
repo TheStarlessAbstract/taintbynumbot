@@ -535,6 +535,11 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
+	// deaths: {
+	// 	response: async (config) => {
+	// 		let result = [];
+	// 	},
+	// },
 	delcomm: {
 		response: async (config) => {
 			let result = [];
@@ -1085,23 +1090,18 @@ const commands = {
 							]);
 
 							if (cardDrawn.bonusJager) {
-								audioLink = await AudioLink.findOne({ name: "jager" });
-								audio.play(audioLink);
+								playAudio("jager");
 								result.push([
 									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
 								]);
 							}
 
-							if (cardDrawn.value == "Queen") {
-								audioLink = await AudioLink.findOne({
-									name: "Check out the big brain Brad",
-								});
-								audio.play(audioLink);
-							} else if (cardDrawn.value == "Ace") {
-								audioLink = await AudioLink.findOne({
-									name: "The Greater Good",
-								});
-								audio.play(audioLink);
+							switch (cardDrawn.value) {
+								case "Queen":
+									playAudio("Check out the big brain Brad");
+									break;
+								case "Ace":
+									playAudio("The Greater Good");
 							}
 						} else {
 							result.push([
@@ -1646,14 +1646,10 @@ function getRandomBetweenInclusiveMax(min, max) {
 }
 
 function getCommands() {
-	// Create the commandList array using the Array.map() method
 	const commandList = Object.entries(commands).map(([key, value]) => {
-		// Use a ternary operator to check for the existence of the versions property
 		return value.versions
-			? // If the versions property exists, return an object with the command name and versions
-			  { name: key, versions: value.versions }
-			: // If the versions property does not exist, return an object with the command name and default version information
-			  {
+			? { name: key, versions: value.versions }
+			: {
 					name: key,
 					versions: [
 						{
@@ -1858,6 +1854,13 @@ const getDeathCounter = async (
 
 	return gameDeathCounter;
 };
+
+async function playAudio(audioName) {
+	audioLink = await AudioLink.findOne({
+		name: audioName,
+	});
+	audio.play(audioLink);
+}
 
 // Restore the game state from the given save state.
 function restoreGameState(gameState) {
