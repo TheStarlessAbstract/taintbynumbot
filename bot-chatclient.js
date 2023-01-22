@@ -66,7 +66,6 @@ async function setupChatClientListeners(apiClient, chatClient) {
 	});
 
 	await chatClient.onMessage(async (channel, user, message, msg) => {
-		tempchannel = this.channel;
 		// increments messageCount for each message not by the bot, or buhhsbot
 		messageCount++;
 
@@ -144,7 +143,7 @@ async function setTimedMessages(chatClient) {
 			);
 
 			// Send the message text to the chat
-			chatClient.say(tempchannel, message.text);
+			chatClient.say("#" + username, message.text);
 
 			// Reset the message count
 			messageCount = 0;
