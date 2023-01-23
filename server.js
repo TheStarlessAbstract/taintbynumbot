@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
-const fs = require("fs").promises;
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
@@ -10,6 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const serverIo = require("./server-io");
+// const serverPubNub = require("./server-pubnub");
 
 const port = process.env.PORT || 5000;
 const uri = process.env.MONGO_URI;
@@ -42,6 +42,12 @@ app.get("/auth", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-auth.html");
 });
 
+// // http://localhost:5000/disable:sdasds&dassad&fdasdsfaad
+// app.get("/command", (req, res) => {
+// 	serverPubNub.publish("Dazed sucks");
+// 	res.sendStatus(200);
+// });
+
 app.post("/playaudio", (req, res) => {
 	serverIo.playAudio(req.body.url);
 	res.sendStatus(201);
@@ -70,12 +76,6 @@ server.listen(port, () => {
 init();
 
 async function init() {
-	try {
-		await fs.mkdir("./files", { recursive: false }, (err) => {
-			if (err) throw err;
-		});
-	} catch (err) {}
-
 	serverIo.setup(io);
 }
 

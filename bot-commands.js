@@ -658,11 +658,8 @@ const commands = {
 
 				drinkBitchLastUseTime = currentTime;
 
-				audio.play(
-					drinkBitchAudioLinks[
-						getRandomBetweenExclusiveMax(0, drinkBitchAudioLinks.length)
-					]
-				);
+				audioLink = getRandomisedAudioFileUrl(drinkBitchAudioLinks);
+				audio.play(audioLink);
 
 				result.push("@TheStarlessAbstract drink, bitch!");
 				user.points -= pointsRequired;
@@ -676,11 +673,8 @@ const commands = {
 					);
 				} else if (error == "Not enough points") {
 					if (getRandomBetweenInclusiveMax(1, 100) == 100) {
-						audio.play(
-							drinkBitchAudioLinks[
-								getRandomBetweenExclusiveMax(0, drinkBitchAudioLinks.length)
-							]
-						);
+						audioLink = getRandomisedAudioFileUrl(drinkBitchAudioLinks);
+						audio.play(audioLink);
 
 						result.push(
 							"@" +
@@ -899,10 +893,14 @@ const commands = {
 							0
 						);
 
-						audioLink =
-							gameDeaths == 666
-								? await AudioLink.findOne({ name: "666" })
-								: getRandomBetweenExclusiveMax(0, deathAudioLinks.length);
+						let audioLink;
+
+						if (gameDeaths == 666) {
+							audioLink = await AudioLink.findOne({ name: "666" });
+							audioLink = audioLink?.url;
+						} else {
+							audioLink = getRandomisedAudioFileUrl(deathAudioLinks);
+						}
 
 						audio.play(audioLink);
 
@@ -1079,7 +1077,7 @@ const commands = {
 				kingsLastUseTime = currentTime;
 
 				// get user by userId
-				user = await LoyaltyPoint.findOne({
+				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
 				});
 
@@ -1898,11 +1896,18 @@ function getPlurality(value, singular, plural) {
 	return result;
 }
 
+function getRandomisedAudioFileUrl(audioLinkArray) {
+	let index = getRandomBetweenExclusiveMax(0, audioLinkArray.length);
+	let audioUrl = audioLinkArray[index].url;
+
+	return audioUrl;
+}
+
 async function playAudio(audioName) {
-	audioLink = await AudioLink.findOne({
+	let audioObject = await AudioLink.findOne({
 		name: audioName,
 	});
-	audio.play(audioLink);
+	audio.play(audioObject.url);
 }
 
 // Restore the game state from the given save state.

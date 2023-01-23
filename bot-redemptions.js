@@ -32,7 +32,7 @@ async function setup(pubSubClient, userId) {
 		);
 
 		if (audioLink) {
-			audio.play(audioLink);
+			audio.play(audioLink.url);
 		} else if (message.rewardTitle.includes("Higher or Lower")) {
 			let latestPredictions = await apiClient.predictions
 				.getPredictionsPaginated(twitchId)

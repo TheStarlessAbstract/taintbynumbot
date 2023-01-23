@@ -134,9 +134,9 @@ function getRandomBetween(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function playAudio(url) {
+function playAudio(audioLink) {
 	if (lastPlayFinished) {
-		io.emit("playAudio", url);
+		io.emit("playAudio", audioLink);
 		lastPlayFinished = false;
 	}
 }
