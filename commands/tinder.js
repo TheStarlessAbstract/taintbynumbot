@@ -7,20 +7,19 @@ const getCommand = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let entries = [];
-			let index;
-			let quote;
-
 			let currentTime = new Date();
 
 			if (currentTime - timer > COOLDOWN) {
-				tinderTimer = currentTime.getTime();
+				let entries = [];
+				let index;
+				timer = currentTime;
 
 				if (!config.argument) {
 					entries = await Tinder.find({});
 				} else {
 					if (!isNaN(config.argument)) {
-						quote = await Tinder.findOne({ index: config.argument });
+						let quote = await Tinder.findOne({ index: config.argument });
+
 						if (quote) {
 							entries.push(quote);
 						}
@@ -33,7 +32,6 @@ const getCommand = () => {
 
 				if (entries.length > 0) {
 					index = getRandomBetweenExclusiveMax(0, entries.length);
-
 					result.push(entries[index].index + `. ` + entries[index].text);
 
 					if (entries[index].user != "") {

@@ -7,14 +7,13 @@ const getCommand = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let entries = [];
-			let index;
-			let quote;
-
 			let currentTime = new Date();
 
-			if (currentTime - titleTimer > COOLDOWN) {
-				titleTimer = currentTime.getTime();
+			if (currentTime - timer > COOLDOWN) {
+				let entries = [];
+				let index;
+				let quote;
+				timer = currentTime;
 
 				if (!config.argument) {
 					entries = await Title.find({});
@@ -33,7 +32,6 @@ const getCommand = () => {
 
 				if (entries.length > 0) {
 					index = getRandomBetweenExclusiveMax(0, entries.length);
-
 					result.push(entries[index].index + `. ` + entries[index].text);
 					if (quote.user != "") {
 						result.push(

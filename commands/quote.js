@@ -7,19 +7,18 @@ const getCommand = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let entries = [];
-			let index;
-			let quote;
-
 			let currentTime = new Date();
 
 			if (currentTime - timer > COOLDOWN) {
-				timer = currentTime.getTime();
+				let entries = [];
+				let index;
+				timer = currentTime;
 
 				if (!config.argument) {
 					entries = await Quote.find({});
 				} else {
 					if (!isNaN(config.argument)) {
+						let quote;
 						quote = await Quote.findOne({ index: config.argument });
 						if (quote) {
 							entries.push(quote);
@@ -33,7 +32,6 @@ const getCommand = () => {
 
 				if (entries.length > 0) {
 					index = getRandomBetweenExclusiveMax(0, entries.length);
-
 					result.push(entries[index].index + `. ` + entries[index].text);
 				} else if (isNaN(config.argument)) {
 					result.push("No Starless quote found mentioning: " + config.argument);

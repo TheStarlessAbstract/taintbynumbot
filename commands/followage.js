@@ -5,7 +5,7 @@ const getCommand = () => {
 		response: async (config) => {
 			let result = [];
 
-			let apiClient = chatClient.getApiClient();
+			const apiClient = chatClient.getApiClient();
 			const follow = await apiClient.users.getFollowFromUserToBroadcaster(
 				config.userInfo.userId,
 				twitchId

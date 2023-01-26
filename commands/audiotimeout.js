@@ -6,7 +6,6 @@ const getCommand = () => {
 			let result = [];
 
 			if (config.isModUp) {
-				// check if argument is a positive number
 				if (!isNaN(config.argument) && config.argument > 0) {
 					audio.setAudioTimeout(config.argument);
 					result.push([
@@ -14,8 +13,7 @@ const getCommand = () => {
 							config.argument +
 							" seconds",
 					]);
-				} // check if argument is a negative number
-				else if (!isNaN(config.argument) && config.argument < 1) {
+				} else if (!isNaN(config.argument) && config.argument < 1) {
 					result.push([
 						"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10",
 					]);

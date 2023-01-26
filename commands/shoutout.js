@@ -17,7 +17,6 @@ const getCommand = () => {
 					}
 
 					let apiClient = chatClient.getApiClient();
-
 					user = await apiClient.users.getUserByName(username);
 
 					if (!user) {

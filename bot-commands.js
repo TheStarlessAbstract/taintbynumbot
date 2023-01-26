@@ -1,47 +1,35 @@
-const axios = require("axios");
-
 const AudioLink = require("./models/audiolink");
 const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
 const Deck = require("./models/deck");
 const KingsSaveState = require("./models/kingssavestate");
-const LoyaltyPoint = require("./models/loyaltypoint");
 const Message = require("./models/message");
-const Quote = require("./models/quote");
-const Tinder = require("./models/tinder");
-const Title = require("./models/title");
 
 const audio = require("./bot-audio");
 const messages = require("./bot-messages");
 const discord = require("./bot-discord");
 
-const audiotimeout = require("./commands/audiotimeout");
+const audioTimeout = require("./commands/audiotimeout");
 const buhhs = require("./commands/buhhs");
+const deaths = require("./commands/deaths");
+const drinkBitch = require("./commands/drinkbitch");
+const f = require("./commands/f");
 const followage = require("./commands/followage");
+const kings = require("./commands/kings");
 const lurk = require("./commands/lurk");
+const points = require("./commands/points");
+const quoteAdd = require("./commands/quote-add");
 const quote = require("./commands/quote");
 const shoutout = require("./commands/shoutout");
+const tinderAdd = require("./commands/tinder-add");
+const tinderEditAuthor = require("./commands/tinder-editauthor");
 const tinder = require("./commands/tinder");
+const titleAdd = require("./commands/title-add");
 const title = require("./commands/title");
 
-const KINGSCOOLDOWN = 5000;
-
-let twitchId = process.env.TWITCH_USER_ID;
-let url = process.env.BOT_DOMAIN;
-
-let audioLink;
-let deathAudioLinks;
-let drinkBitchAudioLinks;
-let allTimeStreamDeaths = 0;
 let apiClient;
-let gameStreamDeaths;
-let totalStreamDeaths = 0;
 let chatCommands;
-let fLastUseTime = "";
-let drinkBitchLastUseTime = "";
-let kingsLastUseTime = "";
 let kingsRemainLastUseTime = "";
-let pointsLastUseTime = "";
 let chugLastUseTime = "";
 let deck;
 let cardsToDraw;
@@ -249,194 +237,10 @@ const commands = {
 			},
 		],
 	},
-	addtinder: {
-		response: async (config) => {
-			let message;
-			let user;
-			let result = [];
-
-			if (config.isModUp && config.argument) {
-				let tinderEntries = await Tinder.find({});
-
-				const tinderIndex = tinderEntries.length
-					? getNextIndex(tinderEntries)
-					: 1;
-
-				if (config.argument.includes("@")) {
-					config.argument = config.argument.split("@");
-					message = config.argument[0];
-					user = config.argument[1];
-				} else {
-					message = config.argument;
-					user = "";
-				}
-
-				try {
-					await Tinder.create({
-						index: tinderIndex,
-						user: user,
-						text: message,
-						addedBy: config.userInfo.displayName,
-					});
-					result.push(["Added new Tinder bio"]);
-
-					if (!user) {
-						result.push([
-							"To add the name of the author of this Tinder bio, use the command: !edittinderauthor " +
-								tinderIndex +
-								" @USERNAME",
-						]);
-					}
-				} catch (err) {
-					if (err.code == 11000) {
-						result.push("This Tinder bio has already been added");
-					} else {
-						console.log(err);
-						result.push(
-							"There was some problem adding this Tinder bio, and Starless should really sort this shit out."
-						);
-					}
-				}
-			} else if (!config.isModUp) {
-				result.push(["!addTinder command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To add a Tinder quote, you must include the quote after the command: '!addtinder Never mind about carpe diem, carpe taint @design_by_rose'",
-				]);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description: "To save Starless' new Tinder bio",
-				usage:
-					"!addtinder As long as my face is around, you will always have some place to sit",
-				usableBy: "mods",
-			},
-		],
-	},
-	addtitle: {
-		response: async (config) => {
-			let message;
-			let user;
-			let result = [];
-			let created;
-
-			if (config.isModUp) {
-				let titleEntries = await Title.find({});
-
-				const titleIndex = titleEntries.length ? getNextIndex(titleEntries) : 1;
-
-				if (!config.argument) {
-					try {
-						let channel = await apiClient.channels.getChannelInfo(twitchId);
-
-						if (channel == null) {
-							result.push(
-								"Twitch says no, and Starless should really sort this out some time after stream"
-							);
-						} else {
-							message = channel.title;
-						}
-					} catch (err) {
-						result.push(
-							"Twitch says no, and Starless should really sort this out some time after stream"
-						);
-					}
-				} else if (config.argument) {
-					if (config.argument.includes("@")) {
-						config.argument = config.argument.split("@");
-						message = config.argument[0];
-						user = config.argument[1];
-					} else {
-						message = config.argument;
-					}
-				}
-				if (result.length == 0) {
-					try {
-						created = await Title.create({
-							index: titleIndex,
-							text: message,
-							user: user,
-							addedBy: config.userInfo.displayName,
-						});
-
-						if (created._id) {
-							result.push("Title added");
-						}
-					} catch (err) {
-						if (err.code == 11000) {
-							result.push("This title has already been added");
-						} else {
-							console.log(err);
-							result.push(
-								"There was some problem adding the title, and Starless should really sort this shit out."
-							);
-						}
-					}
-				}
-			} else if (!config.isModUp) {
-				result.push("!addTitle command is for Mods only");
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
-				usage:
-					"!addtitle Streamer barely plays game, probably in the menu right now",
-				usableBy: "mods",
-			},
-		],
-	},
-	addquote: {
-		response: async (config) => {
-			let result = [];
-
-			if (config.isModUp && config.argument) {
-				let quoteEntries = await Quote.find({});
-
-				const quoteIndex = quoteEntries.length ? getNextIndex(quoteEntries) : 1;
-
-				try {
-					await Quote.create({
-						index: quoteIndex,
-						text: config.argument,
-						addedBy: config.userInfo.displayName,
-					});
-					result.push(["Quote added"]);
-				} catch (err) {
-					if (err.code == 11000) {
-						result.push("This quote has already been added");
-					} else {
-						console.log(err);
-						result.push(
-							"There was some problem adding this quote, and Starless should really sort this shit out."
-						);
-					}
-				}
-			} else if (!config.isModUp) {
-				result.push(["!addquote command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
-				]);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description: "Saves a new, and totally out of context quote",
-				usage: "!addquote Fuck fuck fuck fuck fuck",
-				usableBy: "mods",
-			},
-		],
-	},
-	audiotimeout: audiotimeout.getCommand(),
+	addtinder: tinderAdd.getCommand(),
+	addtitle: titleAdd.getCommand(),
+	addQuote: quoteAdd.getCommand(),
+	audiotimeout: audioTimeout.getCommand(),
 	buhhs: buhhs.getCommand(),
 	// chug: {
 	// 	response: async (config) => {
@@ -480,43 +284,7 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
-	deaths: {
-		response: async (config) => {
-			let result = [];
-
-			try {
-				let channel = await apiClient.channels.getChannelInfoById(twitchId);
-
-				let deathCounters = await DeathCounter.find({
-					gameTitle: channel.gameName,
-				});
-
-				let gameDeaths = deathCounters.reduce(
-					(total, counter) => total + counter.deaths,
-					0
-				);
-
-				result.push(
-					"Starless has died a grand total of " +
-						gameDeaths +
-						" times, while ✨playing✨ " +
-						channel.gameName
-				);
-			} catch (err) {
-				result.push(
-					"Twitch isn't being very helpful right now, try again later"
-				);
-			}
-			return result;
-		},
-		versions: [
-			{
-				description: "Gets total deaths for current game",
-				usage: "!deaths",
-				usableBy: "users",
-			},
-		],
-	},
+	deaths: deaths.getCommand(),
 	delcomm: {
 		response: async (config) => {
 			let result = [];
@@ -577,76 +345,7 @@ const commands = {
 			},
 		],
 	},
-	drinkbitch: {
-		response: async (config) => {
-			let result = [];
-			let pointsRequired = 500;
-
-			let currentTime = new Date();
-
-			try {
-				let user = await LoyaltyPoint.findOne({
-					userId: config.userInfo.userId,
-				});
-
-				if (!user) {
-					throw new Error("No user found");
-				}
-
-				if (user.points < pointsRequired) {
-					throw new Error("Not enough points");
-				}
-
-				if (currentTime - drinkBitchLastUseTime < 5000) {
-					throw new Error("Wait longer");
-				}
-
-				drinkBitchLastUseTime = currentTime;
-
-				audioLink = getRandomisedAudioFileUrl(drinkBitchAudioLinks);
-				audio.play(audioLink);
-
-				result.push("@TheStarlessAbstract drink, bitch!");
-				user.points -= pointsRequired;
-				user.save();
-			} catch (error) {
-				if (error == "No user found") {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
-					);
-				} else if (error == "Not enough points") {
-					if (getRandomBetweenInclusiveMax(1, 100) == 100) {
-						audioLink = getRandomisedAudioFileUrl(drinkBitchAudioLinks);
-						audio.play(audioLink);
-
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
-						);
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
-						);
-					}
-				}
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description: "Makes Starless drink booze",
-				usage: "!drinkbitch",
-				usableBy: "users",
-				cost: "500 Tainty Points",
-			},
-		],
-	},
+	drinkbitch: drinkBitch.getCommand(),
 	editcomm: {
 		response: async (config) => {
 			let result = [];
@@ -728,351 +427,10 @@ const commands = {
 			},
 		],
 	},
-	edittinderauthor: {
-		response: async (config) => {
-			let user;
-			let quoteIndex;
-			let result = [];
-
-			if (config.isModUp && config.argument) {
-				config.argument = config.argument.split(" ");
-				quoteIndex = config.argument[0];
-				user = config.argument[1];
-
-				if (isNaN(quoteIndex) || !user.startsWith("@")) {
-					result.push([
-						"To user this command, !edittinderauthor 1 @thestarlessabstract",
-					]);
-				} else {
-					user = user.substring(1);
-					let quote = await Tinder.findOne({ index: quoteIndex });
-
-					if (quote) {
-						quote.user = user;
-						quote.save();
-						result.push(["Tinder bio updated"]);
-					} else {
-						result.push(["No Tinder bio found for that number"]);
-					}
-				}
-			} else if (!config.isModUp) {
-				result.push(["!edittinderauthor command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To use this command, !edittinderauthor 1 @thestarlessabstract",
-				]);
-			}
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"Updates the author of a Tinder bio, using the bio number and @user",
-				usage: "!edittinderauthor 69 @design_by_rose",
-				usableBy: "mods",
-			},
-		],
-	},
-	f: {
-		response: async ({}) => {
-			let result = [];
-			let gamesPlayed;
-			let pularlity;
-			let averageString = "";
-
-			try {
-				let stream = await apiClient.streams.getStreamByUserId(twitchId);
-
-				if (stream == null) {
-					result.push(
-						"Starless doesn't seem to be streaming right now, come back later"
-					);
-				} else {
-					let currentTime = new Date();
-
-					if (currentTime - fLastUseTime > 5000) {
-						fLastUseTime = currentTime;
-						let gameName = stream.gameName;
-						let streamDate = stream.startDate;
-						let timeSinceStartAsMs = Math.floor(currentTime - streamDate);
-
-						streamDate = new Date(
-							streamDate.getFullYear(),
-							streamDate.getMonth(),
-							streamDate.getDate()
-						);
-
-						let deathCounters = await DeathCounter.find({
-							streamStartDate: streamDate,
-						}).exec();
-
-						gameStreamDeaths = await getDeathCounter(
-							gameName,
-							streamDate,
-							gameStreamDeaths,
-							deathCounters
-						);
-
-						for (let i = 0; i < deathCounters.length; i++) {
-							totalStreamDeaths += deathCounters[i].deaths;
-						}
-
-						gameStreamDeaths.deaths++;
-						totalStreamDeaths++;
-						allTimeStreamDeaths++;
-						gameStreamDeaths.save();
-						let averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
-
-						let averageToDeath = {
-							hours: Math.floor(averageToDeathMs / (1000 * 60 * 60)),
-							minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
-							seconds: Math.floor((averageToDeathMs / 1000) % 60),
-						};
-
-						let gameStreams = await DeathCounter.find({
-							gameTitle: gameName,
-						}).exec();
-
-						let gameDeaths = gameStreams.reduce(
-							(total, stream) => total + stream.deaths,
-							0
-						);
-
-						let audioLink;
-
-						if (gameDeaths == 666) {
-							audioLink = await AudioLink.findOne({ name: "666" });
-							audioLink = audioLink?.url;
-						} else {
-							audioLink = getRandomisedAudioFileUrl(deathAudioLinks);
-						}
-
-						audio.play(audioLink);
-
-						resp = await axios.post(url + "/deathcounter", {
-							deaths: gameStreamDeaths.deaths,
-							gameDeaths: gameDeaths,
-							allDeaths: allTimeStreamDeaths,
-							average: averageToDeath,
-						});
-
-						deathCounters = await DeathCounter.find({
-							streamStartDate: streamDate,
-						}).exec();
-
-						gamesPlayed = deathCounters.length;
-
-						let random = Math.floor(Math.random() * 100) + 1;
-						if (random == 1) {
-							pularlity = getPlurality(
-								gameStreamDeaths.deaths,
-								"death/fail",
-								"deaths/fails"
-							);
-
-							result.push(
-								"ThisIsFine ThisIsFine ThisIsFine it's only " +
-									gameStreamDeaths.deaths +
-									" " +
-									pularlity +
-									" ThisIsFine ThisIsFine ThisIsFine"
-							);
-						} else {
-							pularlity = getPlurality(
-								gameStreamDeaths.deaths,
-								"time",
-								"times"
-							);
-
-							result.push(
-								"Starless has now died/failed " +
-									gameStreamDeaths.deaths +
-									" " +
-									pularlity +
-									" while playing " +
-									gameStreamDeaths.gameTitle +
-									" this stream"
-							);
-
-							if (random >= 13 && random <= 23) {
-								pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
-
-								result.push(
-									"Since records have started, Starless has died/failed a grand total of " +
-										allTimeStreamDeaths +
-										" " +
-										pularlity
-								);
-							} else if (gamesPlayed > 1 && random >= 35 && random <= 45) {
-								pularlity = getPlurality(totalStreamDeaths, "time", "times");
-
-								result.push(
-									"Starless has played " +
-										gamesPlayed +
-										" games this stream, and has died/failed about " +
-										totalStreamDeaths +
-										" " +
-										pularlity
-								);
-							} else if (random >= 57 && random <= 67) {
-								if (gameDeaths != 0) {
-									pularlity = getPlurality(gameDeaths, "time", "times");
-
-									result.push(
-										"Starless has died/failed at least " +
-											gameDeaths +
-											" " +
-											pularlity +
-											", across all streams while playing " +
-											gameStreams[0].gameTitle
-									);
-								}
-							} else if (random >= 79 && random <= 89) {
-								pularlity = getPlurality(gameDeaths, "time", "times");
-
-								if (averageToDeath.hours > 0) {
-									averageString = averageToDeath.hours + "h ";
-								}
-								if (averageToDeath.minutes > 0) {
-									averageString = averageString + averageToDeath.minutes + "m ";
-								}
-								if (averageToDeath.seconds > 0) {
-									averageString = averageString + averageToDeath.seconds + "s ";
-								}
-
-								result.push(
-									"Starless is dying/failing on average every " +
-										averageString +
-										"this stream. Don't go getting your hopes up this time"
-								);
-							}
-						}
-					}
-				}
-			} catch (err) {
-				console.log(err);
-				result.push(
-					"Twitch says no, and Starless should really sort this out some time after stream"
-				);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"To keep track of my many, many, many, many, many deaths/failures",
-				usage: "!f",
-				usableBy: "users",
-			},
-		],
-		active: true,
-	},
+	edittinderauthor: tinderEditAuthor.getCommand(),
+	f: f.getCommand(),
 	followage: followage.getCommand(),
-	kings: {
-		response: async (config) => {
-			let result = [];
-			let cost = 100;
-			let redeemUser = config.userInfo.userName;
-			let cardDrawn;
-
-			let currentTime = new Date();
-
-			if (currentTime - kingsLastUseTime > KINGSCOOLDOWN) {
-				kingsLastUseTime = currentTime;
-
-				// get user by userId
-				let user = await LoyaltyPoint.findOne({
-					userId: config.userInfo.userId,
-				});
-
-				if (user) {
-					if (user.points >= cost) {
-						user.points -= cost;
-
-						let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
-
-						if (drawFrom.length == 1) {
-							cardDrawn = drawFrom[0];
-						} else {
-							cardDrawn =
-								drawFrom[getRandomBetweenInclusiveMax(0, drawFrom.length - 1)];
-						}
-
-						cardDrawn.isDrawn = true;
-
-						if (cardDrawn.value == "King") {
-							kingsCount++;
-						}
-
-						result.push([
-							"@" +
-								redeemUser +
-								" You have drawn the " +
-								cardDrawn.value +
-								" of " +
-								cardDrawn.suit,
-						]);
-
-						if (kingsCount != 4) {
-							result.push([
-								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
-							]);
-
-							if (cardDrawn.bonusJager) {
-								playAudio("jager");
-								result.push([
-									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
-								]);
-							}
-
-							switch (cardDrawn.value) {
-								case "Queen":
-									playAudio("Check out the big brain Brad");
-									break;
-								case "Ace":
-									playAudio("The Greater Good");
-							}
-						} else {
-							result.push([
-								"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
-							]);
-
-							kingsCount = 0;
-						}
-
-						// checks if card drawn is last card
-						if (drawFrom.length == 1) {
-							resetKings();
-						}
-
-						user.save();
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
-						);
-					}
-				} else {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
-					);
-				}
-			}
-			return result;
-		},
-		versions: [
-			{
-				description: "Draw a card in the Kings game",
-				usage: "!kings",
-				usableBy: "users",
-				cost: "100 Tainty Points",
-			},
-		],
-	},
+	kings: kings.getCommand(),
 	kingsremain: {
 		response: async (config) => {
 			let result = [];
@@ -1122,97 +480,7 @@ const commands = {
 		],
 	},
 	lurk: lurk.getCommand(),
-	points: {
-		response: async (config) => {
-			let result = [];
-			let user;
-
-			let currentTime = new Date();
-
-			if (currentTime - pointsLastUseTime > 5000 || config.isModUp) {
-				pointsLastUseTime = currentTime;
-
-				if (!config.argument) {
-					user = await LoyaltyPoint.findOne({
-						userId: config.userInfo.userId,
-					});
-
-					if (user) {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" has " +
-								user.points +
-								" Tainty Points"
-						);
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
-						);
-					}
-				} else if (config.isBroadcaster && isNaN(config.argument)) {
-					let username;
-					if (config.argument.startsWith("@")) {
-						username = config.argument.substring(1).split(" ");
-					} else {
-						username = config.argument.split(" ");
-					}
-					if (username.length == 2) {
-						let newPoints = username[1];
-						username = username[0];
-
-						user = await apiClient.users.getUserByName(username.toLowerCase());
-
-						user = await LoyaltyPoint.findOne({
-							userId: user.id,
-						});
-
-						user.points += Number(newPoints);
-						await user.save();
-
-						result.push(
-							"Our glorious leader Starless, has given @" +
-								username +
-								" " +
-								newPoints +
-								" Tainty Points"
-						);
-					} else {
-						result.push(
-							"@TheStarlessAbstract it's not that hard, just !points username number"
-						);
-					}
-				} else if (config.isBroadcaster && !isNaN(config.argument)) {
-					result.push(
-						"@TheStarlessAbstract you used the command wrong, you utter swine"
-					);
-				} else if (!config.isBroadcaster && config.argument) {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" you aren't allowed to this command like that"
-					);
-				}
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
-				usage: "!points",
-				usableBy: "users",
-			},
-			{
-				description: "Give points to a user",
-				usage: "!points 2000 @buhhsbot",
-				usableBy: "streamer",
-			},
-		],
-	},
+	points: points.getCommand(),
 	so: shoutout.getCommand(),
 	tinderquote: tinder.getCommand(),
 	titleharassment: title.getCommand(),
@@ -1249,35 +517,26 @@ const commands = {
 
 async function setup() {
 	chatCommands = await Command.find({});
-	deathAudioLinks = await AudioLink.find({ command: "f" }).exec();
-	drinkBitchAudioLinks = await AudioLink.find({ command: "drinkbitch" }).exec();
+	f.updateAudioLinks();
+	f.setAllTimeStreamDeaths();
+	f.setTotalStreamDeaths();
+	f.setTotalGameDeaths();
+	drinkBitch.updateAudioLinks();
 
 	for (const command of chatCommands) {
 		commands[command.name] = { response: command.text };
 	}
 
 	const currentDateTime = new Date();
+	drinkBitch.setTimer(currentDateTime);
+	points.setTimer(currentDateTime);
 	quote.setTimer(currentDateTime);
 	tinder.setTimer(currentDateTime);
 	title.setTimer(currentDateTime);
-	fLastUseTime = currentDateTime;
-	chugLastUseTime = currentDateTime;
-	kingsLastUseTime = currentDateTime;
-	pointsLastUseTime = currentDateTime;
-	drinkBitchLastUseTime = currentDateTime;
+	f.setTimer(currentDateTime);
+	// chugLastUseTime = currentDateTime;
+	kings.setTimer(currentDateTime);
 	kingsRemainLastUseTime = currentDateTime;
-}
-
-function getNextIndex(array) {
-	return array[array.length - 1].index + 1;
-}
-
-async function createDeathCounter(game, date) {
-	return await DeathCounter.create({
-		deaths: 0,
-		gameTitle: game,
-		streamStartDate: date,
-	});
 }
 
 async function setAllTimeStreamDeaths() {
@@ -1290,10 +549,6 @@ async function setAllTimeStreamDeaths() {
 
 function getRandomBetweenExclusiveMax(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function getRandomBetweenInclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getCommands() {
@@ -1312,38 +567,25 @@ function getCommands() {
 			  };
 	});
 
-	// Use the Array.sort() method to sort the commandList array alphabetically by command name
 	commandList.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
 	return commandList;
 }
 
 async function resetKings() {
-	// Reset the game of Kings to its initial state.
-	// If a save state is found, restore the game from that state.
-
-	// Find the current save state for the game of Kings.
 	let gameState = await KingsSaveState.findOne({});
 
-	// If there is no save state, initialize the game.
 	if (!gameState) {
-		// Initialize the game state.
 		await initializeGameState();
 	} else {
-		// Restore the game state from the save state.
 		restoreGameState(gameState);
-
-		// Delete the save state.
 		await KingsSaveState.deleteOne({ _id: gameState._id });
 	}
 }
 
 async function initializeGameState() {
-	// This array will hold the indices of the "Hydrate you fools" cards,
-	// which will be eligible for the Jagerbomb bonus.
 	let jagerBonusCards = [];
 	let jagerCardIndex;
 
-	// Create the array of cards to draw.
 	cardsToDraw = [];
 	kingsCount = 0;
 
@@ -1351,15 +593,11 @@ async function initializeGameState() {
 		deck = await createDeck(suits, values);
 	}
 
-	// Loop through the cards in the deck.
 	for (let i = 0; i < deck.cards.length; i++) {
-		// Add the "Hydrate you fools" cards to the array of cards eligible
-		// for the Jagerbomb bonus.
 		if (deck.cards[i].explanation === "Hydrate you fools") {
 			jagerBonusCards.push(i);
 		}
 
-		// cards used in play
 		cardsToDraw.push({
 			suit: deck.cards[i].suit,
 			value: deck.cards[i].value,
@@ -1370,24 +608,13 @@ async function initializeGameState() {
 		});
 	}
 
-	// Choose two of the "Hydrate you fools" cards to be Jagerbomb cards.
 	for (let i = 0; i < 2; i++) {
 		jagerCardIndex = getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
 		cardsToDraw[jagerBonusCards[jagerCardIndex]].bonusJager = true;
 		jagerBonusCards.splice(jagerCardIndex);
 	}
 
-	// Shuffle the cards to draw.
 	shuffle();
-}
-
-async function saveKingsState() {
-	let saveState = new KingsSaveState({
-		cardsToDraw: cardsToDraw,
-		kingsCount: kingsCount,
-	});
-
-	await saveState.save();
 }
 
 // The shuffle function takes an array of items and shuffles them in place.
@@ -1416,8 +643,6 @@ async function createDeck(suits, values) {
 
 	if (!newDeck) {
 		newDeck = new Deck({ cards: [] });
-
-		// Add cards to the deck for each suit and value.
 		suits.forEach((suit) => {
 			values.forEach((value) => {
 				newDeck.cards.push({
@@ -1429,62 +654,10 @@ async function createDeck(suits, values) {
 			});
 		});
 
-		// Save the deck to the database and return it.
 		await newDeck.save();
 	}
 
 	return newDeck;
-}
-
-const getDeathCounter = async (
-	gameName,
-	streamDate,
-	gameStreamDeaths,
-	deathCounters
-) => {
-	let gameDeathCounter;
-
-	if (
-		gameStreamDeaths?.gameTitle === gameName &&
-		gameStreamDeaths.streamStartDate === streamDate
-	) {
-		gameDeathCounter = gameStreamDeaths;
-	} else {
-		if (deathCounters) {
-			gameDeathCounter = deathCounters.find((dc) => dc.gameTitle === gameName);
-		}
-		if (!gameDeathCounter) {
-			gameDeathCounter = createDeathCounter(gameName, streamDate);
-		}
-	}
-
-	return gameDeathCounter;
-};
-
-function getPlurality(value, singular, plural) {
-	let result;
-
-	if (value > 1) {
-		result = plural;
-	} else {
-		result = singular;
-	}
-
-	return result;
-}
-
-function getRandomisedAudioFileUrl(audioLinkArray) {
-	let index = getRandomBetweenExclusiveMax(0, audioLinkArray.length);
-	let audioUrl = audioLinkArray[index].url;
-
-	return audioUrl;
-}
-
-async function playAudio(audioName) {
-	let audioObject = await AudioLink.findOne({
-		name: audioName,
-	});
-	audio.play(audioObject.url);
 }
 
 function restoreGameState(gameState) {
@@ -1504,7 +677,6 @@ exports.list = commands;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setApiClient = setApiClient;
 exports.setup = setup;
-exports.saveKingsState = saveKingsState;
 exports.resetKings = resetKings;
 exports.setChatClient = setChatClient;
 exports.getCommands = getCommands;
