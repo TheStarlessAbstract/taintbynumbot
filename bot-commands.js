@@ -1,28 +1,33 @@
 const axios = require("axios");
 
+const AudioLink = require("./models/audiolink");
 const Command = require("./models/command");
 const DeathCounter = require("./models/deathcounter");
+const Deck = require("./models/deck");
+const KingsSaveState = require("./models/kingssavestate");
+const LoyaltyPoint = require("./models/loyaltypoint");
 const Message = require("./models/message");
+const Quote = require("./models/quote");
 const Tinder = require("./models/tinder");
 const Title = require("./models/title");
-const Quote = require("./models/quote");
-const Deck = require("./models/deck");
-const AudioLink = require("./models/audiolink");
-const LoyaltyPoint = require("./models/loyaltypoint");
-const KingsSaveState = require("./models/kingssavestate");
 
 const audio = require("./bot-audio");
 const messages = require("./bot-messages");
 const discord = require("./bot-discord");
 
-const TINDERCOOLDOWN = 30000;
-const TITLECOOLDOWN = 30000;
-const QUOTECOOLDOWN = 0;
+const audiotimeout = require("./commands/audiotimeout");
+const buhhs = require("./commands/buhhs");
+const followage = require("./commands/followage");
+const lurk = require("./commands/lurk");
+const quote = require("./commands/quote");
+const shoutout = require("./commands/shoutout");
+const tinder = require("./commands/tinder");
+const title = require("./commands/title");
+
 const KINGSCOOLDOWN = 5000;
 
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
-let twitchUsername = process.env.TWITCH_USERNAME;
 
 let audioLink;
 let deathAudioLinks;
@@ -30,11 +35,7 @@ let drinkBitchAudioLinks;
 let allTimeStreamDeaths = 0;
 let apiClient;
 let gameStreamDeaths;
-let time;
-let tinderTimer;
-let titleTimer;
 let totalStreamDeaths = 0;
-let quoteTimer;
 let chatCommands;
 let fLastUseTime = "";
 let drinkBitchLastUseTime = "";
@@ -435,64 +436,8 @@ const commands = {
 			},
 		],
 	},
-	audiotimeout: {
-		response: async (config) => {
-			let result = [];
-
-			if (config.isModUp) {
-				// check if argument is a positive number
-				if (!isNaN(config.argument) && config.argument > 0) {
-					audio.setAudioTimeout(config.argument);
-					result.push([
-						"Bot audio timeout has been started, and set to " +
-							config.argument +
-							" seconds",
-					]);
-				} // check if argument is a negative number
-				else if (!isNaN(config.argument) && config.argument < 1) {
-					result.push([
-						"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10",
-					]);
-				} else if (config.argument && isNaN(config.argument)) {
-					result.push([
-						"To set the bot audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10",
-					]);
-				} else {
-					audio.setAudioTimeout();
-					let status = audio.getAudioTimeout() ? "started" : "stopped";
-					result.push(["Bot audio timeout has been " + status]);
-				}
-			} else if (!config.isModUp) {
-				result.push(["!audiotimeout command is for Mods only"]);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"Sets audio timeout for bot alerts to default length, or turns off the audio timeout",
-				usage: "!audiotimeout",
-				usableBy: "mods",
-			},
-			{
-				description: "Sets the audio timeout to the specified about of seconds",
-				usage: "!audiotimeout 3",
-				usableBy: "mods",
-			},
-		],
-	},
-	buhhs: {
-		response:
-			"buhhsbot is a super amazing bot made by the super amazing @asdfWENDYfdsa. Go to https://www.twitch.tv/buhhsbot, and type !join in chat to have buhhsbot bootify your chat",
-		versions: [
-			{
-				description: "For the glory of buhhs",
-				usage: "!buhhs",
-				usableBy: "users",
-			},
-		],
-	},
+	audiotimeout: audiotimeout.getCommand(),
+	buhhs: buhhs.getCommand(),
 	// chug: {
 	// 	response: async (config) => {
 	// 		let result = [];
@@ -1021,49 +966,9 @@ const commands = {
 				usableBy: "users",
 			},
 		],
+		active: true,
 	},
-	followage: {
-		response: async (config) => {
-			let result = [];
-
-			const follow = await apiClient.users.getFollowFromUserToBroadcaster(
-				config.userInfo.userId,
-				twitchId
-			);
-
-			if (follow) {
-				const currentTimestamp = Date.now();
-				const followStartTimestamp = follow.followDate.getTime();
-
-				let followLength = getFollowLength(
-					currentTimestamp - followStartTimestamp
-				);
-
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" has been following TheStarlessAbstract for " +
-						followLength,
-				]);
-			} else {
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" hit that follow button, otherwise this command is doing a whole lot of nothing for you",
-				]);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"How long has it been since you last unfollowed, and then refollowed",
-				usage: "!followage",
-				usableBy: "users",
-			},
-		],
-	},
+	followage: followage.getCommand(),
 	kings: {
 		response: async (config) => {
 			let result = [];
@@ -1216,26 +1121,7 @@ const commands = {
 			},
 		],
 	},
-	lurk: {
-		response: async (config) => {
-			let result = [];
-
-			result.push(
-				config.userInfo.displayName +
-					" finds a comfortable spot behind the bushes to perv on the stream"
-			);
-
-			return result;
-		},
-		versions: [
-			{
-				description:
-					"Let the stream know you are going to lurk for a while...please come back",
-				usage: "!lurk",
-				usableBy: "users",
-			},
-		],
-	},
+	lurk: lurk.getCommand(),
 	points: {
 		response: async (config) => {
 			let result = [];
@@ -1327,275 +1213,10 @@ const commands = {
 			},
 		],
 	},
-	so: {
-		response: async (config) => {
-			let result = [];
-			let username;
-			let user;
-			let stream;
-			let streamed;
-
-			if (config.isModUp) {
-				if (config.argument) {
-					username = config.argument;
-					if (username.startsWith("@")) {
-						username = username.slice(1);
-					}
-
-					user = await apiClient.users.getUserByName(username);
-
-					if (!user) {
-						result.push(["Couldn't find a user by the name of " + username]);
-					} else {
-						stream = await apiClient.channels.getChannelInfo(user.id);
-
-						if (stream.gameName != "") {
-							streamed = ", they last streamed " + stream.gameName;
-						} else {
-							streamed = "";
-						}
-
-						result.push(
-							"Go check out " +
-								username +
-								" at twitch.tv/" +
-								username +
-								streamed +
-								". I hear they love the Taint"
-						);
-					}
-				} else {
-					result.push([
-						"You got to include a username to shoutout someone: !so buhhsbot",
-					]);
-				}
-			} else if (!config.isModUp) {
-				result.push(["!so command is for Mods only"]);
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description: "Gives a shoutout to some wonderful user",
-				usage: "!so @buhhsbot",
-				usableBy: "mods",
-			},
-		],
-	},
-	tinderquote: {
-		response: async (config) => {
-			time = new Date();
-			let result = [];
-			let quoteEntries = [];
-			let quote;
-			let index;
-
-			let currentTime = new Date();
-
-			if (currentTime - tinderTimer > TINDERCOOLDOWN) {
-				tinderTimer = time.getTime();
-
-				if (!config.argument) {
-					// get all Tinder bios
-					quoteEntries = await Tinder.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						// find the Tinder bio with this index
-						quote = await Tinder.findOne({ index: config.argument });
-						if (quote) {
-							quoteEntries.push(quote);
-						}
-					} else {
-						// find all Tinder bios that contain config.argument
-						quoteEntries = await Tinder.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-					}
-				}
-
-				if (quoteEntries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
-
-					result.push(
-						quoteEntries[index].index + `. ` + quoteEntries[index].text
-					);
-
-					if (quoteEntries[index].user != "") {
-						result.push(
-							`This Tinder bio was brought to you by the glorious, and taint-filled @${quoteEntries[index].user}`
-						);
-					}
-				} else if (isNaN(config.argument)) {
-					result.push("No Tinder bio found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push("Nobody has ever created Tinder bio for Starless");
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no Tinder bio number " + config.argument);
-				}
-			}
-
-			return result;
-		},
-		versions: [
-			{
-				description: "Gets a random Tinder Bio",
-				usage: "!tinderquote",
-				usableBy: "users",
-			},
-			{
-				description: "Gets Tinder Bio number 69",
-				usage: "!tinderquote 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random Tinder Bio that includes the string 'sit on my face' uwu",
-				usage: "!tinderquote sit on my face",
-				usableBy: "users",
-			},
-		],
-	},
-	titleharassment: {
-		response: async (config) => {
-			time = new Date();
-			let result = [];
-			let quoteEntries = [];
-			let quote;
-			let index;
-
-			let currentTime = new Date();
-
-			if (currentTime - titleTimer > TITLECOOLDOWN) {
-				titleTimer = time.getTime();
-
-				if (!config.argument) {
-					// get all titles
-					quoteEntries = await Title.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						// find the title with this index
-						quote = await Title.findOne({ index: config.argument });
-						if (quote) {
-							quoteEntries.push(quote);
-						}
-					} else {
-						// find all title that contain config.argument
-						quoteEntries = await Title.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-					}
-				}
-
-				if (quoteEntries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
-
-					result.push(
-						quoteEntries[index].index + `. ` + quoteEntries[index].text
-					);
-
-					if (quote.user != "") {
-						result.push(
-							`This possible streamer harassment was brought to you by the glorious, and taint-filled @${quoteEntries[index].user}`
-						);
-					}
-				} else if (isNaN(config.argument)) {
-					result.push("No Title found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push(
-						"The mods don't seem to have been very abusive lately...with titles"
-					);
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no title number " + config.argument);
-				}
-			}
-			return result;
-		},
-		versions: [
-			{
-				description: "Gets a random title",
-				usage: "!titleharassment",
-				usableBy: "users",
-			},
-			{
-				description: "Gets title number 69",
-				usage: "!titleharassment 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random title that includes the string 'sit on my face' uwu",
-				usage: "!titleharassment sit on my face",
-				usableBy: "users",
-			},
-		],
-	},
-	quote: {
-		response: async (config) => {
-			time = new Date();
-			let result = [];
-			let quoteEntries = [];
-			let quote;
-			let index;
-
-			let currentTime = new Date();
-
-			if (currentTime - quoteTimer > QUOTECOOLDOWN) {
-				quoteTimer = time.getTime();
-
-				if (!config.argument) {
-					// get all quotes
-					quoteEntries = await Quote.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						// find the quote with this index
-						quote = await Quote.findOne({ index: config.argument });
-						if (quote) {
-							quoteEntries.push(quote);
-						}
-					} else {
-						// find all quotes that contain config.argument
-						quoteEntries = await Quote.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-					}
-				}
-
-				if (quoteEntries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, quoteEntries.length);
-
-					result.push(
-						quoteEntries[index].index + `. ` + quoteEntries[index].text
-					);
-				} else if (isNaN(config.argument)) {
-					result.push("No Starless quote found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push("Starless has never said anything of note");
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no Starless quote number " + config.argument);
-				}
-			}
-			return result;
-		},
-		versions: [
-			{
-				description: "Gets a random quote",
-				usage: "!quote",
-				usableBy: "users",
-			},
-			{
-				description: "Gets quote number 69",
-				usage: "!quote 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random quote that includes the string 'sit on my face' uwu",
-				usage: "!quote sit on my face",
-				usableBy: "users",
-			},
-		],
-	},
+	so: shoutout.getCommand(),
+	tinderquote: tinder.getCommand(),
+	titleharassment: title.getCommand(),
+	quote: quote.getCommand(),
 	updatemessages: {
 		response: async (config) => {
 			let result = [];
@@ -1636,7 +1257,9 @@ async function setup() {
 	}
 
 	const currentDateTime = new Date();
-	quoteTimer = currentDateTime;
+	quote.setTimer(currentDateTime);
+	tinder.setTimer(currentDateTime);
+	title.setTimer(currentDateTime);
 	fLastUseTime = currentDateTime;
 	chugLastUseTime = currentDateTime;
 	kingsLastUseTime = currentDateTime;
@@ -1692,52 +1315,6 @@ function getCommands() {
 	// Use the Array.sort() method to sort the commandList array alphabetically by command name
 	commandList.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
 	return commandList;
-}
-
-function getFollowLength(followTime) {
-	// Convert the followTime timestamp into individual time units
-	let second = Math.floor(followTime / 1000);
-	let minute = Math.floor(second / 60);
-	second = second % 60;
-	let hour = Math.floor(minute / 60);
-	minute = minute % 60;
-	let day = Math.floor(hour / 24);
-	hour = hour % 24;
-	let year = Math.floor(day / 365);
-	day = day % 365;
-	let month = Math.floor(day / 30);
-	day = day % 30;
-	let week = Math.floor(day / 7);
-	day = day % 7;
-
-	// Create an array of time unit objects, each with a value and a name
-	const timeUnits = [
-		{ value: year, name: "year" },
-		{ value: month, name: "month" },
-		{ value: week, name: "week" },
-		{ value: day, name: "day" },
-		{ value: hour, name: "hour" },
-		{ value: minute, name: "minute" },
-		{ value: second, name: "second" },
-	];
-
-	// Use a for loop to iterate over the timeUnits array and construct the final string
-	let followString = "";
-	for (const timeUnit of timeUnits) {
-		if (timeUnit.value > 0) {
-			followString +=
-				timeUnit.value +
-				" " +
-				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name);
-			(", ");
-		}
-	}
-
-	// Remove the final comma and space from the string
-	followString = followString.slice(0, -2);
-	followString += ".";
-
-	return followString;
 }
 
 async function resetKings() {
@@ -1910,7 +1487,6 @@ async function playAudio(audioName) {
 	audio.play(audioObject.url);
 }
 
-// Restore the game state from the given save state.
 function restoreGameState(gameState) {
 	cardsToDraw = gameState.cardsToDraw;
 	kingsCount = gameState.kingsCount;

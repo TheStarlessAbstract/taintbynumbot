@@ -22,7 +22,7 @@ let timedMessagesInterval;
 let intervalMessages;
 let isLive = false;
 let messageCount = 0;
-let tempchannel;
+let apiClient;
 
 async function setup() {
 	// Initialize the commands and messages modules
@@ -57,6 +57,7 @@ async function setupChatClientListeners(apiClient, chatClient) {
 	chatClient.onRegister(async () => {
 		connected();
 		checkLive(apiClient, chatClient);
+		setApiClient(apiClient);
 
 		commands.setApiClient(apiClient);
 		commands.resetKings();
@@ -219,5 +220,14 @@ async function isStreamLive(apiClient) {
 	return streamStatus;
 }
 
+function setApiClient(newApiClient) {
+	apiClient = newApiClient;
+}
+
+function getApiClient() {
+	return apiClient;
+}
+
 exports.setup = setup;
 exports.messageUpdate = messageUpdate;
+exports.getApiClient = getApiClient;
