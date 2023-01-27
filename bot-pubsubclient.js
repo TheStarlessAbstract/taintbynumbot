@@ -1,4 +1,3 @@
-require("dotenv").config();
 const ApiClient = require("@twurple/api").ApiClient;
 const PubSubClient = require("@twurple/pubsub").PubSubClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;

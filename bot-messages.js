@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const chatClient = require("./bot-chatclient");
 
 const Message = require("./models/message");

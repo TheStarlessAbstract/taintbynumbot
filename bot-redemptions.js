@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const audio = require("./bot-audio");
 
 const axios = require("axios");
