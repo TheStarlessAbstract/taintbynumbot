@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const chatClient = require("../bot-chatclient");
 
 const Title = require("../models/title");
@@ -15,7 +13,6 @@ const getCommand = () => {
 				let entries = await Title.find({});
 				let index = entries.length ? getNextIndex(entries) : 1;
 				let message;
-				let user;
 
 				if (!config.argument) {
 					try {
@@ -38,7 +35,6 @@ const getCommand = () => {
 					if (config.argument.includes("@")) {
 						config.argument = config.argument.split("@");
 						message = config.argument[0];
-						user = config.argument[1];
 					} else {
 						message = config.argument;
 					}
@@ -49,7 +45,6 @@ const getCommand = () => {
 						let created = await Title.create({
 							index: index,
 							text: message,
-							user: user,
 							addedBy: config.userInfo.displayName,
 						});
 
@@ -74,6 +69,12 @@ const getCommand = () => {
 			return result;
 		},
 		versions: [
+			{
+				description:
+					"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
+				usage: "!addtitle",
+				usableBy: "mods",
+			},
 			{
 				description:
 					"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",

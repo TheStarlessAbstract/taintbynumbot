@@ -10,11 +10,12 @@ const getCommand = () => {
 				const index = entries.length ? getNextIndex(entries) : 1;
 
 				try {
-					await Quote.create({
+					let created = await Quote.create({
 						index: index,
 						text: config.argument,
 						addedBy: config.userInfo.displayName,
 					});
+
 					result.push(["Quote added"]);
 				} catch (err) {
 					if (err.code == 11000) {

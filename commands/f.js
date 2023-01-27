@@ -1,4 +1,3 @@
-require("dotenv").config();
 const axios = require("axios");
 
 const AudioLink = require("../models/audiolink");
@@ -7,7 +6,11 @@ const DeathCounter = require("../models/deathcounter");
 const audio = require("../bot-audio");
 const chatClient = require("../bot-chatclient");
 
+let twitchId = process.env.TWITCH_USER_ID;
+let url = process.env.BOT_DOMAIN;
+
 let allTimeStreamDeaths;
+let apiClient;
 let audioLinks;
 let COOLDOWN = 5000;
 let gamesPlayed;
@@ -15,8 +18,6 @@ let gameStreamDeaths;
 let timer;
 let totalGameDeaths;
 let totalStreamDeaths;
-let twitchId = process.env.TWITCH_USER_ID;
-let url = process.env.BOT_DOMAIN;
 
 const getCommand = () => {
 	return {
@@ -24,8 +25,7 @@ const getCommand = () => {
 			let result = [];
 
 			try {
-				let apiClient = chatClient.getApiClient();
-				let stream = await apiClient.streams.getStreamByUserId(twitchId);
+				let stream = await getStreamData();
 
 				if (stream == null) {
 					result.push(
@@ -259,6 +259,10 @@ function getRandomBetweenExclusiveMax(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
+async function getStreamData() {
+	return await apiClient.streams.getStreamByUserId(twitchId);
+}
+
 async function setAllTimeStreamDeaths() {
 	let deathCounters = await DeathCounter.find({}).exec();
 	allTimeStreamDeaths = deathCounters.reduce(
@@ -267,7 +271,14 @@ async function setAllTimeStreamDeaths() {
 	);
 }
 
-async function setTotalStreamDeaths(date) {
+async function setTotalStreamDeaths() {
+	let date;
+	let stream = await getStreamData();
+
+	if (stream) {
+		date = stream.startDate;
+	}
+
 	let deathCounters = await DeathCounter.find({
 		streamStartDate: date,
 	}).exec();
@@ -280,12 +291,28 @@ async function setTotalStreamDeaths(date) {
 	);
 }
 
-async function setTotalGameDeaths(game) {
-	let deathCounters = await DeathCounter.findOne({ gameTitle: game });
+async function setTotalGameDeaths() {
+	let game;
+	let stream = await getStreamData();
+
+	if (stream) {
+		game = stream.gameName;
+	}
+
+	let deathCounters = await DeathCounter.find({ gameTitle: game });
 	totalGameDeaths = deathCounters.reduce(
 		(total, counter) => total + counter.deaths,
 		0
 	);
+}
+
+async function setup() {
+	apiClient = await chatClient.getApiClient();
+
+	await updateAudioLinks();
+	await setAllTimeStreamDeaths();
+	await setTotalStreamDeaths(); // needs date
+	await setTotalGameDeaths(); // needs game
 }
 
 exports.getCommand = getCommand;
@@ -293,4 +320,5 @@ exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setTimer = setTimer;
 exports.setTotalGameDeaths = setTotalGameDeaths;
 exports.setTotalStreamDeaths = setTotalStreamDeaths;
+exports.setup = setup;
 exports.updateAudioLinks = updateAudioLinks;

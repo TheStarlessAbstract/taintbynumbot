@@ -11,7 +11,7 @@ const getCommand = () => {
 			let result = [];
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN || config.isModUp) {
+			if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
 				let user;
 				timer = currentTime;
 
@@ -103,3 +103,4 @@ function setTimer(newTimer) {
 }
 
 exports.getCommand = getCommand;
+exports.setTimer = setTimer;

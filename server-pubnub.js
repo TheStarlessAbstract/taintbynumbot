@@ -1,4 +1,3 @@
-require("dotenv").config();
 const PubNub = require("pubnub");
 
 const pubKey = process.env.PUBNUB_PUBKEY;

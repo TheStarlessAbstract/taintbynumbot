@@ -40,7 +40,8 @@ const getCommand = () => {
 				usableBy: "mods",
 			},
 			{
-				description: "Sets the audio timeout to the specified about of seconds",
+				description:
+					"Sets the audio timeout to the specified amount of seconds",
 				usage: "!audiotimeout 3",
 				usableBy: "mods",
 			},

@@ -1,4 +1,4 @@
-const Tinder = require("../models/Tinder");
+const Tinder = require("../models/tinder");
 
 const getCommand = () => {
 	return {

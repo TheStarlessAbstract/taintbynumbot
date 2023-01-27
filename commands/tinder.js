@@ -1,4 +1,4 @@
-const Tinder = require("../models/Tinder");
+const Tinder = require("../models/tinder");
 
 let COOLDOWN = 30000;
 let timer;

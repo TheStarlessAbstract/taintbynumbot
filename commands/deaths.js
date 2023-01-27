@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const DeathCounter = require("../models/deathcounter");
 
 const chatClient = require("../bot-chatclient");

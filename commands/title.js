@@ -33,11 +33,6 @@ const getCommand = () => {
 				if (entries.length > 0) {
 					index = getRandomBetweenExclusiveMax(0, entries.length);
 					result.push(entries[index].index + `. ` + entries[index].text);
-					if (quote.user != "") {
-						result.push(
-							`This possible streamer harassment was brought to you by the glorious, and taint-filled @${entries[index].user}`
-						);
-					}
 				} else if (isNaN(config.argument)) {
 					result.push("No Title found mentioning: " + config.argument);
 				} else if (!config.argument) {

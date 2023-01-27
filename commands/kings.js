@@ -1,8 +1,6 @@
-require("dotenv").config();
-
 const AudioLink = require("../models/audiolink");
-const Deck = require("./models/deck");
-const KingsSaveState = require("./models/kingssavestate");
+const Deck = require("../models/deck");
+const KingsSaveState = require("../models/kingssavestate");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
 let cardsToDraw;
@@ -145,11 +143,11 @@ async function initializeGameState() {
 		});
 	}
 
-	let jagerCardIndex;
+	let index;
 	for (let i = 0; i < 2; i++) {
-		jagerCardIndex = getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
-		cardsToDraw[jagerBonusCards[jagerCardIndex]].bonusJager = true;
-		jagerBonusCards.splice(jagerCardIndex);
+		index = getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
+		cardsToDraw[jagerBonusCards[index]].bonusJager = true;
+		jagerBonusCards.splice(index, 1);
 	}
 
 	shuffle();
@@ -191,6 +189,10 @@ async function createDeck() {
 	}
 
 	return deck;
+}
+
+function getCardsToDraw() {
+	return cardsToDraw;
 }
 
 async function playAudio(audioName) {
@@ -306,6 +308,8 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+exports.getCardsToDraw = getCardsToDraw;
 exports.getCommand = getCommand;
 exports.saveKingsState = saveKingsState;
 exports.setTimer = setTimer;
+exports.resetKings = resetKings;
