@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 const serverIo = require("./server-io");
-// const serverPubNub = require("./server-pubnub");
+const serverPubNub = require("./server-pubnub");
 
 const port = process.env.PORT || 5000;
 const uri = process.env.MONGO_URI;
@@ -42,11 +42,12 @@ app.get("/auth", (req, res) => {
 	res.sendFile(__dirname + "/public/bot-auth.html");
 });
 
-// // http://localhost:5000/disable:sdasds&dassad&fdasdsfaad
-// app.get("/command", (req, res) => {
-// 	serverPubNub.publish("Dazed sucks");
-// 	res.sendStatus(200);
-// });
+app.get("/command", (req, res) => {
+	let commandName = req.query.name;
+
+	serverPubNub.publishMessage("command_toggle", commandName);
+	res.sendStatus(200);
+});
 
 app.post("/playaudio", (req, res) => {
 	serverIo.playAudio(req.body.url);
