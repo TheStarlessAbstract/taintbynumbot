@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const LoyaltyPoint = require("./models/loyaltypoint");
 
 let twitchUsername = process.env.TWITCH_USERNAME;

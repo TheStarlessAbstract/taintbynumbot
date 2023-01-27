@@ -10,7 +10,6 @@ let TitleSchema = new Schema({
 		type: String,
 		unique: true,
 	},
-	user: String,
 	addedBy: String,
 });
 

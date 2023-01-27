@@ -8,6 +8,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const serverIo = require("./server-io");
+const serverPubNub = require("./server-pubnub");
+
 const uri = process.env.MONGO_URI;
 
 if (uri != undefined)

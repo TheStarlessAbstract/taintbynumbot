@@ -1,11 +1,10 @@
 require("dotenv").config();
-
 const mongoose = require("mongoose");
 
 const chatClient = require("./bot-chatclient");
 const pubSubClient = require("./bot-pubsubclient");
-const commands = require("./bot-commands");
 const discord = require("./bot-discord");
+const kings = require("./commands/kings");
 
 const uri = process.env.MONGO_URI;
 
@@ -41,10 +40,10 @@ function setupSignalHandlers() {
 
 async function handleSignal(signal) {
 	if (signal === "SIGTERM") {
-		await commands.saveKingsState();
+		await kings.saveKingsState();
 		process.exit(0);
 	} else if (signal === "SIGINT") {
-		await commands.saveKingsState();
+		await kings.saveKingsState();
 		process.exit(0);
 	}
 }
