@@ -311,8 +311,8 @@ async function setup() {
 
 	await updateAudioLinks();
 	await setAllTimeStreamDeaths();
-	await setTotalStreamDeaths(); // needs date
-	await setTotalGameDeaths(); // needs game
+	await setTotalStreamDeaths();
+	await setTotalGameDeaths();
 }
 
 exports.getCommand = getCommand;
