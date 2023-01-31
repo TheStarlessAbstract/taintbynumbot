@@ -10,6 +10,7 @@ const pubnub = new PubNub({
 });
 
 const publishMessage = async (channel, message) => {
+	console.log(message);
 	const publishPayload = {
 		channel: channel,
 		message: {

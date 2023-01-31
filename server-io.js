@@ -6,7 +6,7 @@ const DeathSaveState = require("./models/deathsavestate");
 let clientId = process.env.TWITCH_CLIENT_ID;
 
 let io;
-let url;
+let url = process.env.BOT_DOMAIN;
 let interval;
 let deathCounterInterval;
 let lastPlayFinished = true;
@@ -17,32 +17,20 @@ let allDeaths = 0;
 let average;
 let lastDeathType = "Stream Deaths";
 let deathCount;
-
-if (process.env.PORT) {
-	url = process.env.BOT_DOMAIN;
-} else {
-	url = "http://localhost:5000/";
-}
+let ssl = process.env.PORT ? https : http;
 
 async function setup(newIo) {
 	io = newIo;
 	io.on("connection", async (socket) => {
 		if (socket.handshake.headers.referer.includes("channelpointoverlay")) {
 			console.log("/channelpointoverlay connected");
-
 			isLive = true;
 
 			interval = setInterval(() => {
 				try {
-					if (process.env.PORT) {
-						https.get(url, (res) => {
-							// do nothing
-						});
-					} else {
-						http.get(url, (res) => {
-							// do nothing
-						});
-					}
+					ssl.get(url, (res) => {
+						// do nothing
+					});
 				} catch (err) {
 					console.log(err);
 				}

@@ -4,6 +4,15 @@ const chatClient = require("../bot-chatclient");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
+let versions = [
+	{
+		description: "Gets total deaths for current game",
+		usage: "!deaths",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async () => {
@@ -35,14 +44,17 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description: "Gets total deaths for current game",
-				usage: "!deaths",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

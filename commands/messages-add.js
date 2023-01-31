@@ -2,6 +2,15 @@ const Message = require("../models/message");
 
 const messages = require("../bot-messages");
 
+let versions = [
+	{
+		description: "Creates a new timed message",
+		usage: "!addmessage DM @design_by_rose for all your dick graphic needs",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -39,14 +48,17 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Creates a new timed message",
-				usage: "!addmessage DM @design_by_rose for all your dick graphic needs",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

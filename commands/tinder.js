@@ -3,6 +3,28 @@ const Tinder = require("../models/tinder");
 let COOLDOWN = 30000;
 let timer;
 
+let versions = [
+	{
+		description: "Gets a random Tinder Bio",
+		usage: "!tinderquote",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Gets Tinder Bio number 69",
+		usage: "!tinderquote 69",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description:
+			"Gets a random Tinder Bio that includes the string 'sit on my face' uwu",
+		usage: "!tinderquote sit on my face",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -50,24 +72,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Gets a random Tinder Bio",
-				usage: "!tinderquote",
-				usableBy: "users",
-			},
-			{
-				description: "Gets Tinder Bio number 69",
-				usage: "!tinderquote 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random Tinder Bio that includes the string 'sit on my face' uwu",
-				usage: "!tinderquote sit on my face",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
@@ -79,5 +83,15 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setTimer = setTimer;

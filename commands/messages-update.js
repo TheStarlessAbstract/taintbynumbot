@@ -1,5 +1,14 @@
 const messages = require("../bot-messages");
 
+let versions = [
+	{
+		description: "Updates random bot message list",
+		usage: "!updatemessages",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -21,14 +30,17 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Updates random bot message list",
-				usage: "!updatemessages",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

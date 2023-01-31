@@ -28,13 +28,13 @@ const title = require("./commands/title");
 let chugLastUseTime = "";
 
 const commands = {
-	addcomm: commandAdd.getCommand(),
-	addmessage: messagesAdd.getCommand(),
-	addtinder: tinderAdd.getCommand(),
-	addtitle: titleAdd.getCommand(),
-	addquote: quoteAdd.getCommand(),
-	audiotimeout: audioTimeout.getCommand(),
-	buhhs: buhhs.getCommand(),
+	addcomm: commandAdd,
+	addmessage: messagesAdd,
+	addtinder: tinderAdd,
+	addtitle: titleAdd,
+	addquote: quoteAdd,
+	audiotimeout: audioTimeout,
+	buhhs: buhhs,
 	// chug: {
 	// 	response: async (config) => {
 	// 		let result = [];
@@ -77,23 +77,23 @@ const commands = {
 	// 		return result;
 	// 	},
 	// },
-	deaths: deaths.getCommand(),
-	delcomm: commandDelete.getCommand(),
-	drinkbitch: drinkBitch.getCommand(),
-	editcomm: commandEdit.getCommand(),
-	edittinderauthor: tinderEditAuthor.getCommand(),
-	f: f.getCommand(),
-	followage: followage.getCommand(),
-	kings: kings.getCommand(),
-	kingsremain: kingsRemain.getCommand(),
-	kingsreset: kingsReset.getCommand(),
-	lurk: lurk.getCommand(),
-	points: points.getCommand(),
-	so: shoutout.getCommand(),
-	tinderquote: tinder.getCommand(),
-	titleharassment: title.getCommand(),
-	quote: quote.getCommand(),
-	updatemessages: messagesUpdate.getCommand(),
+	deaths: deaths,
+	delcomm: commandDelete,
+	drinkbitch: drinkBitch,
+	editcomm: commandEdit,
+	edittinderauthor: tinderEditAuthor,
+	f: f,
+	followage: followage,
+	kings: kings,
+	kingsremain: kingsRemain,
+	kingsreset: kingsReset,
+	lurk: lurk,
+	modabuse: title,
+	points: points,
+	so: shoutout,
+	tinderquote: tinder,
+	quote: quote,
+	updatemessages: messagesUpdate,
 };
 
 async function setup() {

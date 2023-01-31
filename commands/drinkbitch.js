@@ -8,6 +8,16 @@ let COOLDOWN = 5000;
 let cost = 500;
 let timer;
 
+let versions = [
+	{
+		description: "Makes Starless drink booze",
+		usage: "!drinkbitch",
+		usableBy: "users",
+		cost: "500 Tainty Points",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -69,14 +79,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Makes Starless drink booze",
-				usage: "!drinkbitch",
-				usableBy: "users",
-				cost: "500 Tainty Points",
-			},
-		],
 	};
 };
 
@@ -103,6 +105,16 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setTimer = setTimer;
 exports.updateAudioLinks = updateAudioLinks;

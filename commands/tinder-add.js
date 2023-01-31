@@ -1,5 +1,15 @@
 const Tinder = require("../models/tinder");
 
+let versions = [
+	{
+		description: "To save Starless' new Tinder bio",
+		usage:
+			"!addtinder As long as my face is around, you will always have some place to sit",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -56,14 +66,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "To save Starless' new Tinder bio",
-				usage:
-					"!addtinder As long as my face is around, you will always have some place to sit",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
@@ -71,4 +73,14 @@ function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

@@ -3,6 +3,15 @@ const Command = require("../models/command");
 const commands = require("../bot-commands");
 const discord = require("../bot-discord");
 
+let versions = [
+	{
+		description: "Creates a new command",
+		usage: "!addcomm !newcommand This is what a new command looks like",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -65,14 +74,17 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Creates a new command",
-				usage: "!addcomm !newcommand This is what a new command looks like",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

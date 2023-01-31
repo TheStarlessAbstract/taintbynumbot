@@ -5,6 +5,22 @@ const LoyaltyPoint = require("../models/loyaltypoint");
 let COOLDOWN = 5000;
 let timer;
 
+let versions = [
+	{
+		description:
+			"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
+		usage: "!points",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Give points to a user",
+		usage: "!points 2000 @buhhsbot",
+		usableBy: "streamer",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -82,19 +98,6 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
-				usage: "!points",
-				usableBy: "users",
-			},
-			{
-				description: "Give points to a user",
-				usage: "!points 2000 @buhhsbot",
-				usableBy: "streamer",
-			},
-		],
 	};
 };
 
@@ -102,5 +105,15 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setTimer = setTimer;

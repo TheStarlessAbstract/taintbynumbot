@@ -1,5 +1,14 @@
 const Quote = require("../models/quote");
 
+let versions = [
+	{
+		description: "Saves a new, and totally out of context quote",
+		usage: "!addquote Fuck fuck fuck fuck fuck",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -37,13 +46,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Saves a new, and totally out of context quote",
-				usage: "!addquote Fuck fuck fuck fuck fuck",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
@@ -51,4 +53,14 @@ function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

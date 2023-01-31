@@ -2,6 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 
 const chatClient = require("./bot-chatclient");
+const pubnub = require("./bot-pubnub");
 const pubSubClient = require("./bot-pubsubclient");
 const discord = require("./bot-discord");
 const kings = require("./commands/kings");
@@ -15,6 +16,7 @@ async function init() {
 	setupSignalHandlers();
 
 	// Connect to MongoDB and set up other components
+	pubnub.setup();
 	await connectToMongoDB();
 	await chatClient.setup();
 	await pubSubClient.setup();

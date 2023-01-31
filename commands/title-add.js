@@ -4,6 +4,24 @@ const Title = require("../models/title");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
+let versions = [
+	{
+		description:
+			"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
+		usage: "!addtitle",
+		usableBy: "mods",
+		active: true,
+	},
+	{
+		description:
+			"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
+		usage:
+			"!addtitle Streamer barely plays game, probably in the menu right now",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -68,21 +86,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
-				usage: "!addtitle",
-				usableBy: "mods",
-			},
-			{
-				description:
-					"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
-				usage:
-					"!addtitle Streamer barely plays game, probably in the menu right now",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
@@ -90,4 +93,14 @@ function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

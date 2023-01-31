@@ -19,6 +19,16 @@ let timer;
 let totalGameDeaths;
 let totalStreamDeaths;
 
+let versions = [
+	{
+		description:
+			"To keep track of my many, many, many, many, many deaths/failures",
+		usage: "!f",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async ({}) => {
@@ -183,15 +193,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"To keep track of my many, many, many, many, many deaths/failures",
-				usage: "!f",
-				usableBy: "users",
-			},
-		],
-		active: true,
 	};
 };
 
@@ -315,7 +316,17 @@ async function setup() {
 	await setTotalGameDeaths();
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setTimer = setTimer;
 exports.setTotalGameDeaths = setTotalGameDeaths;

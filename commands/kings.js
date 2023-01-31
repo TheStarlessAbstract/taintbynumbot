@@ -9,6 +9,16 @@ let cost = 100;
 let kingsCount;
 let timer;
 
+let versions = [
+	{
+		description: "Draw a card in the Kings game",
+		usage: "!kings",
+		usableBy: "users",
+		cost: "100 Tainty Points",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -99,14 +109,6 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description: "Draw a card in the Kings game",
-				usage: "!kings",
-				usableBy: "users",
-				cost: "100 Tainty Points",
-			},
-		],
 	};
 };
 
@@ -308,6 +310,16 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.getCardsToDraw = getCardsToDraw;
 exports.getCommand = getCommand;
 exports.saveKingsState = saveKingsState;

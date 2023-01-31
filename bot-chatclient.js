@@ -69,24 +69,33 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		let [command, argument] = message.slice(1).split(/\s(.+)/);
 
-		const { response, details } =
-			(await commands.list[command.toLowerCase()]) || {};
+		const { response } =
+			(await commands.list[command.toLowerCase()].getCommand()) || {};
 
-		if (typeof response === "function") {
-			let result = await response({
-				isBroadcaster,
-				isModUp,
-				userInfo,
-				argument,
-			});
+		let versions = commands.list[command].getVersions();
 
-			if (result) {
-				for (let i = 0; i < result.length; i++) {
-					chatClient.say(channel, result[i]);
+		let hasActiveVersions =
+			versions.filter(function (version) {
+				return version.active;
+			}).length > 0;
+
+		if (hasActiveVersions) {
+			if (typeof response === "function") {
+				let result = await response({
+					isBroadcaster,
+					isModUp,
+					userInfo,
+					argument,
+				});
+
+				if (result) {
+					for (let i = 0; i < result.length; i++) {
+						chatClient.say(channel, result[i]);
+					}
+				} else if (typeof response === "string") {
+					chatClient.say(channel, response);
 				}
 			}
-		} else if (typeof response === "string") {
-			chatClient.say(channel, response);
 		}
 	});
 }

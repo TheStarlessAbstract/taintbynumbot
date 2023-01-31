@@ -1,3 +1,13 @@
+let versions = [
+	{
+		description:
+			"Let the stream know you are going to lurk for a while...please come back",
+		usage: "!lurk",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -10,15 +20,17 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Let the stream know you are going to lurk for a while...please come back",
-				usage: "!lurk",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

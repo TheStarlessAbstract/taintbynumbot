@@ -3,6 +3,16 @@ const kings = require("./kings");
 let COOLDOWN = 5000;
 let timer;
 
+let versions = [
+	{
+		description:
+			"Checks how many cards remaining in the deck for the current game of !kings",
+		usage: "!kingsremain",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async () => {
@@ -21,14 +31,6 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Checks how many cards remaining in the deck for the current game of !kings",
-				usage: "!kingsremain",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
@@ -36,5 +38,15 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setTimer = setTimer;

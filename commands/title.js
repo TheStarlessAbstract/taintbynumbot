@@ -3,6 +3,28 @@ const Title = require("../models/title");
 let COOLDOWN = 30000;
 let timer;
 
+let versions = [
+	{
+		description: "Gets a random title",
+		usage: "!titleharassment",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Gets title number 69",
+		usage: "!titleharassment 69",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description:
+			"Gets a random title that includes the string 'sit on my face' uwu",
+		usage: "!titleharassment sit on my face",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -45,24 +67,6 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description: "Gets a random title",
-				usage: "!titleharassment",
-				usableBy: "users",
-			},
-			{
-				description: "Gets title number 69",
-				usage: "!titleharassment 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random title that includes the string 'sit on my face' uwu",
-				usage: "!titleharassment sit on my face",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
@@ -74,5 +78,15 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
 exports.setTimer = setTimer;

@@ -1,5 +1,14 @@
 const kings = require("./kings");
 
+let versions = [
+	{
+		description: "Resets !kings to a brand new deck",
+		usage: "!kingsreset",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -18,14 +27,17 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Resets !kings to a brand new deck",
-				usage: "!kingsreset",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

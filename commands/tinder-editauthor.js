@@ -1,5 +1,15 @@
 const Tinder = require("../models/tinder");
 
+let versions = [
+	{
+		description:
+			"Updates the author of a Tinder bio, using the bio number and @user",
+		usage: "!edittinderauthor 69 @design_by_rose",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -35,15 +45,17 @@ const getCommand = () => {
 			}
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Updates the author of a Tinder bio, using the bio number and @user",
-				usage: "!edittinderauthor 69 @design_by_rose",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;

@@ -1,5 +1,15 @@
 const chatClient = require("../bot-chatclient");
 
+let versions = [
+	{
+		description:
+			"How long has it been since you last unfollowed, and then refollowed",
+		usage: "!followage",
+		usableBy: "users",
+		active: true,
+	},
+];
+
 const getCommand = () => {
 	return {
 		response: async (config) => {
@@ -35,14 +45,6 @@ const getCommand = () => {
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"How long has it been since you last unfollowed, and then refollowed",
-				usage: "!followage",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
@@ -88,4 +90,14 @@ function getFollowLength(followTime) {
 	return followString;
 }
 
+function getVersions() {
+	return versions;
+}
+
+function setVersionActive(element) {
+	versions[element].active = !versions[element].active;
+}
+
 exports.getCommand = getCommand;
+exports.getVersions = getVersions;
+exports.setVersionActive = setVersionActive;
