@@ -1,7 +1,69 @@
+const TimerCommand = require("../classes/timer-command");
+
 const Tinder = require("../models/tinder");
 
-let COOLDOWN = 30000;
-let timer;
+let cooldown = 30000;
+
+let commandResponse = () => {
+	return {
+		response: async (config) => {
+			let result = [];
+			let currentTime = new Date();
+
+			if (
+				currentTime - tinder.getTimer() > tinder.getCooldown() ||
+				config.isBroadcaster
+			) {
+				let entries = [];
+				let index;
+				tinder.setTimer(currentTime);
+
+				if (tinder.getVersionActivity(0) && !config.argument) {
+					entries = await Tinder.find({});
+
+					if (!entries) {
+						result.push("Nobody has ever created Tinder bio for Starless");
+					}
+				} else {
+					if (tinder.getVersionActivity(1) && !isNaN(config.argument)) {
+						let quote = await Tinder.findOne({ index: config.argument });
+
+						if (quote) {
+							entries.push(quote);
+						} else {
+							result.push("There is no Tinder bio number " + config.argument);
+						}
+					} else if (
+						tinder.getVersionActivity(2) &&
+						config.argument &&
+						isNaN(config.argument)
+					) {
+						entries = await Tinder.find({
+							text: { $regex: config.argument, $options: "i" },
+						});
+
+						if (!entries) {
+							result.push("No Tinder bio found mentioning: " + config.argument);
+						}
+					}
+				}
+
+				if (entries.length > 0) {
+					index = getRandomBetweenExclusiveMax(0, entries.length);
+					result.push(entries[index].index + `. ` + entries[index].text);
+
+					if (entries[index].user != "") {
+						result.push(
+							`This Tinder bio was brought to you by the glorious, and taint-filled @${entries[index].user}`
+						);
+					}
+				}
+			}
+
+			return result;
+		},
+	};
+};
 
 let versions = [
 	{
@@ -25,73 +87,10 @@ let versions = [
 	},
 ];
 
-const getCommand = () => {
-	return {
-		response: async (config) => {
-			let result = [];
-			let currentTime = new Date();
-
-			if (currentTime - timer > COOLDOWN) {
-				let entries = [];
-				let index;
-				timer = currentTime;
-
-				if (!config.argument) {
-					entries = await Tinder.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						let quote = await Tinder.findOne({ index: config.argument });
-
-						if (quote) {
-							entries.push(quote);
-						}
-					} else {
-						entries = await Tinder.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-					}
-				}
-
-				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
-					result.push(entries[index].index + `. ` + entries[index].text);
-
-					if (entries[index].user != "") {
-						result.push(
-							`This Tinder bio was brought to you by the glorious, and taint-filled @${entries[index].user}`
-						);
-					}
-				} else if (isNaN(config.argument)) {
-					result.push("No Tinder bio found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push("Nobody has ever created Tinder bio for Starless");
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no Tinder bio number " + config.argument);
-				}
-			}
-
-			return result;
-		},
-	};
-};
+const tinder = new TimerCommand(commandResponse, versions, cooldown);
 
 function getRandomBetweenExclusiveMax(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
-
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
-exports.setTimer = setTimer;
+exports.command = tinder;

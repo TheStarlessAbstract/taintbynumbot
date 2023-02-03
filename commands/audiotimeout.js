@@ -1,32 +1,18 @@
+const BaseCommand = require("../classes/base-command");
+
 const audio = require("../bot-audio");
 
-let versions = [
-	{
-		description:
-			"Sets audio timeout for bot alerts to default length, or turns off the audio timeout",
-		usage: "!audiotimeout",
-		usableBy: "mods",
-		active: true,
-	},
-	{
-		description: "Sets the audio timeout to the specified amount of seconds",
-		usage: "!audiotimeout 3",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
 			if (config.isModUp) {
-				if (versions[0].active && !config.argument) {
+				if (audioTimeout.versions[0].active && !config.argument) {
 					audio.setAudioTimeout();
 					let status = audio.getAudioTimeout() ? "started" : "stopped";
 					result.push(["Bot audio timeout has been " + status]);
-				} else if (versions[1].active && config.argument) {
+				} else if (audioTimeout.versions[1].active && config.argument) {
 					switch (config.argument) {
 						case config.argument > 0:
 							audio.setAudioTimeout(config.argument);
@@ -57,14 +43,22 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description:
+			"Sets audio timeout for bot alerts to default length, or turns off the audio timeout",
+		usage: "!audiotimeout",
+		usableBy: "mods",
+		active: true,
+	},
+	{
+		description: "Sets the audio timeout to the specified amount of seconds",
+		usage: "!audiotimeout 3",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const audioTimeout = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = audioTimeout;

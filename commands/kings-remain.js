@@ -1,26 +1,20 @@
+const TimerCommand = require("../classes/timer-command");
+
 const kings = require("./kings");
 
-let COOLDOWN = 5000;
-let timer;
+let cooldown = 5000;
 
-let versions = [
-	{
-		description:
-			"Checks how many cards remaining in the deck for the current game of !kings",
-		usage: "!kingsremain",
-		usableBy: "users",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
-		response: async () => {
+		response: async (config) => {
 			let result = [];
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN) {
-				timer = currentTime;
+			if (
+				currentTime - kingsRemain.getTimer() > kingsRemain.getCooldown() ||
+				config.isBroadcaster
+			) {
+				kingsRemain.setTimer(currentTime);
 
 				let cardsToDraw = kings.getCardsToDraw();
 				let cardsRemain = cardsToDraw.filter((card) => {
@@ -34,19 +28,16 @@ const getCommand = () => {
 	};
 };
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+let versions = [
+	{
+		description:
+			"Checks how many cards remaining in the deck for the current game of !kings",
+		usage: "!kingsremain",
+		usableBy: "users",
+		active: true,
+	},
+];
 
-function getVersions() {
-	return versions;
-}
+const kingsRemain = new TimerCommand(commandResponse, versions, cooldown);
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
-exports.setTimer = setTimer;
+exports.command = kingsRemain;

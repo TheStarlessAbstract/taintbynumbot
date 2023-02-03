@@ -1,15 +1,8 @@
+const BaseCommand = require("../classes/base-command");
+
 const Quote = require("../models/quote");
 
-let versions = [
-	{
-		description: "Saves a new, and totally out of context quote",
-		usage: "!addquote Fuck fuck fuck fuck fuck",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -49,18 +42,19 @@ const getCommand = () => {
 	};
 };
 
+let versions = [
+	{
+		description: "Saves a new, and totally out of context quote",
+		usage: "!addquote Fuck fuck fuck fuck fuck",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
+const addQuote = new BaseCommand(commandResponse, versions);
+
 function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = addQuote;

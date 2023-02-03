@@ -1,18 +1,11 @@
+const BaseCommand = require("../classes/base-command");
+
 const Command = require("../models/command");
 
 const commands = require("../bot-commands");
 const discord = require("../bot-discord");
 
-let versions = [
-	{
-		description: "Edits an existing command",
-		usage: "!editcomm !newCommand This is an edited command",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -80,14 +73,15 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description: "Edits an existing command",
+		usage: "!editcomm !newCommand This is an edited command",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const addCommand = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = addCommand;

@@ -28,7 +28,6 @@ async function setup() {
 		await updateCommands();
 	} else {
 		twitchCommands = createCommands();
-
 		for (let i = 0; i < twitchCommands.length; i++) {
 			channel.send({ content: twitchCommands[i] });
 		}

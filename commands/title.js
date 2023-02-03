@@ -1,7 +1,64 @@
+const TimerCommand = require("../classes/timer-command");
+
 const Title = require("../models/title");
 
-let COOLDOWN = 30000;
-let timer;
+let cooldown = 30000;
+
+let commandResponse = () => {
+	return {
+		response: async (config) => {
+			let result = [];
+			let currentTime = new Date();
+
+			if (
+				currentTime - title.getTimer() > title.getCooldown() ||
+				config.isBroadcaster
+			) {
+				let entries = [];
+				let index;
+				let quote;
+				title.setTimer(currentTime);
+
+				if (title.getVersionActivity(0) && !config.argument) {
+					entries = await Title.find({});
+
+					if (!entries) {
+						result.push(
+							"The mods don't seem to have been very abusive lately...with titles"
+						);
+					}
+				} else {
+					if (title.getVersionActivity(1) && !isNaN(config.argument)) {
+						quote = await Title.findOne({ index: config.argument });
+						if (quote) {
+							entries.push(quote);
+						} else {
+							result.push("There is no title number " + config.argument);
+						}
+					} else if (
+						title.getVersionActivity(2) &&
+						config.argument &&
+						isNaN(config.argument)
+					) {
+						entries = await Title.find({
+							text: { $regex: config.argument, $options: "i" },
+						});
+
+						if (!entries) {
+							result.push("No Title found mentioning: " + config.argument);
+						}
+					}
+				}
+
+				if (entries.length > 0) {
+					index = getRandomBetweenExclusiveMax(0, entries.length);
+					result.push(entries[index].index + `. ` + entries[index].text);
+				}
+			}
+			return result;
+		},
+	};
+};
 
 let versions = [
 	{
@@ -25,68 +82,10 @@ let versions = [
 	},
 ];
 
-const getCommand = () => {
-	return {
-		response: async (config) => {
-			let result = [];
-			let currentTime = new Date();
-
-			if (currentTime - timer > COOLDOWN) {
-				let entries = [];
-				let index;
-				let quote;
-				timer = currentTime;
-
-				if (!config.argument) {
-					entries = await Title.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						quote = await Title.findOne({ index: config.argument });
-						if (quote) {
-							entries.push(quote);
-						}
-					} else {
-						entries = await Title.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-					}
-				}
-
-				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
-					result.push(entries[index].index + `. ` + entries[index].text);
-				} else if (isNaN(config.argument)) {
-					result.push("No Title found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push(
-						"The mods don't seem to have been very abusive lately...with titles"
-					);
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no title number " + config.argument);
-				}
-			}
-			return result;
-		},
-	};
-};
+const title = new TimerCommand(commandResponse, versions, cooldown);
 
 function getRandomBetweenExclusiveMax(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
-
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
-exports.setTimer = setTimer;
+exports.command = title;

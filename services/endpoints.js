@@ -1,70 +1,60 @@
+const express = require("express");
+const path = require("path");
+
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
 
-async function setup(app, server) {
-	const port = process.env.PORT || 5000;
-	const express = require("express"); // ask formal
+const router = express.Router();
 
-	process.on("SIGTERM", handle);
-	process.on("SIGINT", handle);
-	app.use(express.json());
-	app.use(express.static(__dirname + "/public"));
+router.get("/", (req, res) => {
+	console.log("hello twitch");
+	res.send("Hello Twitch!");
+});
 
-	app.get("/", (req, res) => {
-		console.log("hello twitch");
-		res.send("Hello Twitch!");
-	});
+router.get("/auth", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
+});
 
-	app.get("/auth", (req, res) => {
-		res.sendFile(__dirname + "/public/bot-auth.html");
-	});
+router.get("/channelpointoverlay", (req, res) => {
+	res.sendFile(
+		path.join(__dirname, "..", "public", "bot-channelPointsOverlay.html")
+	);
+});
 
-	app.get("/channelpointoverlay", (req, res) => {
-		res.sendFile(__dirname + "/public/bot-channelPointsOverlay.html");
-	});
+router.get("/command", (req, res) => {
+	let name = req.query.name;
+	let number = req.query.version;
+	let message = `{"command":  "${name}", "version": ${number}}`;
 
-	app.get("/command", (req, res) => {
-		let name = req.query.name;
-		let number = req.query.version;
-		let message = `{"command":  "${name}", "version": ${number}}`;
+	serverPubNub.publishMessage("command_toggle", message);
+	res.sendStatus(200);
+});
 
-		serverPubNub.publishMessage("command_toggle", message);
-		res.sendStatus(200);
-	});
+router.post("/deathcounter", (req, res) => {
+	let average;
+	let deaths = req.body.deaths;
+	let gameDeaths = req.body.gameDeaths;
+	let allDeaths = req.body.allDeaths;
 
-	app.get("/deathcounteroverlay", (req, res) => {
-		res.sendFile(__dirname + "/public/bot-deathCounterOverlay.html");
-	});
+	if (!req.body.average) {
+		average = { hours: 0, minutes: 0, seconds: 0 };
+	} else {
+		average = req.body.average;
+	}
 
-	app.post("/deathcounter", (req, res) => {
-		let average;
-		let deaths = req.body.deaths;
-		let gameDeaths = req.body.gameDeaths;
-		let allDeaths = req.body.allDeaths;
+	serverIo.setDeaths(deaths, gameDeaths, allDeaths, average);
+	res.sendStatus(201);
+});
 
-		if (!req.body.average) {
-			average = { hours: 0, minutes: 0, seconds: 0 };
-		} else {
-			average = req.body.average;
-		}
+router.get("/deathcounteroverlay", (req, res) => {
+	res.sendFile(
+		path.join(__dirname, "..", "public", "bot-deathCounterOverlay.html")
+	);
+});
 
-		serverIo.setDeaths(deaths, gameDeaths, allDeaths, average);
-		res.sendStatus(201);
-	});
+router.post("/playaudio", (req, res) => {
+	serverIo.playAudio(req.body.url);
+	res.sendStatus(201);
+});
 
-	app.post("/playaudio", (req, res) => {
-		serverIo.playAudio(req.body.url);
-		res.sendStatus(201);
-	});
-
-	server.listen(port, () => {
-		console.log("listening on *:" + port);
-	});
-}
-
-async function handle(signal) {
-	await serverIo.saveDeathState();
-	process.exit(0);
-}
-
-exports.setup = setup;
+module.exports = router;

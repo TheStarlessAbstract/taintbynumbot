@@ -1,3 +1,5 @@
+const BaseCommand = require("../classes/base-command");
+
 const AudioLink = require("../models/audiolink");
 const Deck = require("../models/deck");
 const KingsSaveState = require("../models/kingssavestate");
@@ -9,24 +11,14 @@ let cost = 100;
 let kingsCount;
 let timer;
 
-let versions = [
-	{
-		description: "Draw a card in the Kings game",
-		usage: "!kings",
-		usableBy: "users",
-		cost: "100 Tainty Points",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 			let redeemUser = config.userInfo.userName;
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN) {
+			if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
 				timer = currentTime;
 
 				let user = await LoyaltyPoint.findOne({
@@ -111,6 +103,18 @@ const getCommand = () => {
 		},
 	};
 };
+
+let versions = [
+	{
+		description: "Draw a card in the Kings game",
+		usage: "!kings",
+		usableBy: "users",
+		cost: "100 Tainty Points",
+		active: true,
+	},
+];
+
+const kings = new BaseCommand(commandResponse, versions);
 
 async function resetKings() {
 	let gameState = await KingsSaveState.findOne({});
@@ -310,18 +314,8 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = kings;
 exports.getCardsToDraw = getCardsToDraw;
-exports.getCommand = getCommand;
 exports.saveKingsState = saveKingsState;
 exports.setTimer = setTimer;
 exports.resetKings = resetKings;

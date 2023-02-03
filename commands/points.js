@@ -1,37 +1,25 @@
+const TimerCommand = require("../classes/timer-command");
+
 const chatClient = require("../bot-chatclient");
 
 const LoyaltyPoint = require("../models/loyaltypoint");
 
-let COOLDOWN = 5000;
-let timer;
+let cooldown = 5000;
 
-let versions = [
-	{
-		description:
-			"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
-		usage: "!points",
-		usableBy: "users",
-		active: true,
-	},
-	{
-		description: "Give points to a user",
-		usage: "!points 2000 @buhhsbot",
-		usableBy: "streamer",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
+			if (
+				currentTime - points.getTimer() > points.getCooldown() ||
+				config.isBroadcaster
+			) {
 				let user;
-				timer = currentTime;
+				points.setTimer(currentTime);
 
-				if (!config.argument) {
+				if (points.getVersionActivity(0) && !config.argument) {
 					user = await LoyaltyPoint.findOne({
 						userId: config.userInfo.userId,
 					});
@@ -51,8 +39,13 @@ const getCommand = () => {
 								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
 						);
 					}
-				} else if (config.isBroadcaster && isNaN(config.argument)) {
+				} else if (
+					points.getVersionActivity(1) &&
+					config.isBroadcaster &&
+					isNaN(config.argument)
+				) {
 					let username;
+
 					if (config.argument.startsWith("@")) {
 						username = config.argument.substring(1).split(" ");
 					} else {
@@ -101,19 +94,22 @@ const getCommand = () => {
 	};
 };
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+let versions = [
+	{
+		description:
+			"Check how many Tainty Points you have. You are going to need some for !drinkbitch, and !kings",
+		usage: "!points",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Give points to a user",
+		usage: "!points 2000 @buhhsbot",
+		usableBy: "streamer",
+		active: true,
+	},
+];
 
-function getVersions() {
-	return versions;
-}
+const points = new TimerCommand(commandResponse, versions, cooldown);
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
-exports.setTimer = setTimer;
+exports.command = points;

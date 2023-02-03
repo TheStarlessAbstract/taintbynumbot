@@ -1,3 +1,5 @@
+const BaseCommand = require("../classes/base-command");
+
 const AudioLink = require("../models/audiolink");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
@@ -7,6 +9,60 @@ let audioLinks;
 let COOLDOWN = 5000;
 let cost = 500;
 let timer;
+
+let commandResponse = () => {
+	return {
+		response: async (config) => {
+			let result = [];
+			let audioLink;
+			let currentTime = new Date();
+
+			if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
+				timer = currentTime;
+
+				let user = await LoyaltyPoint.findOne({
+					userId: config.userInfo.userId,
+				});
+
+				if (user) {
+					if (user.points > cost) {
+						audioLink = getRandomisedAudioFileUrl(audioLinks);
+						audio.play(audioLink);
+
+						user.points -= cost;
+						user.save();
+						result.push("@TheStarlessAbstract drink, bitch!");
+					} else {
+						if (getRandomBetweenInclusiveMax(1, 100) == 100) {
+							audioLink = getRandomisedAudioFileUrl(audioLinks);
+							audio.play(audioLink);
+
+							result.push(
+								"@" +
+									config.userInfo.displayName +
+									" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
+							);
+						} else {
+							result.push(
+								"@" +
+									config.userInfo.displayName +
+									" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
+							);
+						}
+					}
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
+					);
+				}
+			}
+
+			return result;
+		},
+	};
+};
 
 let versions = [
 	{
@@ -18,69 +74,7 @@ let versions = [
 	},
 ];
 
-const getCommand = () => {
-	return {
-		response: async (config) => {
-			let result = [];
-			let audioLink;
-			let currentTime = new Date();
-
-			try {
-				if (currentTime - timer < COOLDOWN) {
-					throw new Error("Wait longer");
-				}
-
-				let user = await LoyaltyPoint.findOne({
-					userId: config.userInfo.userId,
-				});
-
-				if (!user) {
-					throw new Error("No user found");
-				}
-
-				if (user.points < cost) {
-					throw new Error("Not enough points");
-				}
-
-				timer = currentTime;
-
-				audioLink = getRandomisedAudioFileUrl(audioLinks);
-				audio.play(audioLink);
-
-				user.points -= cost;
-				user.save();
-				result.push("@TheStarlessAbstract drink, bitch!");
-			} catch (error) {
-				if (error == "No user found") {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
-					);
-				} else if (error == "Not enough points") {
-					if (getRandomBetweenInclusiveMax(1, 100) == 100) {
-						audioLink = getRandomisedAudioFileUrl(audioLinks);
-						audio.play(audioLink);
-
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
-						);
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
-						);
-					}
-				}
-			}
-
-			return result;
-		},
-	};
-};
+const drinkBitch = new BaseCommand(commandResponse, versions);
 
 function getRandomisedAudioFileUrl(array) {
 	let index = getRandomBetweenExclusiveMax(0, array.length);
@@ -105,16 +99,6 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = drinkBitch;
 exports.setTimer = setTimer;
 exports.updateAudioLinks = updateAudioLinks;

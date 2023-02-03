@@ -1,15 +1,8 @@
+const BaseCommand = require("../classes/base-command");
+
 const chatClient = require("../bot-chatclient");
 
-let versions = [
-	{
-		description: "Gives a shoutout to some wonderful user",
-		usage: "!so @buhhsbot",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -62,14 +55,15 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description: "Gives a shoutout to some wonderful user",
+		usage: "!so @buhhsbot",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const so = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = so;

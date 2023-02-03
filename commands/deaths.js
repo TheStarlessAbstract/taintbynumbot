@@ -1,19 +1,12 @@
+const BaseCommand = require("../classes/base-command");
+
 const DeathCounter = require("../models/deathcounter");
 
 const chatClient = require("../bot-chatclient");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
-let versions = [
-	{
-		description: "Gets total deaths for current game",
-		usage: "!deaths",
-		usableBy: "users",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async () => {
 			let result = [];
@@ -47,14 +40,15 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description: "Gets total deaths for current game",
+		usage: "!deaths",
+		usableBy: "users",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const deaths = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = deaths;

@@ -1,28 +1,12 @@
+const BaseCommand = require("../classes/base-command");
+
 const chatClient = require("../bot-chatclient");
 
 const Title = require("../models/title");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
-let versions = [
-	{
-		description:
-			"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
-		usage: "!addtitle",
-		usableBy: "mods",
-		active: true,
-	},
-	{
-		description:
-			"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
-		usage:
-			"!addtitle Streamer barely plays game, probably in the menu right now",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -32,7 +16,7 @@ const getCommand = () => {
 				let index = entries.length ? getNextIndex(entries) : 1;
 				let message;
 
-				if (!config.argument) {
+				if (addTitle.versions[0].active && !config.argument) {
 					try {
 						const apiClient = chatClient.getApiClient();
 						let channel = await apiClient.channels.getChannelInfo(twitchId);
@@ -49,7 +33,7 @@ const getCommand = () => {
 							"Twitch says no, and Starless should really sort this out some time after stream"
 						);
 					}
-				} else if (config.argument) {
+				} else if (addTitle.versions[1].active && config.argument) {
 					if (config.argument.includes("@")) {
 						config.argument = config.argument.split("@");
 						message = config.argument[0];
@@ -89,18 +73,28 @@ const getCommand = () => {
 	};
 };
 
+let versions = [
+	{
+		description:
+			"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
+		usage: "!addtitle",
+		usableBy: "mods",
+		active: true,
+	},
+	{
+		description:
+			"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
+		usage:
+			"!addtitle Streamer barely plays game, probably in the menu right now",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
+const addTitle = new BaseCommand(commandResponse, versions);
+
 function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = addTitle;

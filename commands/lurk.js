@@ -1,14 +1,6 @@
-let versions = [
-	{
-		description:
-			"Let the stream know you are going to lurk for a while...please come back",
-		usage: "!lurk",
-		usableBy: "users",
-		active: true,
-	},
-];
+const BaseCommand = require("../classes/base-command");
 
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -23,14 +15,16 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description:
+			"Let the stream know you are going to lurk for a while...please come back",
+		usage: "!lurk",
+		usableBy: "users",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const lurk = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = lurk;

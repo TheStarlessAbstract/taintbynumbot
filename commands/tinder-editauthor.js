@@ -1,16 +1,8 @@
+const BaseCommand = require("../classes/base-command");
+
 const Tinder = require("../models/tinder");
 
-let versions = [
-	{
-		description:
-			"Updates the author of a Tinder bio, using the bio number and @user",
-		usage: "!edittinderauthor 69 @design_by_rose",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -48,14 +40,16 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description:
+			"Updates the author of a Tinder bio, using the bio number and @user",
+		usage: "!edittinderauthor 69 @design_by_rose",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const tinderEditAuthor = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = tinderEditAuthor;

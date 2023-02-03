@@ -1,5 +1,7 @@
 const axios = require("axios");
 
+const BaseCommand = require("../classes/base-command");
+
 const AudioLink = require("../models/audiolink");
 const DeathCounter = require("../models/deathcounter");
 
@@ -19,19 +21,9 @@ let timer;
 let totalGameDeaths;
 let totalStreamDeaths;
 
-let versions = [
-	{
-		description:
-			"To keep track of my many, many, many, many, many deaths/failures",
-		usage: "!f",
-		usableBy: "users",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
-		response: async ({}) => {
+		response: async (config) => {
 			let result = [];
 
 			try {
@@ -44,7 +36,7 @@ const getCommand = () => {
 				} else {
 					let currentTime = new Date();
 
-					if (currentTime - timer > COOLDOWN) {
+					if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
 						timer = currentTime;
 						let gameName = stream.gameName;
 						let streamDate = stream.startDate;
@@ -196,6 +188,18 @@ const getCommand = () => {
 	};
 };
 
+let versions = [
+	{
+		description:
+			"To keep track of my many, many, many, many, many deaths/failures",
+		usage: "!f",
+		usableBy: "users",
+		active: true,
+	},
+];
+
+const f = new BaseCommand(commandResponse, versions);
+
 function setTimer(newTimer) {
 	timer = newTimer;
 }
@@ -316,17 +320,7 @@ async function setup() {
 	await setTotalGameDeaths();
 }
 
-function getVersions() {
-	return versions;
-}
-
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
-
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = f;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
 exports.setTimer = setTimer;
 exports.setTotalGameDeaths = setTotalGameDeaths;

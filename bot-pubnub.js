@@ -3,10 +3,8 @@ const PubNub = require("pubnub");
 
 const commands = require("./bot-commands");
 
-let thing = require("./commands/quote");
-
-const pubKey = process.env.PUBNUB_PUBKEY;
-const subKey = process.env.PUBNUB_SUBKEY;
+const pubKey = process.env.PUBNUB_PUBLISH_KEY;
+const subKey = process.env.PUBNUB_SUBSCRIBE_KEY;
 
 const pubnub = new PubNub({
 	publishKey: pubKey,
@@ -49,11 +47,6 @@ function createListener() {
 }
 const handleCommandToggle = (commandName, number) => {
 	commands.list[commandName].setVersionActive(number);
-
-	// console.log(commands.list[commandName].versions[number]);
-	// versions[number].active = !versions[number].active;
-	// commands.list[commandName].versions[number].active =
-	// 	!commands.list[commandName].versions[number].active;
 };
 
 exports.setup = setup;

@@ -27,13 +27,7 @@ async function setup(newIo) {
 			isLive = true;
 
 			interval = setInterval(() => {
-				try {
-					ssl.get(url, (res) => {
-						// do nothing
-					});
-				} catch (err) {
-					console.log(err);
-				}
+				ssl.get(url, (res) => {});
 			}, getRandomBetween(600000, 900000));
 
 			socket.on("disconnect", () => {

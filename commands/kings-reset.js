@@ -1,15 +1,8 @@
+const BaseCommand = require("../classes/base-command");
+
 const kings = require("./kings");
 
-let versions = [
-	{
-		description: "Resets !kings to a brand new deck",
-		usage: "!kingsreset",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -30,14 +23,15 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description: "Resets !kings to a brand new deck",
+		usage: "!kingsreset",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const kingsReset = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = kingsReset;

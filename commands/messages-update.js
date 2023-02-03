@@ -1,15 +1,8 @@
+const BaseCommand = require("../classes/base-command");
+
 const messages = require("../bot-messages");
 
-let versions = [
-	{
-		description: "Updates random bot message list",
-		usage: "!updatemessages",
-		usableBy: "mods",
-		active: true,
-	},
-];
-
-const getCommand = () => {
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
@@ -33,14 +26,15 @@ const getCommand = () => {
 	};
 };
 
-function getVersions() {
-	return versions;
-}
+let versions = [
+	{
+		description: "Updates random bot message list",
+		usage: "!updatemessages",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setVersionActive(element) {
-	versions[element].active = !versions[element].active;
-}
+const updateMessages = new BaseCommand(commandResponse, versions);
 
-exports.getCommand = getCommand;
-exports.getVersions = getVersions;
-exports.setVersionActive = setVersionActive;
+exports.command = updateMessages;
