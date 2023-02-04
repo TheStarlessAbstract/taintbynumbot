@@ -17,6 +17,8 @@ const kings = require("./commands/kings");
 const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/messages-add");
 const messagesUpdate = require("./commands/messages-update");
+const modAbuseAdd = require("./commands/modabuse-add");
+const modAbuse = require("./commands/modabuse");
 const points = require("./commands/points");
 const quoteAdd = require("./commands/quote-add");
 const quote = require("./commands/quote");
@@ -24,7 +26,6 @@ const so = require("./commands/so");
 const tinderAdd = require("./commands/tinder-add");
 const tinderEditAuthor = require("./commands/tinder-editauthor");
 const tinder = require("./commands/tinder");
-const titleAdd = require("./commands/title-add");
 const title = require("./commands/title");
 
 let chugLastUseTime = "";
@@ -32,8 +33,8 @@ let chugLastUseTime = "";
 const commands = {
 	addcomm: commandAdd.command,
 	addmessage: messagesAdd.command,
+	addmodabuse: modAbuseAdd.command,
 	addtinder: tinderAdd.command,
-	addtitle: titleAdd.command,
 	addquote: quoteAdd.command,
 	audiotimeout: audioTimeout.command,
 	buhhs: buhhs.command,
@@ -90,11 +91,12 @@ const commands = {
 	kingsreset: kingsReset.command,
 	kings: kings.command,
 	lurk: lurk.command,
-	modabuse: title.command,
+	modabuse: modAbuse.command,
 	points: points.command,
+	quote: quote.command,
 	so: so.command,
 	tinderquote: tinder.command,
-	quote: quote.command,
+	// title: title.command,
 	updatemessages: messagesUpdate.command,
 };
 

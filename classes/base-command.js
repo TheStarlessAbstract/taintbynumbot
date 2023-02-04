@@ -4,6 +4,10 @@ class BaseCommand {
 		this.versions = versions;
 	}
 
+	getVersions() {
+		return this.versions;
+	}
+
 	setVersionActive(element) {
 		this.versions[element].active = !this.versions[element].active;
 	}

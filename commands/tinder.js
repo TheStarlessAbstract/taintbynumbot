@@ -26,7 +26,13 @@ let commandResponse = () => {
 					}
 				} else {
 					if (tinder.getVersionActivity(1) && !isNaN(config.argument)) {
-						let quote = await Tinder.findOne({ index: config.argument });
+						let quote;
+
+						if (config.argument == 0) {
+							quote = await Tinder.findOne({}).sort("-index").exec();
+						} else {
+							quote = await Tinder.findOne({ index: config.argument });
+						}
 
 						if (quote) {
 							entries.push(quote);

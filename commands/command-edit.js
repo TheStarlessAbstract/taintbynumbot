@@ -52,7 +52,7 @@ let commandResponse = () => {
 						}
 					} else {
 						result.push([
-							"To edit a Command, you must include the Command name, and follwed by the new Command output, Command must start with '!' '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
+							"To edit a Command, you must include the Command name, and followed by the new Command output, Command must start with '!' '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
 						]);
 					}
 				} else {
@@ -64,7 +64,7 @@ let commandResponse = () => {
 				result.push(["!editcomm command is for Mods only"]);
 			} else if (!config.argument) {
 				result.push([
-					"To edit a Command, you must include the Command name, and follwed by the the Command output, edited Command must start with !: '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
+					"To edit a Command, you must include the Command name, and followed by the the Command output, edited Command must start with !: '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
 				]);
 			}
 

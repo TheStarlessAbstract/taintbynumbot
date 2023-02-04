@@ -69,10 +69,13 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		let [command, argument] = message.slice(1).split(/\s(.+)/);
 
-		const { response } =
-			(await commands.list[command.toLowerCase()].getCommand()) || {};
+		let commandLink = commands.list[command.toLowerCase()];
 
-		let versions = commands.list[command.toLowerCase()].getVersions();
+		if (commandLink == undefined) return;
+
+		const { response } = (await commandLink.getCommand()) || {};
+
+		let versions = commandLink.getVersions();
 
 		let hasActiveVersions =
 			versions.filter(function (version) {

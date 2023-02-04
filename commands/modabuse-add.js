@@ -16,7 +16,7 @@ let commandResponse = () => {
 				let index = entries.length ? getNextIndex(entries) : 1;
 				let message;
 
-				if (addTitle.versions[0].active && !config.argument) {
+				if (addModAbuse.versions[0].active && !config.argument) {
 					try {
 						const apiClient = chatClient.getApiClient();
 						let channel = await apiClient.channels.getChannelInfo(twitchId);
@@ -33,7 +33,7 @@ let commandResponse = () => {
 							"Twitch says no, and Starless should really sort this out some time after stream"
 						);
 					}
-				} else if (addTitle.versions[1].active && config.argument) {
+				} else if (addModAbuse.versions[1].active && config.argument) {
 					if (config.argument.includes("@")) {
 						config.argument = config.argument.split("@");
 						message = config.argument[0];
@@ -65,7 +65,7 @@ let commandResponse = () => {
 					}
 				}
 			} else if (!config.isModUp) {
-				result.push("!addTitle command is for Mods only");
+				result.push("!addModAbuse command is for Mods only");
 			}
 
 			return result;
@@ -77,7 +77,7 @@ let versions = [
 	{
 		description:
 			"Saves the current title, because it is totally super funny, and not at all abusive title to Starless, likely created by Rose",
-		usage: "!addtitle",
+		usage: "!addModAbuse",
 		usableBy: "mods",
 		active: true,
 	},
@@ -85,16 +85,16 @@ let versions = [
 		description:
 			"Saves a new, totally super funny, and not at all abusive title to Starless, likely created by Rose",
 		usage:
-			"!addtitle Streamer barely plays game, probably in the menu right now",
+			"!addModAbuse Streamer barely plays game, probably in the menu right now",
 		usableBy: "mods",
 		active: true,
 	},
 ];
 
-const addTitle = new BaseCommand(commandResponse, versions);
+const addModAbuse = new BaseCommand(commandResponse, versions);
 
 function getNextIndex(array) {
 	return array[array.length - 1].index + 1;
 }
 
-exports.command = addTitle;
+exports.command = addModAbuse;

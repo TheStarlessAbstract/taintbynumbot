@@ -2,6 +2,8 @@ const BaseCommand = require("../classes/base-command");
 
 const chatClient = require("../bot-chatclient");
 
+let twitchId = process.env.TWITCH_USER_ID;
+
 let commandResponse = () => {
 	return {
 		response: async (config) => {
@@ -77,14 +79,16 @@ function getFollowLength(followTime) {
 		{ value: second, name: "second" },
 	];
 
+	// 5 months4 weeks1 day22 hours4 minutes27 secon.
+
 	let followString = "";
 	for (const timeUnit of timeUnits) {
 		if (timeUnit.value > 0) {
 			followString +=
 				timeUnit.value +
 				" " +
-				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name);
-			(", ");
+				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name) +
+				", ";
 		}
 	}
 

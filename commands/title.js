@@ -1,60 +1,31 @@
-const TimerCommand = require("../classes/timer-command");
+const BaseCommand = require("../classes/base-command");
 
-const Title = require("../models/title");
+const chatClient = require("../bot-chatclient");
 
-let cooldown = 30000;
+let twitchId = process.env.TWITCH_USER_ID;
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let currentTime = new Date();
+			console.log(1);
+			if (config.isModUp) {
+				if (title.versions[0].active && !config.argument) {
+					result.push(["The curent title is: "]);
+				} else if (title.versions[1].active && config.argument) {
+					const apiClient = chatClient.getApiClient();
 
-			if (
-				currentTime - title.getTimer() > title.getCooldown() ||
-				config.isBroadcaster
-			) {
-				let entries = [];
-				let index;
-				let quote;
-				title.setTimer(currentTime);
+					console.log(config.argument);
+					await apiClient.channels.updateChannelInfo(twitchId, {
+						title: config.argument,
+					});
 
-				if (title.getVersionActivity(0) && !config.argument) {
-					entries = await Title.find({});
-
-					if (!entries) {
-						result.push(
-							"The mods don't seem to have been very abusive lately...with titles"
-						);
-					}
-				} else {
-					if (title.getVersionActivity(1) && !isNaN(config.argument)) {
-						quote = await Title.findOne({ index: config.argument });
-						if (quote) {
-							entries.push(quote);
-						} else {
-							result.push("There is no title number " + config.argument);
-						}
-					} else if (
-						title.getVersionActivity(2) &&
-						config.argument &&
-						isNaN(config.argument)
-					) {
-						entries = await Title.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
-
-						if (!entries) {
-							result.push("No Title found mentioning: " + config.argument);
-						}
-					}
+					result.push(["Title has been set to " + config.argument]);
 				}
-
-				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
-					result.push(entries[index].index + `. ` + entries[index].text);
-				}
+			} else if (!config.isModUp) {
+				result.push(["!title command is for Mods only"]);
 			}
+
 			return result;
 		},
 	};
@@ -62,30 +33,19 @@ let commandResponse = () => {
 
 let versions = [
 	{
-		description: "Gets a random title",
-		usage: "!titleharassment",
+		description: "Gets current title",
+		usage: "!title",
 		usableBy: "users",
 		active: true,
 	},
 	{
-		description: "Gets title number 69",
-		usage: "!titleharassment 69",
-		usableBy: "users",
-		active: true,
-	},
-	{
-		description:
-			"Gets a random title that includes the string 'sit on my face' uwu",
-		usage: "!titleharassment sit on my face",
-		usableBy: "users",
+		description: "Sets the audio timeout to the specified amount of seconds",
+		usage: "!title My mistakes bring all the bots to the yard",
+		usableBy: "mods",
 		active: true,
 	},
 ];
 
-const title = new TimerCommand(commandResponse, versions, cooldown);
-
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
+const title = new BaseCommand(commandResponse, versions);
 
 exports.command = title;
