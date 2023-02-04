@@ -4,6 +4,7 @@ let mongoose = require("mongoose"),
 let QuoteSchema = new Schema({
 	index: {
 		type: Number,
+		unique: true,
 	},
 	text: {
 		type: String,
