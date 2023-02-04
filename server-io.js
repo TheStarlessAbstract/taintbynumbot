@@ -106,7 +106,12 @@ async function setup(newIo) {
 		if (socket.handshake.headers.referer.includes("auth")) {
 			console.log("/auth connected");
 
-			io.emit("setClientId", clientId);
+			let redirectUri = "http://localhost:5000/test";
+			let scope =
+				"channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
+				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions";
+
+			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
 	});
 }

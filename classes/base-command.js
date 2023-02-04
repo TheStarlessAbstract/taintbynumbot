@@ -9,7 +9,9 @@ class BaseCommand {
 	}
 
 	setVersionActive(element) {
-		this.versions[element].active = !this.versions[element].active;
+		if (typeof element == "number" && this.versions[element]) {
+			this.versions[element].active = !this.versions[element].active;
+		}
 	}
 
 	getVersionActivity(element) {

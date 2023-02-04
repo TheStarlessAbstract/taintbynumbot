@@ -1,4 +1,4 @@
-const quote = require("../../commands/quote");
+const quote = require("../../commands/quote").command;
 
 test("setVersionActive - if param valid - active property set to false", () => {
 	quote.setVersionActive(0);
