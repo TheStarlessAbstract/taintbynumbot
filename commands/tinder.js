@@ -79,7 +79,8 @@ let versions = [
 		active: true,
 	},
 	{
-		description: "Gets Tinder Bio number 69",
+		description:
+			"Gets Tinder Bio number 69. Use !tinderquote 0 to get the latest",
 		usage: "!tinderquote 69",
 		usableBy: "users",
 		active: true,
