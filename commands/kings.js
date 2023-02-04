@@ -1,3 +1,5 @@
+const audio = require("../bot-audio");
+
 const BaseCommand = require("../classes/base-command");
 
 const AudioLink = require("../models/audiolink");

@@ -121,9 +121,13 @@ function getRandomBetween(min, max) {
 }
 
 function playAudio(audioLink) {
+	console.log(1);
 	if (lastPlayFinished) {
+		console.log(2);
 		io.emit("playAudio", audioLink);
 		lastPlayFinished = false;
+	} else {
+		console.log(3);
 	}
 }
 
