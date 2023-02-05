@@ -2,9 +2,6 @@ const BaseCommand = require("../classes/base-command");
 
 const Quote = require("../models/quote");
 
-// const commands = require("../bot-commands");
-// const discord = require("../bot-discord");
-
 let commandResponse = () => {
 	return {
 		response: async (config) => {
@@ -17,8 +14,10 @@ let commandResponse = () => {
 				if (editQuote.versions[0].active && !isNaN(index)) {
 					let quote = await Quote.findOne({ index: index });
 					if (quote) {
+						result.push("Quote " + index + " was: " + quote.text);
 						quote.text = text;
 						await quote.save();
+
 						result.push(
 							"Quote " + index + " has been updated to: " + quote.text
 						);
@@ -30,7 +29,10 @@ let commandResponse = () => {
 					config.argument &&
 					isNaN(index)
 				) {
-					let entries = await Quote.find({ text: text });
+					let entries = await Quote.find({
+						text: { $regex: text, $options: "i" },
+					});
+
 					if (entries) {
 						let pularlity = entries.length > 1 ? "quotes" : "quote";
 
@@ -41,10 +43,15 @@ let commandResponse = () => {
 						let output;
 						if (entries.length > 1) {
 							output = "Indexes include: ";
-							for (let i = 0; i < entries.length; i++) {
+							for (let i = 0; i < 5; i++) {
 								output += entries[i].index + ", ";
 							}
 							result.push(output);
+							if (entries.length > 5) {
+								result.push(
+									"There are more matches, maybe you could be more specific"
+								);
+							}
 						} else {
 							output =
 								entries[0].index +
@@ -54,50 +61,6 @@ let commandResponse = () => {
 					} else {
 						result.push("No quotes found including '" + text + "'");
 					}
-				}
-
-				// let commandName = config.argument
-				// 	.split(/\s(.+)/)[0]
-				// 	.slice(1)
-				// 	.toLowerCase();
-				// let commandText = config.argument.split(/\s(.+)/)[1];
-
-				if (commandText) {
-					const { response } = (await commands.list[commandName]) || {};
-
-					if (response) {
-						let command = await Command.findOne({ name: commandName });
-
-						if (command) {
-							commands.list[commandName] = {
-								response: commandText,
-							};
-
-							command.text = commandText;
-							await command.save();
-
-							discord.updateCommands("edit", {
-								name: commandName,
-								description: commandText,
-								usage: "!" + commandName,
-								usableBy: "users",
-							});
-
-							result.push(["!" + commandName + " has been edited!"]);
-						} else {
-							result.push([
-								"!" +
-									commandName +
-									" is too spicy to be edited through chat, Starless is going to have to do some work for that, so ask nicely",
-							]);
-						}
-					} else {
-						result.push(["No command found by this name !" + commandName]);
-					}
-				} else {
-					result.push([
-						"To edit a Command, you must include the Command name, and followed by the new Command output, Command must start with '!' '!editQuote !Yen Rose would really appreciate it if Yen would step on her'",
-					]);
 				}
 			} else if (!config.isModUp) {
 				result.push(["!editQuote command is for Mods only"]);
@@ -129,17 +92,5 @@ let versions = [
 ];
 
 const editQuote = new BaseCommand(commandResponse, versions);
-
-function getPlurality(value, singular, plural) {
-	let result;
-
-	if (value > 1) {
-		result = plural;
-	} else {
-		result = singular;
-	}
-
-	return result;
-}
 
 exports.command = editQuote;
