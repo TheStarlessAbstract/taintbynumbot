@@ -2,14 +2,36 @@ const BaseCommand = require("../classes/base-command");
 
 const Quote = require("../models/quote");
 
+function IsValidModeratorOrStreamer(config)
+{
+	return config.isBroadcaster || config.isModUp;
+}
+
+function IsArgumentPresent(config)
+{
+	return config.argument != undefined && typeof config.argument == "string" && config.argument != "";
+}
+
+function GetCommandArgumentKey(config)
+{
+	return config.argument.split(/\s(.+)/)[0].toLowerCase();
+}
+
+function GetCommandArgumentValue(config)
+{
+	return config.argument.split(/\s(.+)/)[1];
+}
+
+
+
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
-				let index = config.argument.split(/\s(.+)/)[0].toLowerCase();
-				let text = config.argument.split(/\s(.+)/)[1];
+			if (IsValidModeratorOrStreamer(config) && IsArgumentPresent(config)) {
+				let index = GetCommandArgumentKey(config);
+				let text = GetCommandArgumentValue(config);
 
 				if (editQuote.versions[0].active && !isNaN(index)) {
 					let quote = await Quote.findOne({ index: index });
@@ -94,3 +116,7 @@ let versions = [
 const editQuote = new BaseCommand(commandResponse, versions);
 
 exports.command = editQuote;
+exports.IsValidModeratorOrStreamer = IsValidModeratorOrStreamer;
+exports.IsArgumentPresent = IsArgumentPresent;
+exports.GetCommandArgumentKey = GetCommandArgumentKey;
+exports.GetCommandArgumentValue = GetCommandArgumentValue;
