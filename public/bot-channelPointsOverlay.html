@@ -13,7 +13,6 @@
             var socket = io();
             var x = document.getElementById("myAudio"); 
             var source = document.getElementById("source");
-            console.log(x)
 
             x.addEventListener("ended", () => {
                 socket.emit("ended", "response");
