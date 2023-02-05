@@ -13,8 +13,8 @@ async function update(update) {
 	chatClient.messageUpdate(messages);
 }
 
-function get() {
-	return messages;
+async function get() {
+	return await Message.find({});
 }
 
 exports.setup = setup;

@@ -18,9 +18,13 @@ const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/messages-add");
 const messagesUpdate = require("./commands/messages-update");
 const modAbuseAdd = require("./commands/modabuse-add");
+const modAbuseDelete = require("./commands/modabuse-delete");
+const modAbuseEdit = require("./commands/modabuse-edit");
 const modAbuse = require("./commands/modabuse");
 const points = require("./commands/points");
 const quoteAdd = require("./commands/quote-add");
+const quoteDelete = require("./commands/quote-delete");
+const quoteEdit = require("./commands/quote-edit");
 const quote = require("./commands/quote");
 const so = require("./commands/so");
 const tinderAdd = require("./commands/tinder-add");
@@ -82,8 +86,12 @@ const commands = {
 	// },
 	deaths: deaths.command,
 	delcomm: commandDelete.command,
+	delmodabuse: modAbuseDelete.command,
+	delquote: quoteDelete.command,
 	drinkbitch: drinkBitch.command,
 	editcomm: commandEdit.command,
+	editmodabuse: modAbuseEdit.command,
+	editquote: quoteEdit.command,
 	edittinderauthor: tinderEditAuthor.command,
 	f: f.command,
 	followage: followage.command,

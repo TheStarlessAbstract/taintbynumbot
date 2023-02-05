@@ -15,12 +15,7 @@ let commandResponse = () => {
 					let quote = await Quote.findOne({ index: index });
 					if (quote) {
 						result.push("Quote " + index + " was: " + quote.text);
-						quote.text = text;
-						await quote.save();
-
-						result.push(
-							"Quote " + index + " has been updated to: " + quote.text
-						);
+						await quote.remove();
 					} else {
 						result.push("No quote number " + config.argument + " found");
 					}
@@ -42,9 +37,7 @@ let commandResponse = () => {
 							for (let i = 0; i < 5; i++) {
 								output += entries[i].index + ", ";
 							}
-
 							result.push(output);
-
 							if (entries.length > 5) {
 								result.push(
 									"There are more matches, maybe you could be more specific"
@@ -53,7 +46,7 @@ let commandResponse = () => {
 						} else {
 							output =
 								entries[0].index +
-								" is the number of the quote you are looking to edit. Use !editquote " +
+								" is the number of the quote you are looking to delete. Use !delquote " +
 								entries[0].index;
 						}
 					} else {
@@ -61,11 +54,11 @@ let commandResponse = () => {
 					}
 				}
 			} else if (!config.isModUp) {
-				result.push("!editQuote command is for Mods only");
+				result.push(["!delquote command is for Mods only"]);
 			} else if (!config.argument) {
-				result.push(
-					"To edit a quote, you must include the quote number like !editquote 69, or include a search string like !editquote uwu"
-				);
+				result.push([
+					"To delete a quote, you must include the quote number like !delquote 69, or include a search string like !delquote uwu",
+				]);
 			}
 
 			return result;
@@ -75,20 +68,20 @@ let commandResponse = () => {
 
 let versions = [
 	{
-		description: "Edits an existing quote",
-		usage: "!editQuote 69 What in the fuck?",
+		description: "Deletes an existing quote using specified quote number",
+		usage: "!delquote 69",
 		usableBy: "mods",
 		active: true,
 	},
 	{
 		description:
-			"Searches for a quote with this string, returns the index number of the quote, or quotes if multiple. Use above version to edit specific quote",
-		usage: "!editQuote sit on my face",
+			"Searches for a quote that contains this string, returns the index number of the quote, or quotes if multiple. Use above version to delete specific quote",
+		usage: "!delquote sit on my face",
 		usableBy: "mods",
 		active: true,
 	},
 ];
 
-const editQuote = new BaseCommand(commandResponse, versions);
+const deleteQuote = new BaseCommand(commandResponse, versions);
 
-exports.command = editQuote;
+exports.command = deleteQuote;
