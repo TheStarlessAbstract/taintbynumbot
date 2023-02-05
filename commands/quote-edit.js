@@ -7,14 +7,18 @@ function IsValidModeratorOrStreamer(config)
 	return config.isBroadcaster || config.isModUp;
 }
 
-function IsArgumentPresent(config)
+function IsArgumentPresentAndString(config)
 {
-	return config.argument != undefined && typeof config.argument == "string" && config.argument != "";
+	return config.argument != undefined && typeof config.argument === 'string' && config.argument != "";
 }
 
 function GetCommandArgumentKey(config)
 {
-	return config.argument.split(/\s(.+)/)[0].toLowerCase();
+	if(IsArgumentPresentAndString(config))
+	{
+		return config.argument.split(/\s(.+)/)[0].toLowerCase();
+	}
+	return "";
 }
 
 function GetCommandArgumentValue(config)
@@ -29,7 +33,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (IsValidModeratorOrStreamer(config) && IsArgumentPresent(config)) {
+			if (IsValidModeratorOrStreamer(config) && IsArgumentPresentAndString(config)) {
 				let index = GetCommandArgumentKey(config);
 				let text = GetCommandArgumentValue(config);
 
@@ -117,6 +121,6 @@ const editQuote = new BaseCommand(commandResponse, versions);
 
 exports.command = editQuote;
 exports.IsValidModeratorOrStreamer = IsValidModeratorOrStreamer;
-exports.IsArgumentPresent = IsArgumentPresent;
+exports.IsArgumentPresentAndString = IsArgumentPresentAndString;
 exports.GetCommandArgumentKey = GetCommandArgumentKey;
 exports.GetCommandArgumentValue = GetCommandArgumentValue;
