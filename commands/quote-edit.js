@@ -38,7 +38,7 @@ let commandResponse = () => {
 				let index = GetCommandArgumentKey(config,0);
 				let text = GetCommandArgumentKey(config,1);
 
-				if (editQuote.versions[0].active && !isNaN(index)) {
+				if (versions[0].active && !isNaN(index)) {
 					let quote = await Quote.findOne({ index: index });
 					if (quote) {
 						result.push("Quote " + index + " was: " + quote.text);
@@ -51,16 +51,12 @@ let commandResponse = () => {
 					} else {
 						result.push("No quote number " + config.argument + " found");
 					}
-				} else if (
-					editQuote.versions[1].active &&
-					config.argument &&
-					isNaN(index)
-				) {
+				} else if (versions[1].active && config.argument && isNaN(index)) {
 					let entries = await Quote.find({
 						text: { $regex: text, $options: "i" },
 					});
 
-					if (entries) {
+					if (entries.length > 0) {
 						let pularlity = entries.length > 1 ? "quotes" : "quote";
 
 						result.push(
@@ -73,7 +69,9 @@ let commandResponse = () => {
 							for (let i = 0; i < 5; i++) {
 								output += entries[i].index + ", ";
 							}
+
 							result.push(output);
+
 							if (entries.length > 5) {
 								result.push(
 									"There are more matches, maybe you could be more specific"
@@ -90,11 +88,11 @@ let commandResponse = () => {
 					}
 				}
 			} else if (!config.isModUp) {
-				result.push(["!editQuote command is for Mods only"]);
+				result.push("!editQuote command is for Mods only");
 			} else if (!config.argument) {
-				result.push([
-					"To edit a quote, you must include the quote number like !editquote 69, or include a search string like !editquote uwu",
-				]);
+				result.push(
+					"To edit a quote, you must include the quote number like !editquote 69, or include a search string like !editquote uwu"
+				);
 			}
 
 			return result;

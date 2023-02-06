@@ -125,7 +125,7 @@ async function checkLive(apiClient, chatClient) {
 }
 
 async function setTimedMessages(chatClient) {
-	intervalMessages = messages.get();
+	intervalMessages = await messages.get();
 
 	timedMessagesInterval = setInterval(async () => {
 		if (messageCount >= 25) {
@@ -138,8 +138,8 @@ async function setTimedMessages(chatClient) {
 
 			messageCount = 0;
 
-			if (intervalMessages.length === 0) {
-				intervalMessages = messages.get();
+			if (intervalMessages.length == 0) {
+				intervalMessages = await messages.get();
 			}
 		}
 	}, 10 * 60 * 1000);

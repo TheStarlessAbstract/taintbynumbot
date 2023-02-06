@@ -19,7 +19,7 @@ let commandResponse = () => {
 				let quote;
 				modabuse.setTimer(currentTime);
 
-				if (modabuse.getVersionActivity(0) && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					entries = await Title.find({});
 
 					if (!entries) {
@@ -28,7 +28,7 @@ let commandResponse = () => {
 						);
 					}
 				} else {
-					if (modabuse.getVersionActivity(1) && !isNaN(config.argument)) {
+					if (versions[1].active && !isNaN(config.argument)) {
 						quote = await Title.findOne({ index: config.argument });
 						if (quote) {
 							entries.push(quote);
@@ -36,7 +36,7 @@ let commandResponse = () => {
 							result.push("There is no title number " + config.argument);
 						}
 					} else if (
-						modabuse.getVersionActivity(2) &&
+						versions[2].active &&
 						config.argument &&
 						isNaN(config.argument)
 					) {
