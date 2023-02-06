@@ -83,54 +83,126 @@ test("IsArgumentPresentAndString_WhereArgumentIsBool_ShouldReturnFalse", () => {
 	expect(value).toBe(false);
 });
 
-test("GetCommandArgumentKey_WhereArgumentIsBool_ShouldReturnEmptyString", () => {
+test("GetCommandArgumentKey_WhereArgumentIsBool_AndIndexIsZero_ShouldReturnEmptyString", () => {
 	//Assemble
 	let config = {};
 	config.argument = false;
 	//Act
-	var value = editQuote.GetCommandArgumentKey(config);
+	var value = editQuote.GetCommandArgumentKey(config,0);
 	//Assert
 	expect(value).toBe("");
 });
 
-test("GetCommandArgumentKey_WhereArgumentIsNumber_ShouldReturnEmptyString", () => {
+test("GetCommandArgumentKey_WhereArgumentIsNumber_AndIndexIsZero_ShouldReturnEmptyString", () => {
 	//Assemble
 	let config = {};
 	config.argument = 1;
 	//Act
-	var value = editQuote.GetCommandArgumentKey(config);
+	var value = editQuote.GetCommandArgumentKey(config,0);
 	//Assert
 	expect(value).toBe("");
 });
 
-test("GetCommandArgumentKey_WhereArgumentIsEmptyString_ShouldReturnEmptyString", () => {
+test("GetCommandArgumentKey_WhereArgumentIsEmptyString_AndIndexIsZero_ShouldReturnEmptyString", () => {
 	//Assemble
 	let config = {};
 	config.argument = "";
 	//Act
-	var value = editQuote.GetCommandArgumentKey(config);
+	var value = editQuote.GetCommandArgumentKey(config,0);
 	//Assert
 	expect(value).toBe("");
 });
 
-test("GetCommandArgumentKey_WhereArgumentIsValidString_AndMixedCapitals_ShouldReturnValidStringAllLowerCase", () => {
+test("GetCommandArgumentKey_WhereArgumentIsValidString_AndIndexIsZero_AndMixedCapitals_ShouldReturnValidStringAllLowerCase", () => {
 	//Assemble
 	let config = {};
 	config.argument = "vAlIdStRiNgNoSpAcEs";
 	//Act
-	var value = editQuote.GetCommandArgumentKey(config);
+	var value = editQuote.GetCommandArgumentKey(config,0);
 	//Assert
 	expect(value).toBe("validstringnospaces");
 });
 
-test("GetCommandArgumentKey_WhereArgumentIsValidString_AndAllCapitals_ShouldReturnValidStringAllLowerCase", () => {
+test("GetCommandArgumentKey_WhereArgumentIsValidString_AndIndexIsZero_AndAllCapitals_ShouldReturnValidStringAllLowerCase", () => {
 	//Assemble
 	let config = {};
 	config.argument = "VALIDSTRINGNOSPACES";
 	//Act
-	var value = editQuote.GetCommandArgumentKey(config);
+	var value = editQuote.GetCommandArgumentKey(config,0);
 	//Assert
 	expect(value).toBe("validstringnospaces");
+});
+
+
+
+test("GetCommandArgumentKey_WhereArgumentIsBool_AndIndexIsOne_ShouldReturnEmptyString", () => {
+	//Assemble
+	let config = {};
+	config.argument = false;
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsNumber_AndIndexIsOne_ShouldReturnEmptyString", () => {
+	//Assemble
+	let config = {};
+	config.argument = 1;
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsEmptyString_AndIndexIsOne_ShouldReturnEmptyString", () => {
+	//Assemble
+	let config = {};
+	config.argument = "";
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndMixedCapitals_ShouldReturnEmptyString", () => {
+	//Assemble
+	let config = {};
+	config.argument = "vAlIdStRiNgNoSpAcEs";
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnEmptyString", () => {
+	//Assemble
+	let config = {};
+	config.argument = "VALIDSTRINGNOSPACES";
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnSecondPartAsGivenInMixedCaps", () => {
+	//Assemble
+	let config = {};
+	config.argument = "vAlIdStRiNg WithSpAcEs";
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("WithSpAcEs");
+});
+
+test("GetCommandArgumentKey_WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnSecondPartAsGivenInCaps", () => {
+	//Assemble
+	let config = {};
+	config.argument = "VALIDSTRING WITHSPACES";
+	//Act
+	var value = editQuote.GetCommandArgumentKey(config,1);
+	//Assert
+	expect(value).toBe("WITHSPACES");
 });
 
 

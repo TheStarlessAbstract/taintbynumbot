@@ -12,21 +12,22 @@ function IsArgumentPresentAndString(config)
 	return config.argument != undefined && typeof config.argument === 'string' && config.argument != "";
 }
 
-function GetCommandArgumentKey(config)
+function GetCommandArgumentKey(config, index)
 {
 	if(IsArgumentPresentAndString(config))
 	{
-		return config.argument.split(/\s(.+)/)[0].toLowerCase();
+		var splitData = config.argument.split(/\s(.+)/);
+		if(index == 0)
+		{
+			return splitData[index].toLowerCase();
+		}
+		else if(splitData[index] != undefined)
+		{
+			return splitData[index];
+		}
 	}
 	return "";
 }
-
-function GetCommandArgumentValue(config)
-{
-	return config.argument.split(/\s(.+)/)[1];
-}
-
-
 
 let commandResponse = () => {
 	return {
@@ -34,8 +35,8 @@ let commandResponse = () => {
 			let result = [];
 
 			if (IsValidModeratorOrStreamer(config) && IsArgumentPresentAndString(config)) {
-				let index = GetCommandArgumentKey(config);
-				let text = GetCommandArgumentValue(config);
+				let index = GetCommandArgumentKey(config,0);
+				let text = GetCommandArgumentKey(config,1);
 
 				if (editQuote.versions[0].active && !isNaN(index)) {
 					let quote = await Quote.findOne({ index: index });
@@ -123,4 +124,3 @@ exports.command = editQuote;
 exports.IsValidModeratorOrStreamer = IsValidModeratorOrStreamer;
 exports.IsArgumentPresentAndString = IsArgumentPresentAndString;
 exports.GetCommandArgumentKey = GetCommandArgumentKey;
-exports.GetCommandArgumentValue = GetCommandArgumentValue;
