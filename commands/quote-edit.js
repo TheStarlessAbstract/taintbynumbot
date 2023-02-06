@@ -7,14 +7,14 @@ function IsValidModeratorOrStreamer(config)
 	return config.isBroadcaster || config.isModUp;
 }
 
-function IsArgumentPresentAndString(config)
+function IsValuePresentAndString(value)
 {
-	return config.argument != undefined && typeof config.argument === 'string' && config.argument != "";
+	return value != undefined && typeof value === 'string' && value != "";
 }
 
 function GetCommandArgumentKey(config, index)
 {
-	if(IsArgumentPresentAndString(config))
+	if(IsValuePresentAndString(config.argument))
 	{
 		var splitData = config.argument.split(/\s(.+)/);
 		if(index == 0)
@@ -29,16 +29,25 @@ function GetCommandArgumentKey(config, index)
 	return "";
 }
 
+function IsVersionActive(versionPack, index)
+{
+	if(versionPack != undefined && versionPack.length > 0)
+	{
+		return versionPack[index]?.active ?? false;
+	}
+	return false;
+}
+
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (IsValidModeratorOrStreamer(config) && IsArgumentPresentAndString(config)) {
+			if (IsValidModeratorOrStreamer(config) && IsValuePresentAndString(config.argument)) {
 				let index = GetCommandArgumentKey(config,0);
 				let text = GetCommandArgumentKey(config,1);
 
-				if (versions[0].active && !isNaN(index)) {
+				if (IsVersionActive(versions,0) && IsValuePresentAndString(index)) {
 					let quote = await Quote.findOne({ index: index });
 					if (quote) {
 						result.push("Quote " + index + " was: " + quote.text);
@@ -51,7 +60,7 @@ let commandResponse = () => {
 					} else {
 						result.push("No quote number " + config.argument + " found");
 					}
-				} else if (versions[1].active && config.argument && isNaN(index)) {
+				} else if (IsVersionActive(versions,1) && IsValuePresentAndString(index)) {
 					let entries = await Quote.find({
 						text: { $regex: text, $options: "i" },
 					});
@@ -87,7 +96,7 @@ let commandResponse = () => {
 						result.push("No quotes found including '" + text + "'");
 					}
 				}
-			} else if (!config.isModUp) {
+			} else if (!IsValidModeratorOrStreamer(config)) {
 				result.push("!editQuote command is for Mods only");
 			} else if (!config.argument) {
 				result.push(
@@ -120,5 +129,7 @@ const editQuote = new BaseCommand(commandResponse, versions);
 
 exports.command = editQuote;
 exports.IsValidModeratorOrStreamer = IsValidModeratorOrStreamer;
-exports.IsArgumentPresentAndString = IsArgumentPresentAndString;
+exports.IsValuePresentAndString = IsValuePresentAndString;
 exports.GetCommandArgumentKey = GetCommandArgumentKey;
+exports.IsVersionActive = IsVersionActive;
+exports.GetQuoteForKey = GetQuoteForKey;

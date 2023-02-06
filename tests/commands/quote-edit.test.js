@@ -1,5 +1,23 @@
 const editQuote = require("../../commands/quote-edit");
 
+const Validversions = [
+	{
+		description: "Edits an existing quote",
+		usage: "!editQuote 69 What in the fuck?",
+		usableBy: "mods",
+		active: false,
+	},
+	{
+		description:
+			"Searches for a quote with this string, returns the index number of the quote, or quotes if multiple. Use above version to edit specific quote",
+		usage: "!editQuote sit on my face",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
+const Invalidversions = [];
+
 test("IsValidModeratorOrStreamer_WhereUserIsModerator_AndNotStreamer_ShouldReturnTrue", () => {
 	//Assemble
 	let config = {};
@@ -33,52 +51,47 @@ test("IsValidModeratorOrStreamer_WhereUserIsNotModerator_AndNotStreamer_ShouldRe
 	expect(value).toBe(false);
 });
 
-test("IsArgumentPresentAndString_WhereArgumentIsUndefined_ShouldReturnFalse", () => {
+test("IsValuePresentAndString_WhereArgumentIsUndefined_ShouldReturnFalse", () => {
 	//Assemble
-	let config = {};
-	config.argument = undefined;
+	let config = undefined;
 	//Act
-	var value = editQuote.IsArgumentPresentAndString(config);
+	var value = editQuote.IsValuePresentAndString(config);
 	//Assert
 	expect(value).toBe(false);
 });
 
-test("IsArgumentPresentAndString_WhereArgumentIsEmptyString_ShouldReturnFalse", () => {
+test("IsValuePresentAndString_WhereArgumentIsEmptyString_ShouldReturnFalse", () => {
 	//Assemble
-	let config = {};
-	config.argument = "";
+	let config = "";
 	//Act
-	var value = editQuote.IsArgumentPresentAndString(config);
+	var value = editQuote.IsValuePresentAndString(config);
 	//Assert
 	expect(value).toBe(false);
 });
 
-test("IsArgumentPresentAndString_WhereArgumentIsValidString_ShouldReturnTrue", () => {
+test("IsValuePresentAndString_WhereArgumentIsValidString_ShouldReturnTrue", () => {
 	//Assemble
-	let config = {};
-	config.argument = "validString";
+	let config = "validString";
 	//Act
-	var value = editQuote.IsArgumentPresentAndString(config);
+	var value = editQuote.IsValuePresentAndString(config);
 	//Assert
 	expect(value).toBe(true);
 });
 
-test("IsArgumentPresentAndString_WhereArgumentIsNumber_ShouldReturnFalse", () => {
+test("IsValuePresentAndString_WhereArgumentIsNumber_ShouldReturnFalse", () => {
 	//Assemble
-	let config = {};
-	config.argument = 123;
+	let config = 123;
 	//Act
-	var value = editQuote.IsArgumentPresentAndString(config);
+	var value = editQuote.IsValuePresentAndString(config);
 	//Assert
 	expect(value).toBe(false);
 });
 
-test("IsArgumentPresentAndString_WhereArgumentIsBool_ShouldReturnFalse", () => {
+test("IsValuePresentAndString_WhereArgumentIsBool_ShouldReturnFalse", () => {
 	//Assemble
-	let config = {};
-	config.argument = false;
+	let config = false;
 	//Act
-	var value = editQuote.IsArgumentPresentAndString(config);
+	var value = editQuote.IsValuePresentAndString(config);
 	//Assert
 	expect(value).toBe(false);
 });
@@ -205,8 +218,60 @@ test("GetCommandArgumentKey_WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne
 	expect(value).toBe("WITHSPACES");
 });
 
+test("IsVersionActive_VersionsPackIsUndefined_ShouldReturnFalse", () => 
+{
+	//Assemble
+	
+	//Act
+	var value = editQuote.IsVersionActive(undefined,0);
+	//Assert
+	expect(value).toBe(false);
+});
+
+test("IsVersionActive_VersionsPackIsEmpty_ShouldReturnFalse", () => 
+{
+	//Assemble
+	
+	//Act
+	var value = editQuote.IsVersionActive(Invalidversions,0);
+	//Assert
+	expect(value).toBe(false);
+});
+
+test("IsVersionActive_WhereIndexIsOutOfBounds_ShouldReturnFalse", () => 
+{
+	//Assemble
+	
+	//Act
+	var value = editQuote.IsVersionActive(Validversions,100);
+	//Assert
+	expect(value).toBe(false);
+});
+
+test("IsVersionActive_WhereIndexIsValid_AndSelectedVersionIsNotActive_ShouldReturnFalse", () => 
+{
+	//Act
+	var value = editQuote.IsVersionActive(Validversions,0);
+	//Assert
+	expect(value).toBe(false);
+});
+
+test("IsVersionActive_WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => 
+{
+	//Act
+	var value = editQuote.IsVersionActive(Validversions,1);
+	//Assert
+	expect(value).toBe(true);
+});
+
+test("GetQuoteForKey_WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => 
+{
+	//Act
+	var value = editQuote.GetQuoteForKey("f");
+	//Assert
+	expect(value).toBe(true);
+});
 
 
 
-
-// config.argument.split(/\s(.+)/)[0].toLowerCase();
+//return versions[index].active;
