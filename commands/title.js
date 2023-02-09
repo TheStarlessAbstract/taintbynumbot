@@ -8,11 +8,10 @@ let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			console.log(1);
 			if (config.isModUp) {
-				if (title.versions[0].active && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					result.push(["The curent title is: "]);
-				} else if (title.versions[1].active && config.argument) {
+				} else if (versions[1].active && config.argument) {
 					const apiClient = chatClient.getApiClient();
 
 					console.log(config.argument);

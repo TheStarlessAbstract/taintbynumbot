@@ -7,7 +7,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (versions[0].active && config.isModUp && config.argument) {
 				let entries = await Quote.find({});
 				const index = entries.length ? getNextIndex(entries) : 1;
 

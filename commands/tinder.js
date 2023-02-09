@@ -18,14 +18,14 @@ let commandResponse = () => {
 				let index;
 				tinder.setTimer(currentTime);
 
-				if (tinder.getVersionActivity(0) && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					entries = await Tinder.find({});
 
 					if (!entries) {
 						result.push("Nobody has ever created Tinder bio for Starless");
 					}
 				} else {
-					if (tinder.getVersionActivity(1) && !isNaN(config.argument)) {
+					if (versions[1].active && !isNaN(config.argument)) {
 						let quote;
 
 						if (config.argument == 0) {
@@ -40,7 +40,7 @@ let commandResponse = () => {
 							result.push("There is no Tinder bio number " + config.argument);
 						}
 					} else if (
-						tinder.getVersionActivity(2) &&
+						versions[2].active &&
 						config.argument &&
 						isNaN(config.argument)
 					) {

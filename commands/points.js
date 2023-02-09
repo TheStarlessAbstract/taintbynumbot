@@ -19,7 +19,7 @@ let commandResponse = () => {
 				let user;
 				points.setTimer(currentTime);
 
-				if (points.getVersionActivity(0) && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					user = await LoyaltyPoint.findOne({
 						userId: config.userInfo.userId,
 					});
@@ -40,7 +40,7 @@ let commandResponse = () => {
 						);
 					}
 				} else if (
-					points.getVersionActivity(1) &&
+					versions[1].active &&
 					config.isBroadcaster &&
 					isNaN(config.argument)
 				) {

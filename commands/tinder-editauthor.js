@@ -7,7 +7,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (versions[0].active && config.isModUp && config.argument) {
 				config.argument = config.argument.split(" ");
 				let index = config.argument[0];
 				let user = config.argument[1];

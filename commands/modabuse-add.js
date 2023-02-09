@@ -16,7 +16,7 @@ let commandResponse = () => {
 				let index = entries.length ? getNextIndex(entries) : 1;
 				let message;
 
-				if (addModAbuse.versions[0].active && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					try {
 						const apiClient = chatClient.getApiClient();
 						let channel = await apiClient.channels.getChannelInfo(twitchId);
@@ -33,7 +33,7 @@ let commandResponse = () => {
 							"Twitch says no, and Starless should really sort this out some time after stream"
 						);
 					}
-				} else if (addModAbuse.versions[1].active && config.argument) {
+				} else if (versions[1].active && config.argument) {
 					if (config.argument.includes("@")) {
 						config.argument = config.argument.split("@");
 						message = config.argument[0];

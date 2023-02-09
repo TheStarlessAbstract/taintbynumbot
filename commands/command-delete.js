@@ -10,7 +10,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (versions[0].active && config.isModUp && config.argument) {
 				if (config.argument.startsWith("!")) {
 					let commandName = config.argument.slice(1).toLowerCase();
 					const { response } = (await commands.list[commandName]) || {};

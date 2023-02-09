@@ -11,8 +11,9 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				currentTime - kingsRemain.getTimer() > kingsRemain.getCooldown() ||
-				config.isBroadcaster
+				versions[0].active &&
+				(currentTime - kingsRemain.getTimer() > kingsRemain.getCooldown() ||
+					config.isBroadcaster)
 			) {
 				kingsRemain.setTimer(currentTime);
 
