@@ -18,8 +18,8 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				versions[0].active &&
-				(currentTime - timer > COOLDOWN || config.isBroadcaster)
+				isVersionActive(versions, 0) &&
+				(isCooldownPassed(currentTime, timer, COOLDOWN) || isStreamer(config))
 			) {
 				timer = currentTime;
 
@@ -102,6 +102,32 @@ function setTimer(newTimer) {
 	timer = newTimer;
 }
 
+function isVersionActive(versionPack, index) {
+	if (versionPack != undefined && versionPack.length > 0) {
+		return versionPack[index]?.active ?? false;
+	}
+	return false;
+}
+
+function isCooldownPassed(currentTime, lastTimeSet, currentCooldown) {
+	if (
+		typeof currentTime == "string" ||
+		typeof lastTimeSet == "string" ||
+		typeof currentCooldown == "string" ||
+		currentCooldown < 0
+	) {
+		return false;
+	}
+	return currentTime - lastTimeSet > currentCooldown;
+}
+
+function isStreamer(config) {
+	return config.isBroadcaster;
+}
+
 exports.command = drinkBitch;
 exports.setTimer = setTimer;
 exports.updateAudioLinks = updateAudioLinks;
+exports.isStreamer = isStreamer;
+exports.isVersionActive = isVersionActive;
+exports.isCooldownPassed = isCooldownPassed;
