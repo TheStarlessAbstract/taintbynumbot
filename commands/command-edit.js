@@ -82,6 +82,6 @@ let versions = [
 	},
 ];
 
-const addCommand = new BaseCommand(commandResponse, versions);
+const editCommand = new BaseCommand(commandResponse, versions);
 
-exports.command = addCommand;
+exports.command = editCommand;

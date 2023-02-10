@@ -18,14 +18,14 @@ let commandResponse = () => {
 				let index;
 				quote.setTimer(currentTime);
 
-				if (quote.getVersionActivity(0) && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					entries = await Quote.find({});
 
 					if (!entries) {
 						result.push("Starless has never said anything of note");
 					}
 				} else {
-					if (quote.getVersionActivity(1) && !isNaN(config.argument)) {
+					if (versions[1].active && !isNaN(config.argument)) {
 						let quote = await Quote.findOne({ index: config.argument });
 
 						if (quote) {
@@ -36,7 +36,7 @@ let commandResponse = () => {
 							);
 						}
 					} else if (
-						quote.getVersionActivity(2) &&
+						versions[2].active &&
 						config.argument &&
 						isNaN(config.argument)
 					) {

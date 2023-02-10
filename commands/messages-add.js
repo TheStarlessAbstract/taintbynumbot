@@ -9,7 +9,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (versions[0].active && config.isModUp && config.argument) {
 				let messagesList = await messages.get();
 				try {
 					let message = await Message.create({

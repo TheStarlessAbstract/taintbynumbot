@@ -20,7 +20,10 @@ let commandResponse = () => {
 			let redeemUser = config.userInfo.userName;
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN || config.isBroadcaster) {
+			if (
+				versions[0].active &&
+				(currentTime - timer > COOLDOWN || config.isBroadcaster)
+			) {
 				timer = currentTime;
 
 				let user = await LoyaltyPoint.findOne({

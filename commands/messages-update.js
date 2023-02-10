@@ -7,7 +7,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp) {
+			if (versions[0].active && config.isModUp) {
 				let messagesList = await messages.get();
 
 				messages.update(messagesList);

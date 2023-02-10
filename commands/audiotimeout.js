@@ -8,11 +8,11 @@ let commandResponse = () => {
 			let result = [];
 
 			if (config.isModUp) {
-				if (audioTimeout.versions[0].active && !config.argument) {
+				if (versions[0].active && !config.argument) {
 					audio.setAudioTimeout();
 					let status = audio.getAudioTimeout() ? "started" : "stopped";
 					result.push(["Bot audio timeout has been " + status]);
-				} else if (audioTimeout.versions[1].active && config.argument) {
+				} else if (versions[1].active && config.argument) {
 					switch (config.argument) {
 						case config.argument > 0:
 							audio.setAudioTimeout(config.argument);

@@ -11,6 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
+				versions[0].active &&
 				config.isModUp &&
 				config.argument &&
 				config.argument.startsWith("!")
