@@ -14,7 +14,7 @@ let commandResponse = () => {
 					audio.setAudioTimeout();
 					let status = audio.getAudioTimeout() ? "started" : "stopped";
 
-					result.push(["Bot audio timeout has been " + status]);
+					result.push("Bot audio timeout has been " + status);
 				} else if (
 					isVersionActive(versions, 1) &&
 					isValuePresentAndNumber(time)
@@ -23,26 +23,26 @@ let commandResponse = () => {
 						case config.argument > 0:
 							audio.setAudioTimeout(time);
 
-							result.push([
+							result.push(
 								"Bot audio timeout has been started, and set to " +
 									time +
-									" seconds",
-							]);
+									" seconds"
+							);
 							break;
 						case config.argument < 1:
-							result.push([
-								"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10",
-							]);
+							result.push(
+								"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10"
+							);
 							break;
 						default:
-							result.push([
-								"To set the bot audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10",
-							]);
+							result.push(
+								"To set the bot audio timeout length include the number of seconds for the timeout after the command: !audiotimeout 10"
+							);
 							break;
 					}
 				}
 			} else if (!isValidModeratorOrStreamer(config)) {
-				result.push(["!audiotimeout command is for Mods only"]);
+				result.push("!audiotimeout command is for Mods only");
 			}
 
 			return result;
