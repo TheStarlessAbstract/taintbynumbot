@@ -9,9 +9,15 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
-				let index = config.argument.split(/\s(.+)/)[0].toLowerCase();
-				let text = config.argument.split(/\s(.+)/)[1];
+			if (
+				isValidModeratorOrStreamer(config) &&
+				isValuePresentAndString(config.argument)
+			) {
+				let index = getCommandArgumentKey(config, 0);
+				let text = getCommandArgumentKey(config, 1);
+
+				// let index = config.argument.split(/\s(.+)/)[0].toLowerCase();
+				// let text = config.argument.split(/\s(.+)/)[1];
 
 				if (versions[0].active && !isNaN(index)) {
 					let quote = await Message.findOne({ index: index });
@@ -62,9 +68,9 @@ let commandResponse = () => {
 						result.push("No quotes found including '" + text + "'");
 					}
 				}
-			} else if (!config.isModUp) {
+			} else if (!isValidModeratorOrStreamer(config)) {
 				result.push("!editMessage command is for Mods only");
-			} else if (!config.argument) {
+			} else if (!isValuePresentAndString(config.argument)) {
 				result.push(
 					"To edit a message, you must include the message number like !editMessage 69 Rose needs to be stepped on, will you do it?"
 				);
@@ -91,6 +97,29 @@ let versions = [
 	},
 ];
 
+function isValidModeratorOrStreamer(config) {
+	return config.isBroadcaster || config.isModUp;
+}
+
+function isValuePresentAndString(value) {
+	return value != undefined && typeof value === "string" && value != "";
+}
+
+function getCommandArgumentKey(config, index) {
+	if (isValuePresentAndString(config.argument)) {
+		let splitData = config.argument.split(/\s(.+)/);
+		if (index == 0) {
+			return splitData[index].toLowerCase();
+		} else if (splitData[index] != undefined) {
+			return splitData[index];
+		}
+	}
+	return "";
+}
+
 const editMessage = new BaseCommand(commandResponse, versions);
 
 exports.command = editMessage;
+exports.isValidModeratorOrStreamer = isValidModeratorOrStreamer;
+exports.isValuePresentAndString = isValuePresentAndString;
+exports.getCommandArgumentKey = getCommandArgumentKey;
