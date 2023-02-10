@@ -16,6 +16,8 @@ const kingsReset = require("./commands/kings-reset");
 const kings = require("./commands/kings");
 const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/messages-add");
+const messagesDelete = require("./commands/messages-delete");
+const messagesEdit = require("./commands/messages-edit");
 const messagesUpdate = require("./commands/messages-update");
 const modAbuseAdd = require("./commands/modabuse-add");
 const modAbuseDelete = require("./commands/modabuse-delete");
@@ -86,10 +88,12 @@ const commands = {
 	// },
 	deaths: deaths.command,
 	delcomm: commandDelete.command,
+	delmessage: messagesDelete.command,
 	delmodabuse: modAbuseDelete.command,
 	delquote: quoteDelete.command,
 	drinkbitch: drinkBitch.command,
 	editcomm: commandEdit.command,
+	editmessage: messagesEdit.command,
 	editmodabuse: modAbuseEdit.command,
 	editquote: quoteEdit.command,
 	edittinderauthor: tinderEditAuthor.command,
