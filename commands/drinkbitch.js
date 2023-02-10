@@ -111,14 +111,15 @@ function isVersionActive(versionPack, index) {
 
 function isCooldownPassed(currentTime, lastTimeSet, currentCooldown) {
 	if (
-		typeof currentTime == "string" ||
-		typeof lastTimeSet == "string" ||
-		typeof currentCooldown == "string" ||
-		currentCooldown < 0
+		typeof currentTime == "object" &&
+		typeof lastTimeSet == "object" &&
+		typeof currentCooldown == "number" &&
+		currentCooldown >= 0
 	) {
-		return false;
+		return currentTime - lastTimeSet > currentCooldown;
 	}
-	return currentTime - lastTimeSet > currentCooldown;
+
+	return false;
 }
 
 function isStreamer(config) {
