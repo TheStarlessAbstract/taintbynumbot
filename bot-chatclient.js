@@ -27,18 +27,14 @@ let token;
 
 async function setup() {
 	token = await Token.findOne({ name: "chatClient" });
-
 	if (token) {
 		const tokenData = initializeTokenData(token);
 		const authProvider = createAuthProvider(tokenData);
 		const chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
-
 		await chatClient.connect(chatClient);
-
 		setupChatClientListeners(apiClient, chatClient);
 	}
-
 	await messages.setup();
 }
 

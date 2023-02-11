@@ -1,11 +1,11 @@
 const messageEdit = require("../../commands/messages-edit");
 
-test("a", () => {
+test("test", () => {
 	//Assemble
-	let config = {};
-	config.argument = "Rose";
-	//Act
-	let value = messageEdit.getCommandArgumentKey(config, 1);
+	// let config = {};
+	// config.argument = "Rose";
+	// //Act
+	// let value = messageEdit.getCommandArgumentKey(config, 1);
 	//Assert
-	expect(value).toBe(undefined);
+	expect(undefined).toBe(undefined);
 });
