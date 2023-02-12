@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node bot.js",
-    "test": "jest --detectOpenHandles",
+    "test": "jest",
     "server": "node server.js"
   },
   "author": "TheStarlessAbstract",

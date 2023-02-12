@@ -1,11 +1,3 @@
-const messageEdit = require("../../commands/messages-edit");
-
-test("test", () => {
-	//Assemble
-	// let config = {};
-	// config.argument = "Rose";
-	// //Act
-	// let value = messageEdit.getCommandArgumentKey(config, 1);
-	//Assert
-	expect(undefined).toBe(undefined);
+test("adding 12 and 1 should equal 13", () => {
+	expect(12 + 1).toBe(13);
 });

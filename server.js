@@ -26,6 +26,7 @@ if (uri != undefined) {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 	});
+	mongoose.set("strictQuery", false);
 }
 
 serverIo.setup(io);

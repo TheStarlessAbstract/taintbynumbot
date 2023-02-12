@@ -24,14 +24,11 @@ async function init() {
 }
 
 async function connectToMongoDB() {
-	try {
-		await mongoose.connect(uri, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		});
-	} catch (error) {
-		// Handle the error
-	}
+	mongoose.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	});
+	mongoose.set("strictQuery", false);
 }
 
 function setupSignalHandlers() {
