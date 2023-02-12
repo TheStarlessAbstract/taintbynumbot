@@ -1,21 +1,30 @@
-const { Client, Events, Collection, GatewayIntentBits } = require("discord.js");
-const token = process.env.DISCORD_TOKEN;
+require("dotenv").config();
+
+const Client = require("discord.js").Client;
+const Events = require("discord.js").Events;
+const Collection = require("discord.js").Collection;
+const GatewayIntentBits = require("discord.js").GatewayIntentBits;
 
 const commands = require("./bot-commands");
-
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 const discordChannelId = process.env.DISCORD_CHANNEL;
+init(process.env.JEST_WORKER_ID !== undefined);
 
-client.commands = new Collection();
+function init(isTestWorker) {
+	if (!isTestWorker) {
+		const token = process.env.DISCORD_TOKEN;
 
-// When the client is ready, run this code (only once)
-// We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, (c) => {
-	console.log(`Ready! Logged in as ${c.user.tag}`);
-});
+		client.commands = new Collection();
 
-client.login(token);
+		// When the client is ready, run this code (only once)
+		// We use 'c' for the event parameter to keep it separate from the already defined 'client'
+		client.once(Events.ClientReady, (c) => {
+			console.log(`Ready! Logged in as ${c.user.tag}`);
+		});
+		client.login(token);
+	}
+}
 
 async function setup() {
 	const channel = client.channels.cache.get(discordChannelId);

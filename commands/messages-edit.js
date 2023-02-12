@@ -1,19 +1,29 @@
 const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
 
 const Message = require("../models/message");
 
 const messages = require("../bot-messages");
+
+const helper = new Helper();
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
-				let index = config.argument.split(/\s(.+)/)[0].toLowerCase();
-				let text = config.argument.split(/\s(.+)/)[1];
+			if (
+				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValuePresentAndString(config.argument)
+			) {
+				let index = helper.getCommandArgumentKey(config, 0);
+				let text = helper.getCommandArgumentKey(config, 1);
 
-				if (versions[0].active && !isNaN(index)) {
+				if (
+					helper.isVersionActive(versions, 0) &&
+					helper.isValuePresentAndNumber(index) &&
+					helper.isValuePresentAndString(text)
+				) {
 					let quote = await Message.findOne({ index: index });
 					if (quote) {
 						result.push("Message " + index + " was: " + quote.text);
@@ -26,26 +36,29 @@ let commandResponse = () => {
 					} else {
 						result.push("No message number " + config.argument + " found");
 					}
-				} else if (versions[1].active && config.argument && isNaN(index)) {
+				} else if (
+					helper.isVersionActive(versions, 1) &&
+					helper.isValuePresentAndString(index)
+				) {
 					let entries = await Message.find({
-						text: { $regex: text, $options: "i" },
+						text: { $regex: index, $options: "i" },
 					});
 
 					if (entries.length > 0) {
-						let pularlity = entries.length > 1 ? "messages" : "message";
-
-						result.push(
-							entries.length + " " + pularlity + " found mentioning: " + text
-						);
-
 						let output;
 						if (entries.length > 1) {
+							result.push(
+								entries.length + " messages found mentioning: " + index
+							);
+
 							output = "Indexes include: ";
-							for (let i = 0; i < 5; i++) {
+							let limit = entries.length < 5 ? entries.length : 5;
+
+							for (let i = 0; i < limit; i++) {
 								output += entries[i].index + ", ";
 							}
 
-							result.push(output);
+							result.push(output.slice(0, -2));
 
 							if (entries.length > 5) {
 								result.push(
@@ -54,17 +67,19 @@ let commandResponse = () => {
 							}
 						} else {
 							output =
+								"Use '!editMessage " +
 								entries[0].index +
-								" is the number of the message you are looking to edit. Use !editMessage " +
-								entries[0].index;
+								"' followed by your edit";
+
+							result.push(output);
 						}
 					} else {
-						result.push("No quotes found including '" + text + "'");
+						result.push("No quotes found including '" + index + "'");
 					}
 				}
-			} else if (!config.isModUp) {
+			} else if (!isValidModeratorOrStreamer(config)) {
 				result.push("!editMessage command is for Mods only");
-			} else if (!config.argument) {
+			} else if (!isValuePresentAndString(config.argument)) {
 				result.push(
 					"To edit a message, you must include the message number like !editMessage 69 Rose needs to be stepped on, will you do it?"
 				);
