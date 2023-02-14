@@ -24,14 +24,17 @@ let commandResponse = () => {
 					helper.isValuePresentAndNumber(index) &&
 					helper.isValuePresentAndString(text)
 				) {
-					let quote = await Message.findOne({ index: index });
-					if (quote) {
-						result.push("Message " + index + " was: " + quote.text);
-						quote.text = text;
-						await quote.save();
+					let message = await Message.findOne({ index: index });
+					if (message) {
+						result.push("Message " + index + " was: " + message.text);
+						message.text = text;
+						await message.save();
+
+						let entries = await Message.findOne({});
+						messages.update(entries);
 
 						result.push(
-							"Message " + index + " has been updated to: " + quote.text
+							"Message " + index + " has been updated to: " + message.text
 						);
 					} else {
 						result.push("No message number " + config.argument + " found");

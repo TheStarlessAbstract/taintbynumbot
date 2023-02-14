@@ -35,7 +35,6 @@ async function setup() {
 		await chatClient.connect(chatClient);
 		setupChatClientListeners(apiClient, chatClient);
 	}
-	await messages.setup();
 }
 
 async function connected() {

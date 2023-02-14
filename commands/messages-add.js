@@ -13,6 +13,7 @@ let commandResponse = () => {
 				let messagesList = await messages.get();
 				try {
 					let message = await Message.create({
+						index: getNextIndex(messagesList),
 						text: config.argument,
 						addedBy: config.userInfo.displayName,
 					});
@@ -55,4 +56,14 @@ let versions = [
 
 const addMessage = new BaseCommand(commandResponse, versions);
 
+function getNextIndex(array) {
+	let index = Math.max.apply(
+		Math,
+		array.map(function (o) {
+			return o.index;
+		})
+	);
+
+	return index + 1;
+}
 exports.command = addMessage;
