@@ -1,44 +1,52 @@
-const BaseCommand = require("../classes/base-command");
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const AudioLink = require("../models/audiolink");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
 const audio = require("../bot-audio");
 
+const helper = new Helper();
+
 let audioLinks;
-let COOLDOWN = 5000;
+let cooldown = 5000;
 let cost = 500;
-let timer;
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let audioLink;
 			let currentTime = new Date();
 
 			if (
-				isVersionActive(versions, 0) &&
-				(isCooldownPassed(currentTime, timer, COOLDOWN) || isStreamer(config))
+				helper.isVersionActive(versions, 0) &&
+				(helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
+					helper.isStreamer(config))
 			) {
-				timer = currentTime;
-
+				drinkBitch.setTimer(currentTime);
 				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
 				});
 
 				if (user) {
+					let audioLink;
 					if (user.points > cost) {
-						audioLink = getRandomisedAudioFileUrl(audioLinks);
-						audio.play(audioLink);
+						audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
+
+						if (process.env.JEST_WORKER_ID == undefined) {
+							audio.play(audioLink);
+						}
 
 						user.points -= cost;
-						user.save();
+						await user.save();
 						result.push("@TheStarlessAbstract drink, bitch!");
 					} else {
-						if (getRandomBetweenInclusiveMax(1, 100) == 100) {
-							audioLink = getRandomisedAudioFileUrl(audioLinks);
-							audio.play(audioLink);
+						if (helper.getRandomBetweenInclusiveMax(1, 100) == 100) {
+							audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
+
+							if (process.env.JEST_WORKER_ID == undefined) {
+								audio.play(audioLink);
+							}
 
 							result.push(
 								"@" +
@@ -77,58 +85,11 @@ let versions = [
 	},
 ];
 
-const drinkBitch = new BaseCommand(commandResponse, versions);
-
-function getRandomisedAudioFileUrl(array) {
-	let index = getRandomBetweenExclusiveMax(0, array.length);
-	let audioUrl = array[index].url;
-
-	return audioUrl;
-}
-
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function getRandomBetweenInclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const drinkBitch = new TimerCommand(commandResponse, versions, cooldown);
 
 async function updateAudioLinks() {
-	audioLinks = await AudioLink.find({ command: "drinkbitch" }).exec();
-}
-
-function setTimer(newTimer) {
-	timer = newTimer;
-}
-
-function isVersionActive(versionPack, index) {
-	if (versionPack != undefined && versionPack.length > 0) {
-		return versionPack[index]?.active ?? false;
-	}
-	return false;
-}
-
-function isCooldownPassed(currentTime, lastTimeSet, currentCooldown) {
-	if (
-		typeof currentTime == "object" &&
-		typeof lastTimeSet == "object" &&
-		typeof currentCooldown == "number" &&
-		currentCooldown >= 0
-	) {
-		return currentTime - lastTimeSet > currentCooldown;
-	}
-
-	return false;
-}
-
-function isStreamer(config) {
-	return config.isBroadcaster;
+	audioLinks = await AudioLink.find({ command: "drinkbitch" });
 }
 
 exports.command = drinkBitch;
-exports.setTimer = setTimer;
 exports.updateAudioLinks = updateAudioLinks;
-exports.isStreamer = isStreamer;
-exports.isVersionActive = isVersionActive;
-exports.isCooldownPassed = isCooldownPassed;

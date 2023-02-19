@@ -1,13 +1,11 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
 
 const chatClient = require("./bot-chatclient");
 const pubnub = require("./bot-pubnub");
 const pubSubClient = require("./bot-pubsubclient");
 const discord = require("./bot-discord");
 const kings = require("./commands/kings");
-
-const uri = process.env.MONGO_URI;
+const db = require("./bot-mongoose.js");
 
 init();
 
@@ -17,18 +15,10 @@ async function init() {
 
 	// Connect to MongoDB and set up other components
 	pubnub.setup();
-	await connectToMongoDB();
+	await db.connectToMongoDB();
 	await chatClient.setup();
 	await pubSubClient.setup();
 	await discord.setup();
-}
-
-async function connectToMongoDB() {
-	mongoose.connect(uri, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	});
-	mongoose.set("strictQuery", false);
 }
 
 function setupSignalHandlers() {

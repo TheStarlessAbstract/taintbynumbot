@@ -150,7 +150,9 @@ function getCommands() {
 function setCommandTimers() {
 	const currentDateTime = new Date();
 
-	drinkBitch.setTimer(currentDateTime);
+	console.log(commands.drinkbitch);
+
+	commands.drinkbitch.setTimer(currentDateTime);
 	commands.points.setTimer(currentDateTime);
 	commands.quote.setTimer(currentDateTime);
 	commands.tinderquote.setTimer(currentDateTime);

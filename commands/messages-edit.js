@@ -80,7 +80,7 @@ let commandResponse = () => {
 						result.push("No quotes found including '" + index + "'");
 					}
 				}
-			} else if (!isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config)) {
 				result.push("!editMessage command is for Mods only");
 			} else if (!isValuePresentAndString(config.argument)) {
 				result.push(

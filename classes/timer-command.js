@@ -20,7 +20,11 @@ class TimerCommand extends BaseCommand {
 	}
 
 	setTimer(timer) {
-		this.timer = timer;
+		if (timer instanceof Date) {
+			this.timer = timer;
+		} else if (typeof timer == "number") {
+			this.timer = new Date(timer);
+		}
 	}
 }
 

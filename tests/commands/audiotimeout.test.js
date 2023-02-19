@@ -1,153 +1,124 @@
 const audioTimeout = require("../../commands/audiotimeout");
+const audio = require("../../bot-audio");
 
-let validversions = [
-	{
-		description:
-			"Sets audio timeout for bot alerts to default length, or turns off the audio timeout",
-		usage: "!audiotimeout",
-		usableBy: "mods",
-		active: false,
-	},
-	{
-		description: "Sets the audio timeout to the specified amount of seconds",
-		usage: "!audiotimeout 3",
-		usableBy: "mods",
-		active: true,
-	},
-];
+let isBroadcaster = true;
+let isModUp = true;
+let userInfo = {};
+let argument = undefined;
+let commandLink = audioTimeout.command;
+const { response } = commandLink.getCommand();
 
-let invalidversions = [];
+describe("audioTimeout", () => {
+	// Applies only to tests in this describe block
+	beforeEach(() => {
+		isBroadcaster = true;
+		isModUp = true;
+		userInfo = {};
+		argument = undefined;
 
-test("isValidModeratorOrStreamer_WhereUserIsModerator_AndNotStreamer_ShouldReturnTrue", () => {
-	//Assemble
-	let config = {};
-	config.isModUp = true;
-	config.isBroadcaster = false;
-	//Act
-	let value = audioTimeout.isValidModeratorOrStreamer(config);
-	//Assert
-	expect(value).toBe(true);
-});
+		if (audio.getAudioTimeout()) {
+			audio.setAudioTimeout();
+		}
+	});
 
-test("isValidModeratorOrStreamer_WhereUserIsModerator_AndStreamer_ShouldReturnTrue", () => {
-	//Assemble
-	let config = {};
-	config.isModUp = true;
-	config.isBroadcaster = true;
-	//Act
-	let value = audioTimeout.isValidModeratorOrStreamer(config);
-	//Assert
-	expect(value).toBe(true);
-});
+	test("IsBroadcasterIsTrue_AndIsModUpIsTrue_AndArgumentIsUndefined_ShouldReturnStartedString", async () => {
+		//Assemble
 
-test("isValidModeratorOrStreamer_WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
-	//Assemble
-	let config = {};
-	config.isModUp = false;
-	config.isBroadcaster = false;
-	//Act
-	let value = audioTimeout.isValidModeratorOrStreamer(config);
-	//Assert
-	expect(value).toBe(false);
-});
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
 
-test("getCommandArgumentKey_WhereArgumentIsBool_ShouldReturnEmptyString", () => {
-	//Assemble
-	let config = {};
-	config.argument = false;
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe("");
-});
+		//Assert
+		expect(result[0]).toBe("Bot audio timeout has been started");
+	});
 
-test("getCommandArgumentKey_WhereArgumentIsNumberAsString_ShouldReturnNumber", () => {
-	//Assemble
-	let config = {};
-	config.argument = "1";
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe(1);
-});
+	test("IsBroadcasterIsFalse_ShouldReturnStartedString", async () => {
+		//Assemble
+		isBroadcaster = false;
 
-test("getCommandArgumentKey_WhereArgumentIsNumber_ShouldReturnNumber", () => {
-	//Assemble
-	let config = {};
-	config.argument = 1;
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe(1);
-});
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
 
-test("getCommandArgumentKey_WhereArgumentIsEmptyString_ShouldReturnEmptyString", () => {
-	//Assemble
-	let config = {};
-	config.argument = "";
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe("");
-});
+		//Assert
+		expect(result[0]).toBe("Bot audio timeout has been started");
+	});
 
-test("getCommandArgumentKey_WhereArgumentIsUndefined_ShouldReturnEmptyString", () => {
-	//Assemble
-	let config = {};
-	config.argument = undefined;
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe(null);
-});
+	test("IsModUpIsFalse_ShouldReturnStartedString", async () => {
+		//Assemble
+		isModUp = false;
 
-test("getCommandArgumentKey_WhereArgumentIsNotValidString_ShouldReturnEmptyString", () => {
-	//Assemble
-	let config = {};
-	config.argument = "notvalidstring";
-	//Act
-	let value = audioTimeout.getCommandArgumentKey(config);
-	//Assert
-	expect(value).toBe("");
-});
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
 
-test("isVersionActive_VersionsPackIsUndefined_ShouldReturnFalse", () => {
-	//Assemble
+		//Assert
+		expect(result[0]).toBe("Bot audio timeout has been started");
+	});
 
-	//Act
-	let value = audioTimeout.isVersionActive(undefined, 0);
-	//Assert
-	expect(value).toBe(false);
-});
+	test("ArgumentIsANumber_ShouldReturnTimeString", async () => {
+		//Assemble
+		argument = "3";
 
-test("isVersionActive_VersionsPackIsEmpty_ShouldReturnFalse", () => {
-	//Assemble
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
 
-	//Act
-	let value = audioTimeout.isVersionActive(invalidversions, 0);
-	//Assert
-	expect(value).toBe(false);
-});
+		//Assert
+		expect(result[0]).toBe(
+			"Bot audio timeout has been started, and set to 3 seconds"
+		);
+	});
 
-test("isVersionActive_WhereIndexIsOutOfBounds_ShouldReturnFalse", () => {
-	//Assemble
+	test("ArgumentIsString_ShouldReturnCorrectUsageString", async () => {
+		//Assemble
+		argument = "this will fail";
 
-	//Act
-	let value = audioTimeout.isVersionActive(validversions, 100);
-	//Assert
-	expect(value).toBe(false);
-});
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
 
-test("isVersionActive_WhereIndexIsValid_AndSelectedVersionIsNotActive_ShouldReturnFalse", () => {
-	//Act
-	let value = audioTimeout.isVersionActive(validversions, 0);
-	//Assert
-	expect(value).toBe(false);
-});
+		//Assert
+		expect(result[0]).toBe(
+			"'!audioTimeout' - to start or stop the timeout, or '!audioTimeout {number} to set the length of the timeout'"
+		);
+	});
 
-test("isVersionActive_WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => {
-	//Act
-	let value = audioTimeout.isVersionActive(validversions, 1);
-	//Assert
-	expect(value).toBe(true);
+	test("ArgumentIsBoolean_ShouldReturnCorrectUsageString", async () => {
+		//Assemble
+		argument = true;
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"'!audioTimeout' - to start or stop the timeout, or '!audioTimeout {number} to set the length of the timeout'"
+		);
+	});
 });

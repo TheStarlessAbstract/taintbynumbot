@@ -1,243 +1,82 @@
+require("dotenv").config();
+
 const drinkBitch = require("../../commands/drinkbitch");
 
-let validversions = [
-	{
-		description: "Makes Starless drink booze",
-		usage: "!drinkbitch",
-		usableBy: "users",
-		cost: "500 Tainty Points",
-		active: true,
-	},
-];
+const db = require("../../bot-mongoose.js");
 
-let invalidversions = [];
+let isBroadcaster;
+let isModUp;
+let userInfo;
+let argument;
+let commandLink = drinkBitch.command;
+const { response } = commandLink.getCommand();
+let currentDateTime = new Date();
+let cooldown = commandLink.getCooldown();
 
-let currentTime;
-let lastTimeSet;
-let currentCooldown;
+describe("drinkBitch", () => {
+	beforeAll(async () => {
+		db.connectToMongoDB();
+		await drinkBitch.updateAudioLinks();
+	});
 
-test("isStreamer_WhereUserIsStreamer_ShouldReturnTrue", () => {
-	//Assemble
-	let config = {};
-	config.isBroadcaster = true;
-	//Act
-	let value = drinkBitch.isStreamer(config);
-	//Assert
-	expect(value).toBe(true);
-});
-
-test("isStreamer_WhereUserIsNotStreamer_ShouldReturnFalse", () => {
-	//Assemble
-	let config = {};
-	config.isBroadcaster = false;
-	//Act
-	let value = drinkBitch.isStreamer(config);
-	//Assert
-	expect(value).toBe(false);
-});
-
-test("isVersionActive_VersionsPackIsUndefined_ShouldReturnFalse", () => {
-	//Assemble
-
-	//Act
-	let value = drinkBitch.isVersionActive(undefined, 0);
-	//Assert
-	expect(value).toBe(false);
-});
-
-test("isVersionActive_VersionsPackIsEmpty_ShouldReturnFalse", () => {
-	//Assemble
-
-	//Act
-	let value = drinkBitch.isVersionActive(invalidversions, 0);
-	//Assert
-	expect(value).toBe(false);
-});
-
-test("isVersionActive_WhereIndexIsOutOfBounds_ShouldReturnFalse", () => {
-	//Assemble
-
-	//Act
-	let value = drinkBitch.isVersionActive(validversions, 100);
-	//Assert
-	expect(value).toBe(false);
-});
-
-test("isVersionActive_WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => {
-	//Assemble
-
-	//Act
-	let value = drinkBitch.isVersionActive(validversions, 0);
-	//Assert
-	expect(value).toBe(true);
-});
-
-test("isVersionActive_WhereIndexIsValid_AndSelectedVersionIsNotActive_ShouldReturnFalse", () => {
-	//Assemble
-
-	//Act
-	validversions[0].active = false;
-	let value = drinkBitch.isVersionActive(validversions, 0);
-	//Assert
-	expect(value).toBe(false);
-});
-
-describe("isCooldownPassed", () => {
-	// Applies only to tests in this describe block
 	beforeEach(() => {
-		return initializeCooldownVariables();
+		isBroadcaster = true;
+		isModUp = true;
+		userInfo = { userId: 100612361 };
+		argument = undefined;
+
+		commandLink.setTimer(currentDateTime - 1000);
 	});
 
-	test("WhereCurrentTimeLessThanLastTimeSet_ShouldReturnFalse", () => {
+	afterAll(() => {
+		db.disconnectFromMongoDB();
+	});
+
+	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		currentTime = 1676052800000;
+		isBroadcaster = false;
 
 		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
 		//Assert
-		expect(value).toBe(false);
+		expect(result[0]).toBe(undefined);
 	});
 
-	test("WhereLastTimeSetGreaterThanCurrentTime_ShouldReturnFalse", () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		lastTimeSet = new Date(1676052830000);
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentCooldownIsNegative_ShouldReturnFalse", () => {
-		//Assemble
-		currentCooldown = -5000;
+		isBroadcaster = false;
+		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
 		//Assert
-		expect(value).toBe(false);
+		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
 	});
 
-	test("WhereCurrentTimeIsString_ShouldReturnFalse", () => {
-		//Assemble
-		currentTime = "string";
-
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereLastTimeSetIsString_ShouldReturnFalse", () => {
-		//Assemble
-		lastTimeSet = "string";
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentCooldownIsString_ShouldReturnFalse", () => {
-		//Assemble
-		currentCooldown = "string";
-
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentCooldownsIsUndefined_ShouldReturnFalse", () => {
-		//Assemble
-		currentTime = undefined;
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentCooldownsIsUndefined_ShouldReturnFalse", () => {
-		//Assemble
-		lastTimeSet = undefined;
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentCooldownsIsUndefined_ShouldReturnFalse", () => {
-		//Assemble
-		currentCooldown = undefined;
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentTimeValid_AndLastTimeSetValid_AndCurrentCooldownIsEmptyString_ShouldReturnFalse", () => {
-		//Assemble
-		currentCooldown = "";
-		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereCurrentTimeValid_AndLastTimeSetValid_AndCurrentCooldownValid_ShouldReturnFalse", () => {
+	test("IsBroadcasterIsTrue_AndUserIdIsValid_And UserHasValidBalance_ShouldReturnPositiveString", async () => {
 		//Assemble
 
 		//Act
-		let value = drinkBitch.isCooldownPassed(
-			currentTime,
-			lastTimeSet,
-			currentCooldown
-		);
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
 		//Assert
-		expect(value).toBe(true);
+		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
 	});
 });
-
-function initializeCooldownVariables() {
-	currentTime = new Date(1676052820000);
-	lastTimeSet = new Date(1676052810000);
-	currentCooldown = 5000;
-}
