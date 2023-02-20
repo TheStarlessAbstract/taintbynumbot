@@ -19,9 +19,8 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				helper.isVersionActive(versions, 0) &&
-				(helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
-					helper.isStreamer(config))
+				helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
+				helper.isStreamer(config)
 			) {
 				drinkBitch.setTimer(currentTime);
 				let user = await LoyaltyPoint.findOne({
@@ -33,7 +32,7 @@ let commandResponse = () => {
 					if (user.points > cost) {
 						audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
 
-						if (process.env.JEST_WORKER_ID == undefined) {
+						if (!helper.isTest()) {
 							audio.play(audioLink);
 						}
 
@@ -44,7 +43,7 @@ let commandResponse = () => {
 						if (helper.getRandomBetweenInclusiveMax(1, 100) == 100) {
 							audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
 
-							if (process.env.JEST_WORKER_ID == undefined) {
+							if (!helper.isTest()) {
 								audio.play(audioLink);
 							}
 

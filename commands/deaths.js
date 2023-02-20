@@ -1,40 +1,53 @@
-const BaseCommand = require("../classes/base-command");
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const DeathCounter = require("../models/deathcounter");
 
 const chatClient = require("../bot-chatclient");
 
+const helper = new Helper();
+
 let twitchId = process.env.TWITCH_USER_ID;
+
+let cooldown = 10000;
 
 let commandResponse = () => {
 	return {
-		response: async () => {
+		response: async (config) => {
 			let result = [];
+			let currentTime = new Date();
 
-			try {
-				let apiClient = chatClient.getApiClient();
+			if (
+				helper.isCooldownPassed(currentTime, deaths.timer, cooldown) ||
+				helper.isStreamer(config)
+			) {
+				deaths.setTimer(currentTime);
+				let apiClient = await chatClient.getApiClient();
 				let channel = await apiClient.channels.getChannelInfoById(twitchId);
 
-				let deathCounters = await DeathCounter.find({
-					gameTitle: channel.gameName,
-				});
+				if (channel != null) {
+					let deathCounters = await DeathCounter.find({
+						gameTitle: channel.gameName,
+					});
 
-				let gameDeaths = deathCounters.reduce(
-					(total, counter) => total + counter.deaths,
-					0
-				);
+					let gameDeaths = deathCounters.reduce(
+						(total, counter) => total + counter.deaths,
+						0
+					);
 
-				result.push(
-					"Starless has died a grand total of " +
-						gameDeaths +
-						" times, while ✨playing✨ " +
-						channel.gameName
-				);
-			} catch (err) {
-				result.push(
-					"Twitch isn't being very helpful right now, try again later"
-				);
+					result.push(
+						"Starless has died a grand total of " +
+							gameDeaths +
+							" times, while ✨playing✨ " +
+							channel.gameName
+					);
+				} else {
+					result.push(
+						"Twitch isn't being very helpful right now, try again later"
+					);
+				}
 			}
+
 			return result;
 		},
 	};
@@ -49,6 +62,6 @@ let versions = [
 	},
 ];
 
-const deaths = new BaseCommand(commandResponse, versions);
+const deaths = new TimerCommand(commandResponse, versions);
 
 exports.command = deaths;

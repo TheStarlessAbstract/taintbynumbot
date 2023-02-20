@@ -1,6 +1,7 @@
 const ApiClient = require("@twurple/api").ApiClient;
 const ChatClient = require("@twurple/chat").ChatClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
+const Helper = require("./classes/helper");
 
 const Token = require("./models/token");
 
@@ -18,6 +19,8 @@ let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let userId = process.env.TWITCH_USER_ID;
 let username = process.env.TWITCH_USERNAME;
 
+const helper = new Helper();
+
 let apiClient;
 let isLive = false;
 let intervalMessages;
@@ -27,30 +30,40 @@ let token;
 
 async function setup() {
 	token = await Token.findOne({ name: "chatClient" });
+
 	if (token) {
 		const tokenData = initializeTokenData(token);
 		const authProvider = createAuthProvider(tokenData);
 		const chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
-		await chatClient.connect(chatClient);
-		setupChatClientListeners(apiClient, chatClient);
+
+		setApiClient(apiClient);
+
+		if (!helper.isTest()) {
+			await chatClient.connect(chatClient);
+			await setupChatClientListeners(apiClient, chatClient);
+		}
 	}
 }
 
 async function connected() {
-	console.log(" * Connected to Twitch chat * ");
+	if (!helper.isTest()) {
+		console.log(" * Connected to Twitch chat * ");
+	}
 }
 
 async function setupChatClientListeners(apiClient, chatClient) {
 	chatClient.onRegister(async () => {
 		connected();
-		checkLive(apiClient, chatClient);
-		setApiClient(apiClient);
 
-		kings.resetKings();
-		redemptions.setChatClient(chatClient);
-		await commands.setup();
-		await deathCounter.setup(apiClient);
+		checkLive(apiClient, chatClient);
+
+		if (!helper.isTest()) {
+			kings.resetKings();
+			redemptions.setChatClient(chatClient);
+			await commands.setup();
+			await deathCounter.setup(apiClient);
+		}
 	});
 
 	await chatClient.onMessage(async (channel, user, message, msg) => {
@@ -164,13 +177,15 @@ function createAuthProvider(tokenData) {
 			clientId,
 			clientSecret,
 			onRefresh: async (newTokenData) => {
-				token.accessToken = newTokenData.accessToken;
-				token.refreshToken = newTokenData.refreshToken;
-				token.scope = newTokenData.scope;
-				token.expiresIn = newTokenData.expiresIn;
-				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
+				if (process.env.JEST_WORKER_ID == undefined) {
+					token.accessToken = newTokenData.accessToken;
+					token.refreshToken = newTokenData.refreshToken;
+					token.scope = newTokenData.scope;
+					token.expiresIn = newTokenData.expiresIn;
+					token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
-				await token.save();
+					await token.save();
+				}
 			},
 		},
 		tokenData
@@ -207,7 +222,10 @@ function setApiClient(newApiClient) {
 	apiClient = newApiClient;
 }
 
-function getApiClient() {
+async function getApiClient() {
+	if (!apiClient) {
+		await setup();
+	}
 	return apiClient;
 }
 

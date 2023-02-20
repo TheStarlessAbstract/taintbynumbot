@@ -9,32 +9,34 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			const apiClient = chatClient.getApiClient();
-			const follow = await apiClient.users.getFollowFromUserToBroadcaster(
-				config.userInfo.userId,
-				twitchId
-			);
-
-			if (follow) {
-				const currentTimestamp = Date.now();
-				const followStartTimestamp = follow.followDate.getTime();
-
-				let followLength = getFollowLength(
-					currentTimestamp - followStartTimestamp
+			if (!config.isBroadcaster) {
+				const apiClient = await chatClient.getApiClient();
+				const follow = await apiClient.users.getFollowFromUserToBroadcaster(
+					config.userInfo.userId,
+					twitchId
 				);
 
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" has been following TheStarlessAbstract for " +
-						followLength,
-				]);
-			} else {
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" hit that follow button, otherwise this command is doing a whole lot of nothing for you",
-				]);
+				if (follow) {
+					const currentTimestamp = Date.now();
+					const followStartTimestamp = follow.followDate.getTime();
+
+					let followLength = getFollowLength(
+						currentTimestamp - followStartTimestamp
+					);
+
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" has been following TheStarlessAbstract for " +
+							followLength
+					);
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" hit that follow button, otherwise this command is doing a whole lot of nothing for you"
+					);
+				}
 			}
 
 			return result;
@@ -78,8 +80,6 @@ function getFollowLength(followTime) {
 		{ value: minute, name: "minute" },
 		{ value: second, name: "second" },
 	];
-
-	// 5 months4 weeks1 day22 hours4 minutes27 secon.
 
 	let followString = "";
 	for (const timeUnit of timeUnits) {

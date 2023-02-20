@@ -150,16 +150,15 @@ function getCommands() {
 function setCommandTimers() {
 	const currentDateTime = new Date();
 
-	console.log(commands.drinkbitch);
-
 	commands.drinkbitch.setTimer(currentDateTime);
 	commands.points.setTimer(currentDateTime);
 	commands.quote.setTimer(currentDateTime);
 	commands.tinderquote.setTimer(currentDateTime);
 	commands.modabuse.setTimer(currentDateTime);
-	f.setTimer(currentDateTime);
+	commands.f.setTimer(currentDateTime);
 	// chugLastUseTime = currentDateTime;
 	commands.kingsremain.setTimer(currentDateTime);
+	commands.deaths.setTimer(currentDateTime);
 }
 
 exports.getCommands = getCommands;

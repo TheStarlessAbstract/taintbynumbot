@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const drinkBitch = require("../../commands/drinkbitch");
+const deaths = require("../../commands/deaths");
 
 const db = require("../../bot-mongoose.js");
 
@@ -8,20 +8,19 @@ let isBroadcaster;
 let isModUp;
 let userInfo;
 let argument;
-let commandLink = drinkBitch.command;
+let commandLink = deaths.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("drinkBitch", () => {
+describe("deaths", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
-		await drinkBitch.updateAudioLinks();
 	});
 
 	beforeEach(() => {
 		isBroadcaster = true;
 		isModUp = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {};
 		argument = undefined;
 
 		commandLink.setTimer(currentDateTime - 1000);
@@ -50,7 +49,7 @@ describe("drinkBitch", () => {
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = false;
-		commandLink.setTimer(currentDateTime - 6000);
+		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
@@ -61,10 +60,12 @@ describe("drinkBitch", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
+		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
+			true
+		);
 	});
 
-	test("IsBroadcasterIsTrue_AndUserIdIsValid_And UserHasValidBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_ShouldReturnPositiveString", async () => {
 		//Assemble
 
 		//Act
@@ -76,6 +77,8 @@ describe("drinkBitch", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
+		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
+			true
+		);
 	});
 });

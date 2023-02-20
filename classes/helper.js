@@ -1,6 +1,10 @@
 class Helper {
 	constructor() {}
 
+	isTest() {
+		return process.env.JEST_WORKER_ID != undefined;
+	}
+
 	isValuePresentAndString(value) {
 		return value != undefined && typeof value === "string" && value != "";
 	}
