@@ -7,8 +7,8 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (versions[0].active && config.isModUp) {
-				kings.resetKings();
+			if (config.isModUp) {
+				await kings.resetKings();
 				let cardsToDraw = kings.getCardsToDraw();
 
 				result.push(

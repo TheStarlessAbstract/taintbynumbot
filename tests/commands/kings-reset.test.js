@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const deaths = require("../../commands/deaths");
+const kingsReset = require("../../commands/kings-reset");
 
 const db = require("../../bot-mongoose.js");
 
@@ -8,30 +8,28 @@ let isBroadcaster;
 let isModUp;
 let userInfo;
 let argument;
-let commandLink = deaths.command;
+let commandLink = kingsReset.command;
 const { response } = commandLink.getCommand();
-let currentDateTime = new Date();
 
-describe("deaths", () => {
+describe("kingsReset", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
 
 	beforeEach(() => {
-		isBroadcaster = true;
+		isBroadcaster = false;
 		isModUp = true;
 		userInfo = {};
 		argument = undefined;
-		commandLink.setTimer(currentDateTime - 1000);
 	});
 
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndIsModUpIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		isModUp = false;
 
 		//Act
 		let result = await response({
@@ -45,10 +43,8 @@ describe("deaths", () => {
 		expect(result[0]).toBe(undefined);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
@@ -59,13 +55,14 @@ describe("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
-			true
+		expect(result[0]).toBe(
+			"A new game of Kings has been dealt, with 52 cards!"
 		);
 	});
 
-	test("IsBroadcasterIsTrue_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModUpIsTrue_ShouldReturnPositiveString", async () => {
 		//Assemble
+		isBroadcaster = true;
 
 		//Act
 		let result = await response({
@@ -76,8 +73,8 @@ describe("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
-			true
+		expect(result[0]).toBe(
+			"A new game of Kings has been dealt, with 52 cards!"
 		);
 	});
 });

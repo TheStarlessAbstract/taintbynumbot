@@ -1,18 +1,27 @@
 const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
 
 const Command = require("../models/command");
 
 const commands = require("../bot-commands");
 const discord = require("../bot-discord");
 
+const helper = new Helper();
+
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (versions[0].active && config.isModUp && config.argument) {
+			if (
+				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValuePresentAndString(config.argument)
+			) {
 				if (config.argument.startsWith("!")) {
-					let commandName = config.argument.slice(1).toLowerCase();
+					let commandName = helper
+						.getCommandArgumentKey(config, 0)
+						.slice(1)
+						.toLowerCase();
 					const { response } = (await commands.list[commandName]) || {};
 
 					if (response) {
@@ -39,30 +48,30 @@ let commandResponse = () => {
 								);
 							}
 						} else {
-							result.push([
+							result.push(
 								"!" +
 									commandName +
-									" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely",
-							]);
+									" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely"
+							);
 						}
 					} else {
-						result.push([
+						result.push(
 							"!" +
 								commandName +
-								" doesn't look to be a command, are you sure you spelt it right, dummy?!",
-						]);
+								" doesn't look to be a command, are you sure you spelt it right, dummy?!"
+						);
 					}
 				} else {
-					result.push([
-						"To specify the command to delete, include '!' at the start !delcomm !oldcommand",
-					]);
+					result.push(
+						"To delete a command, include '!' at the start of the command to delete !delcomm ![command name]"
+					);
 				}
-			} else if (!config.isModUp) {
-				result.push(["!delcomm command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To delete a command, you must include the command name, command being deleted must start with '!' : '!delcomm !oldcommand",
-				]);
+			} else if (!helper.isValidModeratorOrStreamer(config)) {
+				result.push("!delcomm command is for Mods only");
+			} else if (!helper.isValuePresentAndString(config.argument)) {
+				result.push(
+					"To delete a command, you must include the name of the command to be deleted - '!delcomm ![command name]"
+				);
 			}
 
 			return result;

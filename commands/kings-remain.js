@@ -1,6 +1,9 @@
 const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const kings = require("./kings");
+
+const helper = new Helper();
 
 let cooldown = 5000;
 
@@ -11,9 +14,12 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				versions[0].active &&
-				(currentTime - kingsRemain.getTimer() > kingsRemain.getCooldown() ||
-					config.isBroadcaster)
+				helper.isCooldownPassed(
+					currentTime,
+					kingsRemain.getTimer(),
+					kingsRemain.getCooldown()
+				) ||
+				helper.isStreamer(config)
 			) {
 				kingsRemain.setTimer(currentTime);
 

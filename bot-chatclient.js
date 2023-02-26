@@ -94,6 +94,7 @@ async function setupChatClientListeners(apiClient, chatClient) {
 			if (typeof response === "function") {
 				let result = await response({
 					isBroadcaster,
+					isMod,
 					isModUp,
 					userInfo,
 					argument,

@@ -14,6 +14,7 @@ let currentDateTime = new Date();
 
 describe("drinkBitch", () => {
 	beforeAll(async () => {
+		process.env.JEST_WORKER_ID = 96;
 		db.connectToMongoDB();
 		await drinkBitch.updateAudioLinks();
 	});
@@ -23,12 +24,11 @@ describe("drinkBitch", () => {
 		isModUp = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
 		argument = undefined;
-
 		commandLink.setTimer(currentDateTime - 1000);
 	});
 
-	afterAll(() => {
-		db.disconnectFromMongoDB();
+	afterAll(async () => {
+		await db.disconnectFromMongoDB();
 	});
 
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {

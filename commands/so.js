@@ -1,28 +1,37 @@
-const BaseCommand = require("../classes/base-command");
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const chatClient = require("../bot-chatclient");
+
+const helper = new Helper();
+
+let cooldown = 5000;
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let username;
-			let user;
+			let currentTime = new Date();
 			let stream;
 			let streamed;
 
-			if (config.isModUp) {
-				if (config.argument) {
-					username = config.argument;
+			if (helper.isValidModeratorOrStreamer(config)) {
+				if (
+					helper.isValuePresentAndString(config.argument) &&
+					helper.isCooldownPassed(currentTime, so.timer, cooldown)
+				) {
+					so.setTimer(currentTime);
+
+					let username = config.argument;
 					if (username.startsWith("@")) {
 						username = username.slice(1);
 					}
 
-					let apiClient = chatClient.getApiClient();
-					user = await apiClient.users.getUserByName(username);
+					let apiClient = await chatClient.getApiClient();
+					let user = await apiClient.users.getUserByName(username);
 
 					if (!user) {
-						result.push(["Couldn't find a user by the name of " + username]);
+						result.push("Couldn't find a user by the name of " + username);
 					} else {
 						stream = await apiClient.channels.getChannelInfo(user.id);
 
@@ -41,13 +50,16 @@ let commandResponse = () => {
 								". I hear they love the Taint"
 						);
 					}
-				} else {
-					result.push([
-						"You got to include a username to shoutout someone: !so buhhsbot",
-					]);
+				} else if (
+					!helper.isValuePresentAndString(config.argument) &&
+					helper.isCooldownPassed(currentTime, so.timer, cooldown)
+				) {
+					result.push(
+						"You got to include a username to shoutout someone: !so buhhsbot"
+					);
 				}
-			} else if (!config.isModUp) {
-				result.push(["!so command is for Mods only"]);
+			} else {
+				result.push("!so command is for Mods only");
 			}
 
 			return result;
@@ -64,6 +76,6 @@ let versions = [
 	},
 ];
 
-const so = new BaseCommand(commandResponse, versions);
+const so = new TimerCommand(commandResponse, versions, cooldown);
 
 exports.command = so;

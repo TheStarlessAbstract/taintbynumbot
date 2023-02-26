@@ -1,30 +1,32 @@
 const audio = require("../bot-audio");
 
-const BaseCommand = require("../classes/base-command");
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const AudioLink = require("../models/audiolink");
 const Deck = require("../models/deck");
 const KingsSaveState = require("../models/kingssavestate");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
+const helper = new Helper();
+
 let cardsToDraw;
-let COOLDOWN = 5000;
+let cooldown = 5000;
 let cost = 100;
 let kingsCount;
-let timer;
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let redeemUser = config.userInfo.userName;
+			let redeemUser = config.userInfo.displayName;
 			let currentTime = new Date();
 
 			if (
-				versions[0].active &&
-				(currentTime - timer > COOLDOWN || config.isBroadcaster)
+				helper.isCooldownPassed(currentTime, kings.timer, cooldown) ||
+				helper.isStreamer(config)
 			) {
-				timer = currentTime;
+				kings.setTimer(currentTime);
 
 				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
@@ -34,7 +36,7 @@ let commandResponse = () => {
 					if (user.points >= cost) {
 						user.points -= cost;
 
-						user.save();
+						await user.save();
 
 						let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
 						let cardDrawn;
@@ -44,7 +46,9 @@ let commandResponse = () => {
 							resetKings();
 						} else {
 							cardDrawn =
-								drawFrom[getRandomBetweenInclusiveMax(0, drawFrom.length - 1)];
+								drawFrom[
+									helper.getRandomBetweenInclusiveMax(0, drawFrom.length - 1)
+								];
 						}
 
 						cardDrawn.isDrawn = true;
@@ -53,19 +57,19 @@ let commandResponse = () => {
 							kingsCount++;
 						}
 
-						result.push([
+						result.push(
 							"@" +
 								redeemUser +
 								" You have drawn the " +
 								cardDrawn.value +
 								" of " +
-								cardDrawn.suit,
-						]);
+								cardDrawn.suit
+						);
 
 						if (kingsCount != 4) {
-							result.push([
-								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation,
-							]);
+							result.push(
+								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
+							);
 
 							switch (cardDrawn.value) {
 								case "Queen":
@@ -78,16 +82,16 @@ let commandResponse = () => {
 
 							if (cardDrawn.bonusJager) {
 								playAudio("jager");
-								result.push([
-									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
-								]);
+								result.push(
+									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
+								);
 							}
 						} else {
 							kingsCount = 0;
 
-							result.push([
-								"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
-							]);
+							result.push(
+								"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
+							);
 						}
 					} else {
 						result.push(
@@ -119,7 +123,7 @@ let versions = [
 	},
 ];
 
-const kings = new BaseCommand(commandResponse, versions);
+const kings = new TimerCommand(commandResponse, versions, cooldown);
 
 async function resetKings() {
 	let gameState = await KingsSaveState.findOne({});
@@ -156,7 +160,7 @@ async function initializeGameState() {
 
 	let index;
 	for (let i = 0; i < 2; i++) {
-		index = getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
+		index = helper.getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
 		cardsToDraw[jagerBonusCards[index]].bonusJager = true;
 		jagerBonusCards.splice(index, 1);
 	}
@@ -210,7 +214,10 @@ async function playAudio(audioName) {
 	let audioLink = await AudioLink.findOne({
 		name: audioName,
 	});
-	audio.play(audioLink.url);
+
+	if (!helper.isTest()) {
+		audio.play(audioLink.url);
+	}
 }
 
 function getSuits() {
@@ -293,14 +300,6 @@ function getValues() {
 	];
 }
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function getRandomBetweenInclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 async function saveKingsState() {
 	let saveState = new KingsSaveState({
 		cardsToDraw: cardsToDraw,
@@ -315,12 +314,7 @@ function restoreGameState(gameState) {
 	kingsCount = gameState.kingsCount;
 }
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
-
 exports.command = kings;
 exports.getCardsToDraw = getCardsToDraw;
 exports.saveKingsState = saveKingsState;
-exports.setTimer = setTimer;
 exports.resetKings = resetKings;

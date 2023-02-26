@@ -150,10 +150,23 @@ describe("isValuePresentAndNumber", () => {
 });
 
 describe("isValidModeratorOrStreamer", () => {
+	test("WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
+		//Assemble
+		let config = {};
+		config.isMod = false;
+		config.isModUp = false;
+		config.isBroadcaster = false;
+		//Act
+		let value = helper.isValidModeratorOrStreamer(config);
+		//Assert
+		expect(value).toBe(false);
+	});
+
 	test("WhereUserIsModerator_AndNotStreamer_ShouldReturnTrue", () => {
 		//Assemble
 		let config = {};
-		config.isModUp = true;
+		config.isMod = true;
+		// config.isModUp = true;
 		config.isBroadcaster = false;
 		//Act
 		let value = helper.isValidModeratorOrStreamer(config);
@@ -161,10 +174,11 @@ describe("isValidModeratorOrStreamer", () => {
 		expect(value).toBe(true);
 	});
 
-	test("WhereUserIsModerator_AndStreamer_ShouldReturnTrue", () => {
+	test("WhereUserNotModerator_AndIsStreamer_ShouldReturnTrue", () => {
 		//Assemble
 		let config = {};
-		config.isModUp = true;
+		config.isMod = false;
+		// config.isModUp = true;
 		config.isBroadcaster = true;
 		//Act
 		let value = helper.isValidModeratorOrStreamer(config);
@@ -172,15 +186,16 @@ describe("isValidModeratorOrStreamer", () => {
 		expect(value).toBe(true);
 	});
 
-	test("WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
+	test("WhereUserIsModerator_AndIsStreamer_ShouldReturnTrue", () => {
 		//Assemble
 		let config = {};
-		config.isModUp = false;
-		config.isBroadcaster = false;
+		config.isMod = true;
+		// config.isModUp = true;
+		config.isBroadcaster = true;
 		//Act
 		let value = helper.isValidModeratorOrStreamer(config);
 		//Assert
-		expect(value).toBe(false);
+		expect(value).toBe(true);
 	});
 });
 
@@ -215,6 +230,16 @@ describe("getCommandArgumentKey", () => {
 		expect(value).toBe("");
 	});
 
+	test("WhereArgumentIsUndefined_AndIndexIsZero_ShouldReturnNull", () => {
+		//Assemble
+		let config = {};
+		config.argument = undefined;
+		//Act
+		let value = helper.getCommandArgumentKey(config, 0);
+		//Assert
+		expect(value).toBe(null);
+	});
+
 	test("WhereArgumentIsValidString_AndIndexIsZero_AndMixedCapitals_ShouldReturnValidStringMixedCapitals", () => {
 		//Assemble
 		let config = {};
@@ -233,6 +258,36 @@ describe("getCommandArgumentKey", () => {
 		let value = helper.getCommandArgumentKey(config, 0);
 		//Assert
 		expect(value).toBe("VALIDSTRINGNOSPACES");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnFirstPartAsGivenInMixedCaps", () => {
+		//Assemble
+		let config = {};
+		config.argument = "vAlIdStRiNg WithSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(config, 0);
+		//Assert
+		expect(value).toBe("vAlIdStRiNg");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnNumber", () => {
+		//Assemble
+		let config = {};
+		config.argument = "1 WithSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(config, 0);
+		//Assert
+		expect(value).toBe(1);
+	});
+
+	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnFirstPartAsGivenInCaps", () => {
+		//Assemble
+		let config = {};
+		config.argument = "VALIDSTRING WITHSPACES";
+		//Act
+		let value = helper.getCommandArgumentKey(config, 1);
+		//Assert
+		expect(value).toBe("WITHSPACES");
 	});
 
 	test("WhereArgumentIsBool_AndIndexIsOne_ShouldReturnEmptyString", () => {
@@ -263,6 +318,16 @@ describe("getCommandArgumentKey", () => {
 		let value = helper.getCommandArgumentKey(config, 1);
 		//Assert
 		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsUndefined_AndIndexIsZero_ShouldReturnNull", () => {
+		//Assemble
+		let config = {};
+		config.argument = undefined;
+		//Act
+		let value = helper.getCommandArgumentKey(config, 1);
+		//Assert
+		expect(value).toBe(null);
 	});
 
 	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndMixedCapitals_ShouldReturnEmptyString", () => {
@@ -303,6 +368,16 @@ describe("getCommandArgumentKey", () => {
 		let value = helper.getCommandArgumentKey(config, 1);
 		//Assert
 		expect(value).toBe("WITHSPACES");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnNumber", () => {
+		//Assemble
+		let config = {};
+		config.argument = "WithSpAcEs 1";
+		//Act
+		let value = helper.getCommandArgumentKey(config, 1);
+		//Assert
+		expect(value).toBe(1);
 	});
 });
 

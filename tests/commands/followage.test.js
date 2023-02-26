@@ -14,8 +14,8 @@ describe("followage", () => {
 		db.connectToMongoDB();
 	});
 
-	afterAll(() => {
-		db.disconnectFromMongoDB();
+	afterAll(async () => {
+		await db.disconnectFromMongoDB();
 	});
 
 	test("UserIsAFollower_ShouldReturnFollowLength", async () => {

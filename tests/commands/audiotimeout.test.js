@@ -9,7 +9,6 @@ let commandLink = audioTimeout.command;
 const { response } = commandLink.getCommand();
 
 describe("audioTimeout", () => {
-	// Applies only to tests in this describe block
 	beforeEach(() => {
 		isBroadcaster = true;
 		isModUp = true;

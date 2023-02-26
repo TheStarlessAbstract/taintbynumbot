@@ -1,8 +1,11 @@
 const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const chatClient = require("../bot-chatclient");
 
 const LoyaltyPoint = require("../models/loyaltypoint");
+
+const helper = new Helper();
 
 let cooldown = 5000;
 
@@ -11,84 +14,101 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 			let currentTime = new Date();
+			let user;
 
 			if (
-				currentTime - points.getTimer() > points.getCooldown() ||
-				config.isBroadcaster
+				helper.isVersionActive(versions, 0) &&
+				!helper.isValuePresentAndString(config.argument) &&
+				(helper.isCooldownPassed(
+					currentTime,
+					points.getTimer(),
+					points.getCooldown()
+				) ||
+					helper.isStreamer(config))
 			) {
-				let user;
 				points.setTimer(currentTime);
 
-				if (versions[0].active && !config.argument) {
-					user = await LoyaltyPoint.findOne({
-						userId: config.userInfo.userId,
-					});
+				user = await LoyaltyPoint.findOne({
+					userId: config.userInfo.userId,
+				});
 
-					if (user) {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" has " +
-								user.points +
-								" Tainty Points"
-						);
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
-						);
-					}
-				} else if (
-					versions[1].active &&
-					config.isBroadcaster &&
-					isNaN(config.argument)
-				) {
-					let username;
-
-					if (config.argument.startsWith("@")) {
-						username = config.argument.substring(1).split(" ");
-					} else {
-						username = config.argument.split(" ");
-					}
-					if (username.length == 2) {
-						let newPoints = username[1];
-						username = username[0];
-
-						const apiClient = chatClient.getApiClient();
-						user = await apiClient.users.getUserByName(username.toLowerCase());
-
-						user = await LoyaltyPoint.findOne({
-							userId: user.id,
-						});
-
-						user.points += Number(newPoints);
-						await user.save();
-
-						result.push(
-							"Our glorious leader Starless, has given @" +
-								username +
-								" " +
-								newPoints +
-								" Tainty Points"
-						);
-					} else {
-						result.push(
-							"@TheStarlessAbstract it's not that hard, just !points username number"
-						);
-					}
-				} else if (config.isBroadcaster && !isNaN(config.argument)) {
-					result.push(
-						"@TheStarlessAbstract you used the command wrong, you utter swine"
-					);
-				} else if (!config.isBroadcaster && config.argument) {
+				if (user) {
 					result.push(
 						"@" +
 							config.userInfo.displayName +
-							" you aren't allowed to this command like that"
+							" has " +
+							user.points +
+							" Tainty Points"
+					);
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
 					);
 				}
+			} else if (
+				helper.isVersionActive(versions, 1) &&
+				helper.isStreamer(config)
+			) {
+				if (helper.isValuePresentAndString(config.argument)) {
+					let username = helper.getCommandArgumentKey(config, 0);
+					let newPoints = helper.getCommandArgumentKey(config, 1);
+
+					if (username.startsWith("@")) {
+						username = username.substring(1);
+					}
+
+					if (
+						helper.isValuePresentAndString(username) &&
+						isNaN(username) &&
+						helper.isValuePresentAndNumber(newPoints)
+					) {
+						const apiClient = await chatClient.getApiClient();
+						user = await apiClient.users.getUserByName(username.toLowerCase());
+
+						if (user) {
+							user = await LoyaltyPoint.findOne({
+								userId: user.id,
+							});
+
+							user.points += Number(newPoints);
+							await user.save();
+
+							result.push(
+								"Our glorious leader Starless, has given @" +
+									username +
+									" " +
+									newPoints +
+									" Tainty Points"
+							);
+						} else {
+							result.push(
+								"@TheStarlessAbstract no user found called " + username
+							);
+						}
+					} else {
+						result.push(
+							"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
+						);
+					}
+				} else if (helper.isValuePresentAndNumber(config.argument)) {
+					result.push(
+						"@TheStarlessAbstract you used the command wrong, you utter swine"
+					);
+				}
+			} else if (
+				!helper.isStreamer(config) &&
+				(helper.isValuePresentAndString(config.argument) ||
+					helper.isValuePresentAndNumber(config.argument))
+			) {
+				result.push(
+					"@" +
+						config.userInfo.displayName +
+						" you aren't allowed to this command like that"
+				);
 			}
+
 			return result;
 		},
 	};
@@ -104,7 +124,7 @@ let versions = [
 	},
 	{
 		description: "Give points to a user",
-		usage: "!points 2000 @buhhsbot",
+		usage: "!points @buhhsbot 2000",
 		usableBy: "streamer",
 		active: true,
 	},

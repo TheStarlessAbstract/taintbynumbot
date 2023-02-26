@@ -18,7 +18,7 @@ class Helper {
 	}
 
 	isValidModeratorOrStreamer(config) {
-		return config.isBroadcaster || config.isModUp;
+		return config.isBroadcaster || config.isModUp || config.isMod;
 	}
 
 	isVersionActive(array, index) {
@@ -45,20 +45,13 @@ class Helper {
 		if (this.isValuePresentAndString(config.argument)) {
 			let splitData = config.argument.split(/\s(.+)/);
 
-			if (index == 0) {
-				if (this.isValuePresentAndString(splitData[index])) {
-					if (!isNaN(splitData[index])) {
-						return Number(splitData[index]);
-					}
-					return splitData[index];
-				} else if (this.isValuePresentAndNumber(splitData[index])) {
-					return splitData[index];
+			if (this.isValuePresentAndString(splitData[index])) {
+				if (!isNaN(splitData[index])) {
+					return Number(splitData[index]);
 				}
-			} else if (splitData[index] != undefined) {
-				if (isNaN(splitData[0])) {
-					return splitData[index];
-				}
-				return config.argument;
+				return splitData[index];
+			} else if (this.isValuePresentAndNumber(splitData[index])) {
+				return splitData[index];
 			}
 		} else if (config.argument == undefined) {
 			return null;

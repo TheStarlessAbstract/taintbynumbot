@@ -11,8 +11,8 @@ function connectToMongoDB() {
 	mongoose.set("strictQuery", false);
 }
 
-function disconnectFromMongoDB() {
-	mongoose.disconnect();
+async function disconnectFromMongoDB() {
+	await mongoose.disconnect();
 }
 
 exports.connectToMongoDB = connectToMongoDB;
