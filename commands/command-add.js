@@ -53,19 +53,19 @@ let commandResponse = () => {
 						}
 					} else {
 						result.push(
-							"To add a Command, you must include the Command text: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'"
+							"To add a Command, you must include the command text - !addComm ![command name] [command text]"
 						);
 					}
 				} else {
 					result.push(
-						"New command must start with '!' - '!addcomm ![newcommand] [command output]"
+						"New Command must start with '!' - !addComm ![newcommand] [command output]"
 					);
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
-				result.push("!addComm command is for Mods only");
+				result.push("!addComm is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push(
-					"To add a Command, you must include the Command name, and follwed by the the Command output, new Command must start with !: '!addcomm !Yen Rose would really appreciate it if Yen would step on her'"
+					"To add a Command use !addComm ![command name] [command text]"
 				);
 			}
 

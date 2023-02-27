@@ -23,6 +23,13 @@ let commandResponse = () => {
 					helper.isValuePresentAndNumber(time)
 				) {
 					switch (true) {
+						case time === 0:
+							if (audio.setAudioTimeout()) {
+								result.push(
+									"To stop the audioTimeout, use !audioTimeout without a number of seconds"
+								);
+							}
+							break;
 						case time > 0:
 							audio.setAudioTimeout(time);
 
@@ -34,7 +41,7 @@ let commandResponse = () => {
 							break;
 						case time < 1:
 							result.push(
-								"Please enter a positive number of seconds for the timeout after the command: !audiotimeout 10"
+								"To use set the timeout length use postive number of seconds - !audiotimeout 10"
 							);
 							break;
 						default:
@@ -45,11 +52,11 @@ let commandResponse = () => {
 					}
 				} else {
 					result.push(
-						"'!audioTimeout' - to start or stop the timeout, or '!audioTimeout {number} to set the length of the timeout'"
+						"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
 					);
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
-				result.push("!audiotimeout command is for Mods only");
+				result.push("!audioTimeout command is for Mods only");
 			}
 
 			return result;

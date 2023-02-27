@@ -32,6 +32,7 @@ let commandResponse = () => {
 
 							if (deletion.deletedCount > 0) {
 								delete commands.list[commandName];
+
 								discord.updateCommands("delete", {
 									name: commandName,
 									description: command.text,
@@ -63,15 +64,13 @@ let commandResponse = () => {
 					}
 				} else {
 					result.push(
-						"To delete a command, include '!' at the start of the command to delete !delcomm ![command name]"
+						"To delete a Command, command name must start with '!' - !delComm ![command name]"
 					);
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
-				result.push("!delcomm command is for Mods only");
+				result.push("!delComm Command is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
-				result.push(
-					"To delete a command, you must include the name of the command to be deleted - '!delcomm ![command name]"
-				);
+				result.push("To delete a Command, use !delComm ![command name]");
 			}
 
 			return result;

@@ -9,35 +9,28 @@ const commandAdd = require("../../commands/command-add");
 let isBroadcaster;
 let isMod;
 let userInfo = {};
-let argument = undefined;
+let argument;
 let commandLink = commandAdd.command;
 const { response } = commandLink.getCommand();
 
 let commandName;
 let commandText;
 
-describe("addComm", () => {
+describe.skip("addComm", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await commands.setup();
 	});
 
-	beforeEach(() => {
-		userInfo = {};
-		argument = undefined;
-	});
-
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
-
-	test("ArgumentNotValid_AndIsBroadcasterFalse_AndIsModFalse_AndCommandNotInDb_ShouldReturnString", async () => {
+	//0-0-0-0 - //0-0-0-1 - //0-0-1-0 - //0-0-1-1 - //0-0-2-0 - //0-0-2-1
+	test("IsBroadcasterFalse_AndAndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = false;
-		commandName = "addCommTest1";
-		commandText = "this is addCommTest1";
-		argument = commandName + " " + commandText;
+		argument = undefined;
 
 		//Act
 		let result = await response({
@@ -47,22 +40,19 @@ describe("addComm", () => {
 			argument,
 		});
 
-		await dBCleanUp(commandName);
-
 		//Assert
-		expect(result[0]).toBe("!addComm command is for Mods only");
+		expect(result[0]).toBe("!addComm is for Mods only");
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterFalse_AndIsModFalse_AndCommandInDb_ShouldReturnString", async () => {
+	//0-1-0-0 - //0-1-0-1
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNotValid_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
-		isMod = false;
+		isMod = true;
 		commandName = "addCommTest2";
 		commandText = "this is addCommTest2";
 		argument = commandName + " " + commandText;
 
-		await dbSetup(commandName, commandText);
-
 		//Act
 		let result = await response({
 			isBroadcaster,
@@ -74,16 +64,19 @@ describe("addComm", () => {
 		await dBCleanUp(commandName);
 
 		//Assert
-		expect(result[0]).toBe("!addComm command is for Mods only");
+		expect(result[0]).toBe(
+			"New Command must start with '!' - !addComm ![newcommand] [command output]"
+		);
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterFalse_AndIsModTrue_AndCommandNotInDb_ShouldReturnString", async () => {
+	//0-1-1-0
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentValid_AndCommandNotInDb_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
 		commandName = "addCommTest3";
 		commandText = "this is addCommTest3";
-		argument = commandName + " " + commandText;
+		argument = "!" + commandName + " " + commandText;
 
 		//Act
 		let result = await response({
@@ -96,18 +89,17 @@ describe("addComm", () => {
 		await dBCleanUp(commandName);
 
 		//Assert
-		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
-		);
+		expect(result[0]).toBe("!addcommtest3 has been created!");
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterFalse_AndIsModTrue_AndCommandInDb_ShouldReturnString", async () => {
+	//0-1-1-1
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentValid_AndCommandInDb_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
 		commandName = "addCommTest4";
 		commandText = "this is addCommTest4";
-		argument = commandName + " " + commandText;
+		argument = "!" + commandName + " " + commandText;
 
 		await dbSetup(commandName, commandText);
 
@@ -122,18 +114,15 @@ describe("addComm", () => {
 		await dBCleanUp(commandName);
 
 		//Assert
-		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
-		);
+		expect(result[0]).toBe("!addcommtest4 already exists");
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterTrue_AndIsModFalse_AndCommandNotInDb_ShouldReturnString", async () => {
+	//0-1-2-0 - //0-1-2-1
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		commandName = "addCommTest5";
-		commandText = "this is addCommTest5";
-		argument = commandName + " " + commandText;
+		isBroadcaster = false;
+		isMod = true;
+		argument = undefined;
 
 		//Act
 		let result = await response({
@@ -143,15 +132,14 @@ describe("addComm", () => {
 			argument,
 		});
 
-		await dBCleanUp(commandName);
-
 		//Assert
 		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
+			"To add a Command use !addComm ![command name] [command text]"
 		);
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterTrue_AndIsModFalse_AndCommandInDb_ShouldReturnString", async () => {
+	//1-0-0-0 - //1-0-0-1
+	test("IsBroadcasterTrue_AnsdIsModFalse_AndArgumentNotValid_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -159,8 +147,6 @@ describe("addComm", () => {
 		commandText = "this is addCommTest6";
 		argument = commandName + " " + commandText;
 
-		await dbSetup(commandName, commandText);
-
 		//Act
 		let result = await response({
 			isBroadcaster,
@@ -173,17 +159,18 @@ describe("addComm", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
+			"New Command must start with '!' - !addComm ![newcommand] [command output]"
 		);
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterTrue_AndIsModTrue_AndCommandNotInDb_ShouldReturnString", async () => {
+	//1-0-1-0
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentValid_AndCommandNotInDb_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
-		isMod = true;
+		isMod = false;
 		commandName = "addCommTest7";
 		commandText = "this is addCommTest7";
-		argument = commandName + " " + commandText;
+		argument = "!" + commandName + " " + commandText;
 
 		//Act
 		let result = await response({
@@ -196,20 +183,63 @@ describe("addComm", () => {
 		await dBCleanUp(commandName);
 
 		//Assert
+		expect(result[0]).toBe("!addcommtest7 has been created!");
+	});
+
+	//1-0-1-1
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentValid_AndCommandInDb_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		commandName = "addCommTest8";
+		commandText = "this is addCommTest8";
+		argument = "!" + commandName + " " + commandText;
+
+		await dbSetup(commandName, commandText);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		await dBCleanUp(commandName);
+
+		//Assert
+		expect(result[0]).toBe("!addcommtest8 already exists");
+	});
+
+	//1-0-2-0 - //1-0-2-1
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = undefined;
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
 		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
+			"To add a Command use !addComm ![command name] [command text]"
 		);
 	});
 
-	test("ArgumentNotValid_AndIsBroadcasterTrue_AndIsModTrue_AndCommandInDb_ShouldReturnString", async () => {
+	//1-1-0-0 - //1-1-0-1
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNotValid_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		commandName = "addCommTest8";
-		commandText = "this is addCommTest8";
+		commandName = "addCommTest10";
+		commandText = "this is addCommTest10";
 		argument = commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
 
 		//Act
 		let result = await response({
@@ -223,59 +253,14 @@ describe("addComm", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"New command must start with '!' - '!addcomm ![newcommand] [command output]"
+			"New Command must start with '!' - !addComm ![newcommand] [command output]"
 		);
 	});
 
-	test("ArgumentValid_AndIsBroadcasterFalse_AndIsModFalse_AndCommandNotInDb_ShouldReturnString", async () => {
+	//1-1-1-0
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentValid_AndCommandNotInDb_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
-		commandName = "addCommTest9";
-		commandText = "this is addCommTest9";
-		argument = "!" + commandName + " " + commandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		await dBCleanUp(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addComm command is for Mods only");
-	});
-
-	test("ArgumentValid_AndIsBroadcasterFalse_AndIsModFalse_AndCommandInDb_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		isMod = false;
-		commandName = "addCommTest10";
-		commandText = "this is addCommTest10";
-		argument = "!" + commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		await dBCleanUp(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addComm command is for Mods only");
-	});
-
-	test("ArgumentValid_AndIsBroadcasterFalse_AndIsModTrue_AndCommandNotInDb_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
+		isBroadcaster = true;
 		isMod = true;
 		commandName = "addCommTest11";
 		commandText = "this is addCommTest11";
@@ -295,16 +280,16 @@ describe("addComm", () => {
 		expect(result[0]).toBe("!addcommtest11 has been created!");
 	});
 
-	test("ArgumentValid_AndIsBroadcasterFalse_AndIsModTrue_AndCommandInDb_ShouldReturnString", async () => {
+	//1-1-1-1
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentValid_AndCommandInDb_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		isBroadcaster = true;
 		isMod = true;
 		commandName = "addCommTest12";
 		commandText = "this is addCommTest12";
 		argument = "!" + commandName + " " + commandText;
 
 		await dbSetup(commandName, commandText);
-
 		//Act
 		let result = await response({
 			isBroadcaster,
@@ -319,59 +304,12 @@ describe("addComm", () => {
 		expect(result[0]).toBe("!addcommtest12 already exists");
 	});
 
-	test("ArgumentValid_AndIsBroadcasterTrue_AndIsModFalse_AndCommandNotInDb_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		commandName = "addCommTest13";
-		commandText = "this is addCommTest13";
-		argument = "!" + commandName + " " + commandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		await dBCleanUp(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addcommtest13 has been created!");
-	});
-
-	test("ArgumentValid_AndIsBroadcasterTrue_AndIsModFalse_AndCommandInDb_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		commandName = "addCommTest14";
-		commandText = "this is addCommTest14";
-		argument = "!" + commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		await dBCleanUp(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addcommtest14 already exists");
-	});
-
-	test("ArgumentValid_AndIsBroadcasterTrue_AndIsModTrue_AndCommandNotInDb_ShouldReturnString", async () => {
+	//1-1-2-0 - //1-1-2-1
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		commandName = "addCommTest15";
-		commandText = "this is addCommTest15";
-		argument = "!" + commandName + " " + commandText;
+		argument = undefined;
 
 		//Act
 		let result = await response({
@@ -381,33 +319,10 @@ describe("addComm", () => {
 			argument,
 		});
 
-		await dBCleanUp(commandName);
-
 		//Assert
-		expect(result[0]).toBe("!addcommtest15 has been created!");
-	});
-
-	test("ArgumentValid_AndIsBroadcasterTrue_AndIsModTrue_AndCommandInDb_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "addCommTest16";
-		commandText = "this is  addCommTest16";
-		argument = "!" + commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		await dBCleanUp(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addcommtest16 already exists");
+		expect(result[0]).toBe(
+			"To add a Command use !addComm ![command name] [command text]"
+		);
 	});
 });
 

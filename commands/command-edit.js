@@ -54,23 +54,27 @@ let commandResponse = () => {
 								);
 							}
 						} else {
-							result.push("No command found by this name !" + commandName);
+							result.push(
+								"!" +
+									commandName +
+									" doesn't look to be a command, are you sure you spelt it right, dummy?!"
+							);
 						}
 					} else {
 						result.push(
-							"To edit a Command, you must include the Command name, and followed by the new Command output, Command must start with '!' '!editcomm !Yen Rose would really appreciate it if Yen would step on her'"
+							"To edit a Command, you must include the edited command text - !editComm ![command name] [edited command text]"
 						);
 					}
 				} else {
 					result.push(
-						"Command being edited starts with '!' - !editComm ![command name] [edited command output]"
+						"To edit a Command, command name must start with '!' - !editComm ![command name] [edited command text]"
 					);
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
-				result.push("!editcomm command is for Mods only");
+				result.push("!editComm is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push(
-					"To edit a Command, you must include the Command name, and followed by the the Command output, edited Command must start with !: '!editcomm !Yen Rose would really appreciate it if Yen would step on her'"
+					"To edit a Command, use !editComm ![command name] [edited command text]"
 				);
 			}
 
