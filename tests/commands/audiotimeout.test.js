@@ -16,7 +16,8 @@ describe("audioTimeout", () => {
 		}
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	//0-0-0-0 - //0-0-0-1 - //0-0-1-0 - //0-0-1-1 - //0-0-2-0 - //0-0-2-1 - //0-0-3-0 - //0-0-3-1 - //0-0-4-0 - //0-0-4-1
+	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = false;
@@ -34,25 +35,8 @@ describe("audioTimeout", () => {
 		expect(result[0]).toBe("!audioTimeout command is for Mods only");
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_AndArgumentNumberAsString_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		isMod = false;
-		argument = "3";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe("!audioTimeout command is for Mods only");
-	});
-
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	//0-1-0-0
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_AndAudioTimeoutFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -70,11 +54,14 @@ describe("audioTimeout", () => {
 		expect(result[0]).toBe("Bot audio timeout has been started");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNumberAsString_ShouldReturnString", async () => {
+	//0-1-0-1
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_AndAudioTimeoutTrue_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
-		argument = "3";
+		argument = undefined;
+
+		audio.setAudioTimeout();
 
 		//Act
 		let result = await response({
@@ -85,69 +72,10 @@ describe("audioTimeout", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(
-			"Bot audio timeout has been started, and set to 3 seconds"
-		);
+		expect(result[0]).toBe("Bot audio timeout has been stopped");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentZeroAsString_ShouldReturnUndefined", async () => {
-		//Assemble
-		isBroadcaster = false;
-		isMod = true;
-		argument = "0";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(undefined);
-	});
-
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		isMod = true;
-		argument = "-3";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
-		);
-	});
-
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNumber_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		isMod = true;
-		argument = 3;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
-		);
-	});
-
+	//0-1-1-0
 	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
@@ -168,11 +96,12 @@ describe("audioTimeout", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentBoolean_ShouldReturnString", async () => {
+	//0-1-2-0
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNumberAsString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
-		argument = true;
+		argument = "3";
 
 		//Act
 		let result = await response({
@@ -184,11 +113,75 @@ describe("audioTimeout", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
+			"Bot audio timeout has been started, and set to 3 seconds"
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	//0-1-3-0
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
+		argument = "-3";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
+		);
+	});
+
+	//0-1-4-0
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentZeroAsString_AndAudioTimeoutFalse_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
+		argument = "0";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	//0-1-4-1
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentZeroAsString_AndAudioTimeoutTrue_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
+		argument = "0";
+
+		audio.setAudioTimeout();
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"To stop the audioTimeout, use !audioTimeout without a number of seconds"
+		);
+	});
+
+	//1-0-0-0
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_AndAudioTimeoutFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -206,11 +199,14 @@ describe("audioTimeout", () => {
 		expect(result[0]).toBe("Bot audio timeout has been started");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentNumberAsString_ShouldReturnString", async () => {
+	//1-0-0-1
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_AndAudioTimeoutTrue_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-		argument = "3";
+		argument = undefined;
+
+		audio.setAudioTimeout();
 
 		//Act
 		let result = await response({
@@ -221,69 +217,10 @@ describe("audioTimeout", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(
-			"Bot audio timeout has been started, and set to 3 seconds"
-		);
+		expect(result[0]).toBe("Bot audio timeout has been stopped");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentZeroAsString_ShouldReturnUndefined", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		argument = "0";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(undefined);
-	});
-
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		argument = "-3";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentNumber_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		argument = 3;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
-		);
-	});
-
+	//1-0-1-0
 	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
@@ -304,11 +241,12 @@ describe("audioTimeout", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentBoolean_ShouldReturnString", async () => {
+	//1-0-2-0
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentNumberAsString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-		argument = true;
+		argument = "3";
 
 		//Act
 		let result = await response({
@@ -320,11 +258,75 @@ describe("audioTimeout", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
+			"Bot audio timeout has been started, and set to 3 seconds"
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	//1-0-3-0
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = "-3";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
+		);
+	});
+
+	//1-0-4-0
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentZeroAsString_AndAudioTimeoutFalse_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = "0";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	//1-0-4-1
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentZeroAsString_AndAudioTimeoutTrue_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = "0";
+
+		audio.setAudioTimeout();
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"To stop the audioTimeout, use !audioTimeout without a number of seconds"
+		);
+	});
+
+	//1-1-0-0
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentUndefined_AndAudioTimeoutFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
@@ -342,11 +344,14 @@ describe("audioTimeout", () => {
 		expect(result[0]).toBe("Bot audio timeout has been started");
 	});
 
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNumberAsString_ShouldReturnString", async () => {
+	//1-1-0-1
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentUndefined_AndAudioTimeoutTrue_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		argument = "3";
+		argument = undefined;
+
+		audio.setAudioTimeout();
 
 		//Act
 		let result = await response({
@@ -357,69 +362,10 @@ describe("audioTimeout", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(
-			"Bot audio timeout has been started, and set to 3 seconds"
-		);
+		expect(result[0]).toBe("Bot audio timeout has been stopped");
 	});
 
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentZeroAsString_ShouldReturnUndefined", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "0";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(undefined);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "-3";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNumber_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = 3;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
-		);
-	});
-
+	//1-1-1-0
 	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
@@ -440,11 +386,12 @@ describe("audioTimeout", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentBoolean_ShouldReturnString", async () => {
+	//1-1-2-0
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNumberAsString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		argument = true;
+		argument = "3";
 
 		//Act
 		let result = await response({
@@ -456,7 +403,66 @@ describe("audioTimeout", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"!audioTimeout - to start or stop the audio timeout, or !audioTimeout [number] to set the length of the audio timeout"
+			"Bot audio timeout has been started, and set to 3 seconds"
 		);
+	});
+
+	//1-1-3-0
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentNegativeNumberAsString_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = true;
+		argument = "-3";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"To use set the timeout length use postive number of seconds - !audiotimeout 10"
+		);
+	});
+
+	//1-1-4-0
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentZeroAsString_AndAudioTimeoutFalse_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = true;
+		argument = "0";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	//1-1-4-1
+	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentZeroAsString_AndAudioTimeoutFalse_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = true;
+		argument = "0";
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
 	});
 });
