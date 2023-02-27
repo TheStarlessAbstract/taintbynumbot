@@ -24,7 +24,7 @@ let commandResponse = () => {
 				) {
 					switch (true) {
 						case time === 0:
-							if (audio.setAudioTimeout()) {
+							if (audio.getAudioTimeout()) {
 								result.push(
 									"To stop the audioTimeout, use !audioTimeout without a number of seconds"
 								);
