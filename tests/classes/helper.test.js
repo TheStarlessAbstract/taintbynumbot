@@ -779,6 +779,6 @@ describe("getRandomBetweenInclusiveMax", () => {
 		//Act
 		value = helper.getRandomBetweenInclusiveMax(min, max);
 		//Assert
-		expect(value >= min && value < max).toBe(true);
+		expect(value >= min && value <= max).toBe(true);
 	});
 });
