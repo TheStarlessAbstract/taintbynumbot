@@ -25,15 +25,24 @@ let commandResponse = () => {
 					let commandText = helper.getCommandArgumentKey(config, 1);
 
 					if (commandText) {
-						const { response } = (await commands.list[commandName]) || {};
+						const { response } = commands.list[commandName]?.getCommand() || {};
 
 						if (response) {
 							let command = await Command.findOne({ name: commandName });
 
-							if (command) {
-								commands.list[commandName] = {
-									response: commandText,
-								};
+							if (command && command.text != commandText) {
+								commands.list[commandName] = new BaseCommand(() => {
+									return {
+										response: command.text,
+									};
+								}, [
+									{
+										description: command.text,
+										usage: "!" + command.name,
+										usableBy: "users",
+										active: true,
+									},
+								]);
 
 								command.text = commandText;
 								await command.save();
@@ -46,6 +55,10 @@ let commandResponse = () => {
 								});
 
 								result.push("!" + commandName + " has been edited!");
+							} else if (command && command.text == commandText) {
+								result.push(
+									"!" + commandName + " already says: " + commandText
+								);
 							} else {
 								result.push(
 									"!" +
@@ -60,6 +73,10 @@ let commandResponse = () => {
 									" doesn't look to be a command, are you sure you spelt it right, dummy?!"
 							);
 						}
+					} else if (!commandName) {
+						result.push(
+							"To edit a Command, you must include the command name - !editComm ![command name] [command text]"
+						);
 					} else {
 						result.push(
 							"To edit a Command, you must include the edited command text - !editComm ![command name] [edited command text]"
