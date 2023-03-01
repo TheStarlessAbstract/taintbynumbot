@@ -1,6 +1,9 @@
 const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
 
 const chatClient = require("../bot-chatclient");
+
+const helper = new Helper();
 
 let twitchId = process.env.TWITCH_USER_ID;
 
@@ -9,7 +12,11 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (!config.isBroadcaster) {
+			if (
+				!config.isBroadcaster &&
+				helper.isValuePresentAndNumber(config.userInfo?.userId) &&
+				helper.isValuePresentAndString(config.userInfo?.displayName)
+			) {
 				const apiClient = await chatClient.getApiClient();
 				const follow = await apiClient.users.getFollowFromUserToBroadcaster(
 					config.userInfo.userId,
