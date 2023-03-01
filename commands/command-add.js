@@ -25,7 +25,7 @@ let commandResponse = () => {
 					let commandText = helper.getCommandArgumentKey(config, 1);
 
 					if (commandText) {
-						const { response } = commands.list[commandName] || {};
+						const { response } = commands.list[commandName]?.getCommand() || {};
 
 						if (!response) {
 							let newCommand = new Command({
@@ -36,9 +36,18 @@ let commandResponse = () => {
 
 							await newCommand.save();
 
-							commands.list[commandName] = {
-								response: commandText,
-							};
+							commands.list[commandName] = new BaseCommand(() => {
+								return {
+									response: commandText,
+								};
+							}, [
+								{
+									description: commandText,
+									usage: "!" + commandName,
+									usableBy: "users",
+									active: true,
+								},
+							]);
 
 							discord.updateCommands("add", {
 								name: commandName,
@@ -51,6 +60,10 @@ let commandResponse = () => {
 						} else if (response) {
 							result.push("!" + commandName + " already exists");
 						}
+					} else if (!commandName) {
+						result.push(
+							"To add a Command, you must include the command name - !addComm ![command name] [command text]"
+						);
 					} else {
 						result.push(
 							"To add a Command, you must include the command text - !addComm ![command name] [command text]"
