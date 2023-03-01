@@ -22,44 +22,51 @@ let commandResponse = () => {
 						.getCommandArgumentKey(config, 0)
 						.slice(1)
 						.toLowerCase();
-					const { response } = (await commands.list[commandName]) || {};
 
-					if (response) {
-						let command = await Command.findOne({ name: commandName });
+					if (commandName) {
+						const { response } = commands.list[commandName]?.getCommand() || {};
 
-						if (command) {
-							let deletion = await Command.deleteOne({ name: commandName });
+						if (response) {
+							let command = await Command.findOne({ name: commandName });
 
-							if (deletion.deletedCount > 0) {
-								delete commands.list[commandName];
+							if (command) {
+								let deletion = await Command.deleteOne({ name: commandName });
 
-								discord.updateCommands("delete", {
-									name: commandName,
-									description: command.text,
-									usage: "!" + commandName,
-									usableBy: "users",
-								});
+								if (deletion.deletedCount > 0) {
+									delete commands.list[commandName];
 
-								result.push("!" + commandName + " has been deleted");
+									discord.updateCommands("delete", {
+										name: commandName,
+										description: command.text,
+										usage: "!" + commandName,
+										usableBy: "users",
+									});
+
+									result.push("!" + commandName + " has been deleted");
+								} else {
+									result.push(
+										"!" +
+											commandName +
+											" has not been deleted, database says no?!"
+									);
+								}
 							} else {
 								result.push(
 									"!" +
 										commandName +
-										" has not been deleted, database says no?!"
+										" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely"
 								);
 							}
 						} else {
 							result.push(
 								"!" +
 									commandName +
-									" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely"
+									" doesn't look to be a command, are you sure you spelt it right, dummy?!"
 							);
 						}
 					} else {
 						result.push(
-							"!" +
-								commandName +
-								" doesn't look to be a command, are you sure you spelt it right, dummy?!"
+							"To delete a Command, you must include the command name - !delComm ![command name]"
 						);
 					}
 				} else {
