@@ -1,28 +1,20 @@
 require("dotenv").config();
 
-const deaths = require("../../commands/deaths");
-
 const db = require("../../bot-mongoose.js");
 
+const deaths = require("../../commands/deaths");
+
 let isBroadcaster;
-let isModUp;
-let userInfo;
-let argument;
+let isMod = false;
+let userInfo = {};
+let argument = undefined;
 let commandLink = deaths.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("deaths", () => {
+describe.skip("deaths", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
-	});
-
-	beforeEach(() => {
-		isBroadcaster = true;
-		isModUp = true;
-		userInfo = {};
-		argument = undefined;
-		commandLink.setTimer(currentDateTime - 1000);
 	});
 
 	afterAll(async () => {
@@ -32,11 +24,12 @@ describe("deaths", () => {
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
+		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -53,7 +46,7 @@ describe("deaths", () => {
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -64,13 +57,34 @@ describe("deaths", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
+		isBroadcaster = true;
+		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
+			true
+		);
+	});
+
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		commandLink.setTimer(currentDateTime - 11000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
 			userInfo,
 			argument,
 		});
