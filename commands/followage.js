@@ -13,7 +13,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				!config.isBroadcaster &&
+				!helper.isStreamer(config) &&
 				helper.isValuePresentAndNumber(config.userInfo?.userId) &&
 				helper.isValuePresentAndString(config.userInfo?.displayName)
 			) {
