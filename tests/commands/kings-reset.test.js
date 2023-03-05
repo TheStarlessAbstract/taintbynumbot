@@ -1,11 +1,11 @@
 require("dotenv").config();
 
-const kingsReset = require("../../commands/kings-reset");
-
 const db = require("../../bot-mongoose.js");
 
+const kingsReset = require("../../commands/kings-reset");
+
 let isBroadcaster;
-let isModUp;
+let isMod;
 let userInfo;
 let argument;
 let commandLink = kingsReset.command;
@@ -16,25 +16,19 @@ describe("kingsReset", () => {
 		db.connectToMongoDB();
 	});
 
-	beforeEach(() => {
-		isBroadcaster = false;
-		isModUp = true;
-		userInfo = {};
-		argument = undefined;
-	});
-
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModUpIsFalse_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
-		isModUp = false;
+		isBroadcaster = false;
+		isMod = false;
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -43,13 +37,15 @@ describe("kingsReset", () => {
 		expect(result[0]).toBe(undefined);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_ShouldReturnString", async () => {
 		//Assemble
+		isBroadcaster = false;
+		isMod = true;
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -60,14 +56,34 @@ describe("kingsReset", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModUpIsTrue_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
+		isMod = false;
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"A new game of Kings has been dealt, with 52 cards!"
+		);
+	});
+
+	test("IsBroadcasterIsTrue_AndIsModIsTrue_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = true;
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
 			userInfo,
 			argument,
 		});
