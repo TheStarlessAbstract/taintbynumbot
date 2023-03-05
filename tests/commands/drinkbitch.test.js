@@ -58,7 +58,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserNotInDatabase_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -78,7 +78,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -105,7 +105,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -147,7 +147,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -167,7 +167,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -194,7 +194,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -236,7 +236,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -256,7 +256,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -283,7 +283,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
