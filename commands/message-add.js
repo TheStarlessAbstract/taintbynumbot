@@ -15,24 +15,26 @@ let commandResponse = () => {
 				helper.isValidModeratorOrStreamer(config) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let existingMessage = await Message.find({ text: config.argument });
-				if (!existingMessage) {
+				let existingMessage = await Message.findOne({ text: config.argument });
+
+				if (existingMessage == null) {
+					let messageList = await Message.find({});
+
 					let message = await Message.create({
-						index: helper.getNextIndex(messagesList),
+						index: helper.getNextIndex(messageList),
 						text: config.argument,
 						addedBy: config.userInfo.displayName,
 					});
 
-					let messagesList = await messages.get();
-					messagesList.push(message);
-					messages.update(messagesList);
+					messageList.push(message);
+					messages.update(messageList);
 
 					result.push("Message added - " + message.index + ": " + message.text);
 				} else {
-					result.push("This message has already been added");
+					result.push("This Message has already been added");
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
-				result.push("!addmessage command is for Mods only");
+				result.push("!addMessage command is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To add a Message use !addMessage [message output]");
 			}
