@@ -94,6 +94,16 @@ class Helper {
 		}
 		return "";
 	}
+
+	getNextIndex(array) {
+		let index = Math.max.apply(
+			Math,
+			array.map(function (o) {
+				return o.index;
+			})
+		);
+		return index + 1;
+	}
 }
 
 module.exports = Helper;
