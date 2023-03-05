@@ -1,14 +1,20 @@
 const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
+
+const helper = new Helper();
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			result.push(
-				config.userInfo.displayName +
-					" finds a comfortable spot behind the bushes to perv on the stream"
-			);
+			if (helper.isValuePresentAndString(config.userInfo.displayName)) {
+				result.push(
+					"@" +
+						config.userInfo.displayName +
+						" finds a comfortable spot behind the bushes to perv on the stream"
+				);
+			}
 
 			return result;
 		},
