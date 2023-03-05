@@ -19,14 +19,20 @@ let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let redeemUser = config.userInfo.displayName;
 			let currentTime = new Date();
 
 			if (
-				helper.isCooldownPassed(currentTime, kings.timer, cooldown) ||
-				helper.isStreamer(config)
+				helper.isValuePresentAndNumber(config.userInfo?.userId) &&
+				helper.isValuePresentAndString(config.userInfo?.displayName) &&
+				(helper.isCooldownPassed(
+					currentTime,
+					kings.getTimer(),
+					kings.getCooldown()
+				) ||
+					helper.isStreamer(config))
 			) {
 				kings.setTimer(currentTime);
+				let redeemUser = config.userInfo.displayName;
 
 				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
