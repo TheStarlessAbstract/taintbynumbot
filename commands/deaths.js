@@ -18,7 +18,11 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				helper.isCooldownPassed(currentTime, deaths.timer, cooldown) ||
+				helper.isCooldownPassed(
+					currentTime,
+					deaths.getTimer(),
+					deaths.getCooldown()
+				) ||
 				helper.isStreamer(config)
 			) {
 				deaths.setTimer(currentTime);
