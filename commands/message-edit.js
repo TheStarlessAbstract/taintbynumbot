@@ -20,7 +20,6 @@ let commandResponse = () => {
 				let text = helper.getCommandArgumentKey(config, 1);
 
 				if (
-					helper.isVersionActive(versions, 0) &&
 					helper.isValuePresentAndNumber(index) &&
 					helper.isValuePresentAndString(text)
 				) {
@@ -38,46 +37,6 @@ let commandResponse = () => {
 						);
 					} else {
 						result.push("No message number " + config.argument + " found");
-					}
-				} else if (
-					helper.isVersionActive(versions, 1) &&
-					helper.isValuePresentAndString(index)
-				) {
-					let entries = await Message.find({
-						text: { $regex: index, $options: "i" },
-					});
-
-					if (entries.length > 0) {
-						let output;
-						if (entries.length > 1) {
-							result.push(
-								entries.length + " messages found mentioning: " + index
-							);
-
-							output = "Indexes include: ";
-							let limit = entries.length < 5 ? entries.length : 5;
-
-							for (let i = 0; i < limit; i++) {
-								output += entries[i].index + ", ";
-							}
-
-							result.push(output.slice(0, -2));
-
-							if (entries.length > 5) {
-								result.push(
-									"There are more matches, maybe you could be more specific"
-								);
-							}
-						} else {
-							output =
-								"Use '!editMessage " +
-								entries[0].index +
-								"' followed by your edit";
-
-							result.push(output);
-						}
-					} else {
-						result.push("No quotes found including '" + index + "'");
 					}
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config)) {
