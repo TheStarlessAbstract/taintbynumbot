@@ -68,7 +68,7 @@ describe.skip("addMessage", () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
-		argument = "This is a test message 3";
+		argument = "This is addMessageTest3";
 
 		//Act
 		let result = await response({
@@ -81,14 +81,14 @@ describe.skip("addMessage", () => {
 		cleanUpList.push(argument);
 
 		//Assert
-		expect(result[0]).toMatch(/This is a test message 3/);
+		expect(result[0]).toMatch(/This is addMessageTest3/);
 	});
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
-		argument = "This is a test message 4";
+		argument = "This is addMessageTest4";
 
 		await dbSetup(argument);
 
@@ -128,7 +128,7 @@ describe.skip("addMessage", () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-		argument = "This is a test message 6";
+		argument = "This is addMessageTest6";
 
 		//Act
 		let result = await response({
@@ -141,14 +141,14 @@ describe.skip("addMessage", () => {
 		cleanUpList.push(argument);
 
 		//Assert
-		expect(result[0]).toMatch(/This is a test message 6/);
+		expect(result[0]).toMatch(/This is addMessageTest6/);
 	});
 
 	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-		argument = "This is a test message 7";
+		argument = "This is addMessageTest7";
 
 		await dbSetup(argument);
 
@@ -184,11 +184,11 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toBe("To add a Message use !addMessage [message output]");
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndnOTInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		argument = "This is a test message 9";
+		argument = "This is addMessageTest9";
 
 		//Act
 		let result = await response({
@@ -201,14 +201,14 @@ describe.skip("addMessage", () => {
 		cleanUpList.push(argument);
 
 		//Assert
-		expect(result[0]).toMatch(/This is a test message 9/);
+		expect(result[0]).toMatch(/This is addMessageTest9/);
 	});
 
 	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = true;
-		argument = "This is a test message 10";
+		argument = "This is addMessageTest10";
 
 		await dbSetup(argument);
 
