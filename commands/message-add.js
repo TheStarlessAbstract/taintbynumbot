@@ -15,14 +15,15 @@ let commandResponse = () => {
 				helper.isValidModeratorOrStreamer(config) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let existingMessage = await Message.findOne({ text: config.argument });
+				let argumentText = config.argument;
+				let existingMessage = await Message.findOne({ text: argumentText });
 
 				if (existingMessage == null) {
 					let messageList = await Message.find({});
 
 					let message = await Message.create({
 						index: helper.getNextIndex(messageList),
-						text: config.argument,
+						text: argumentText,
 						addedBy: config.userInfo.displayName,
 					});
 
