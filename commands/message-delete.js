@@ -14,9 +14,9 @@ let commandResponse = () => {
 				helper.isValidModeratorOrStreamer(config) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let index = helper.getCommandArgumentKey(config, 0);
+				if (!isNaN(config.argument)) {
+					let index = config.argument;
 
-				if (helper.isValuePresentAndNumber(index)) {
 					let message = await Message.findOne({ index: index });
 					if (message) {
 						result.push("Message deleted - " + index + " was: " + message.text);
