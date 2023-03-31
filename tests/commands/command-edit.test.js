@@ -18,7 +18,7 @@ let commandName;
 let commandText;
 let editedCommandText;
 
-describe.skip("editComm", () => {
+describe("editComm", () => {
 	let commandNames = [];
 
 	beforeAll(async () => {
@@ -49,7 +49,7 @@ describe.skip("editComm", () => {
 		expect(result[0]).toBe("!editComm is for Mods only");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -69,7 +69,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -92,7 +92,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -112,7 +112,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasNoCommandText_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -135,7 +135,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -159,7 +159,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndNotEditable_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotEditable_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -183,7 +183,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotIsEditable_AndCommandTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -209,7 +209,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotIsEditable_AndCommandTextIsUnique_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -234,7 +234,7 @@ describe.skip("editComm", () => {
 		expect(result[0]).toBe("!editcommtest9 has been edited!");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -254,7 +254,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -277,7 +277,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -297,7 +297,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasNoCommandText_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -320,7 +320,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -344,7 +344,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndNotEditable_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotEditable_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -366,7 +366,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotIsEditable_AndCommandTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -392,7 +392,7 @@ describe.skip("editComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_AndCommandNotIsEditable_AndCommandTextIsUnique_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -415,187 +415,6 @@ describe.skip("editComm", () => {
 
 		//Assert
 		expect(result[0]).toBe("!editcommtest17 has been edited!");
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = undefined;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To edit a Command, use !editComm ![command name] [edited command text]"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "editCommTest19";
-		argument = commandName;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To edit a Command, command name must start with '!' - !editComm ![command name] [edited command text]"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndNoCommandName_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "!";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To edit a Command, you must include the command name - !editComm ![command name] [command text]"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "editCommTest21";
-		argument = "!" + commandName;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe(
-			"To edit a Command, you must include the edited command text - !editComm ![command name] [edited command text]"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndNotInCommandList_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "editCommTest22";
-		editedCommandText = "22this is editCommTest";
-		argument = "!" + commandName + " " + editedCommandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe(
-			"!editcommtest22 doesn't look to be a command, are you sure you spelt it right, dummy?!"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndNotEditable_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "kings";
-		editedCommandText = "23this is editCommTest";
-		argument = "!" + commandName + " " + editedCommandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"!kings is too spicy to be edited through chat, Starless is going to have to do some work for that, so ask nicely"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextNotUnique_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "editCommTest24";
-		commandText = "this is editCommTest24";
-		argument = "!" + commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe(
-			"!editcommtest24 already says: this is editCommTest24"
-		);
-	});
-
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_AndIsEditable_AndCommandTextIsUnique_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "editCommTest25";
-		commandText = "this is editCommTest25";
-		editedCommandText = "25this is editCommTest";
-		argument = "!" + commandName + " " + editedCommandText;
-
-		await dbSetup(commandName, commandText);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!editcommtest25 has been edited!");
 	});
 });
 
