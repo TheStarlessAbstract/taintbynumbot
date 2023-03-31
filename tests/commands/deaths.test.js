@@ -12,7 +12,7 @@ let commandLink = deaths.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("deaths", () => {
+describe("deaths", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
@@ -35,7 +35,7 @@ describe.skip("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toBeUndefined();
 	});
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
@@ -52,9 +52,7 @@ describe.skip("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
-			true
-		);
+		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
@@ -71,9 +69,7 @@ describe.skip("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
-			true
-		);
+		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
@@ -90,8 +86,6 @@ describe.skip("deaths", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has died a grand total of")).toBe(
-			true
-		);
+		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 });
