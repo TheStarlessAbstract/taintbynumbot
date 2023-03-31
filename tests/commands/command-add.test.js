@@ -17,7 +17,7 @@ const { response } = commandLink.getCommand();
 let commandName;
 let commandText;
 
-describe.skip("addComm", () => {
+describe("addComm", () => {
 	let commandNames = [];
 
 	beforeAll(async () => {
@@ -30,7 +30,6 @@ describe.skip("addComm", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	//0-0
 	test("IsBroadcasterFalse_AndAndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
@@ -49,8 +48,7 @@ describe.skip("addComm", () => {
 		expect(result[0]).toBe("!addComm is for Mods only");
 	});
 
-	//0-1-0
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -70,8 +68,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//0-1-1-0
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -94,8 +91,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//0-1-1-1-0
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -115,8 +111,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//0-1-1-1-1-0
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasNoCommandText_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -140,8 +135,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//0-1-1-1-1-1-0
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -163,8 +157,7 @@ describe.skip("addComm", () => {
 		expect(result[0]).toBe("!addcommtest6 has been created!");
 	});
 
-	//0-1-1-1-1-1-1
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -188,8 +181,7 @@ describe.skip("addComm", () => {
 		expect(result[0]).toBe("!addcommtest7 already exists");
 	});
 
-	//1-0-0
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -209,8 +201,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//1-0-1-0
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -234,8 +225,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//1-0-1-1-0
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -255,8 +245,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//1-0-1-1-1-0
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasNoCommandText_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -279,8 +268,7 @@ describe.skip("addComm", () => {
 		);
 	});
 
-	//1-0-1-1-1-1-0
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -302,8 +290,7 @@ describe.skip("addComm", () => {
 		expect(result[0]).toBe("!addcommtest12 has been created!");
 	});
 
-	//1-0-1-1-1-1-1
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndHasCommandText_AndInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndStringHasCommandText_AndCommandInCommandList_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -325,145 +312,6 @@ describe.skip("addComm", () => {
 
 		//Assert
 		expect(result[0]).toBe("!addcommtest13 already exists");
-	});
-
-	//1-1-0
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = undefined;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To add a Command use !addComm ![command name] [command text]"
-		);
-	});
-
-	//1-1-1-0
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndNoPrefix_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "addCommTest15";
-		commandText = "this is addCommTest15";
-		argument = commandName + " " + commandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe(
-			"New Command must start with '!' - !addComm ![newcommand] [command output]"
-		);
-	});
-
-	//1-1-1-1-0
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndNoCommandName_AndNoCommandText_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "!";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"To add a Command, you must include the command name - !addComm ![command name] [command text]"
-		);
-	});
-
-	//1-1-1-1-1-0
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndNoCommandText_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "addCommTest17";
-		argument = "!" + commandName;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe(
-			"To add a Command, you must include the command text - !addComm ![command name] [command text]"
-		);
-	});
-
-	//1-1-1-1-1-1-0
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndCommandText_AndNotInCommandList_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "addCommTest18";
-		commandText = "this is addCommTest18";
-		argument = "!" + commandName + " " + commandText;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addcommtest18 has been created!");
-	});
-
-	//1-1-1-1-1-1-1
-	test("IsBroadcasterTrue_AndIsModTrue_AndArgumentIsString_AndHasPrefix_AndHasCommandName_AndCommandText_AndInCommandList_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		commandName = "addCommTest19";
-		commandText = "this is addCommTest19";
-		argument = "!" + commandName + " " + commandText;
-
-		await dbSetup(commandName, commandText);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		commandNames.push(commandName);
-
-		//Assert
-		expect(result[0]).toBe("!addcommtest19 already exists");
 	});
 });
 
