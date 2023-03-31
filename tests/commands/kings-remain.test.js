@@ -13,7 +13,7 @@ let commandLink = kingsRemain.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("kingsRemain", () => {
+describe("kingsRemain", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
@@ -37,7 +37,7 @@ describe.skip("kingsRemain", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toBeUndefined();
 	});
 
 	test("IsBroadcasterIsFalse_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
@@ -74,7 +74,7 @@ describe.skip("kingsRemain", () => {
 		expect(result[0]).toBe("Cards remaing in this game 52");
 	});
 
-	test.skip("IsBroadcasterIsTrue_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 6000);
