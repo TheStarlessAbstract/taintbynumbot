@@ -65,7 +65,7 @@ describe("editMessage", () => {
 		expect(result[0]).toMatch(/To edit a Message use !editMessage/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotStartsWitMessageId_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotStartsWithMessageId_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -198,7 +198,7 @@ describe("editMessage", () => {
 		expect(result[0]).toMatch(/To edit a Message use !editMessage/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotStartsWitMessageId_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotStartsWithMessageId_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
