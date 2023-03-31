@@ -14,7 +14,7 @@ let argument;
 let commandLink = messageAdd.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("addMessage", () => {
+describe("addMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -30,7 +30,7 @@ describe.skip("addMessage", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = false;
@@ -47,7 +47,7 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/!addMessage command is for Mods only/);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -64,7 +64,7 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/To add a Message use !addMessage/);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -84,7 +84,7 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This is addMessageTest3/);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -106,7 +106,7 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This Message has already been added/);
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -124,7 +124,7 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toBe("To add a Message use !addMessage [message output]");
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsString_AndnOTInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -144,71 +144,11 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This is addMessageTest6/);
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		isBroadcaster = false;
+		isMod = true;
 		argument = "This is addMessageTest7";
-
-		await dbSetup(argument);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		cleanUpList.push(argument);
-
-		//Assert
-		expect(result[0]).toMatch(/This Message has already been added/);
-	});
-
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = {};
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe("To add a Message use !addMessage [message output]");
-	});
-
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "This is addMessageTest9";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		cleanUpList.push(argument);
-
-		//Assert
-		expect(result[0]).toMatch(/This is addMessageTest9/);
-	});
-
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
-		argument = "This is addMessageTest10";
 
 		await dbSetup(argument);
 
