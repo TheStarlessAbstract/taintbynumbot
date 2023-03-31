@@ -10,29 +10,43 @@ const loyalty = require("./bot-loyalty");
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
+let apiClient;
 let token;
-let tokenData;
 
 async function setup() {
-	token = await Token.findOne({ name: "pubSubClient" });
-	if (token) {
-		tokenData = {
-			accessToken: token.accessToken,
-			refreshToken: token.refreshToken,
-			scope: token.scope,
-			expiresIn: 0,
-			obtainmentTimestamp: 0,
-		};
-	} else if (!token) {
-		token = new Token({ name: "pubSubClient" });
-	}
+	token = await Token.findOne({ name: "pubSubClientTest" });
 
-	if (tokenData) {
-		const authProvider = new RefreshingAuthProvider(
-			{
-				clientId,
-				clientSecret,
-				onRefresh: async (newTokenData) => {
+	if (token) {
+		const tokenData = initializeTokenData(token);
+		const authProvider = createAuthProvider(tokenData);
+		const pubSubClient = new PubSubClient();
+		const userId = await pubSubClient.registerUserListener(authProvider);
+		const apiClient = new ApiClient({ authProvider });
+
+		setApiClient(apiClient);
+		redemptions.setApiClient(apiClient);
+		loyalty.setup(apiClient);
+		const listener = await redemptions.setup(pubSubClient, userId); // check io
+	}
+}
+
+function initializeTokenData(token) {
+	return {
+		accessToken: token.accessToken,
+		refreshToken: token.refreshToken,
+		scope: token.scope,
+		expiresIn: 0,
+		obtainmentTimestamp: 0,
+	};
+}
+
+function createAuthProvider(tokenData) {
+	return new RefreshingAuthProvider(
+		{
+			clientId,
+			clientSecret,
+			onRefresh: async (newTokenData) => {
+				if (process.env.JEST_WORKER_ID == undefined) {
 					token.accessToken = newTokenData.accessToken;
 					token.refreshToken = newTokenData.refreshToken;
 					token.scope = newTokenData.scope;
@@ -40,18 +54,23 @@ async function setup() {
 					token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
 					await token.save();
-				},
+				}
 			},
-			tokenData
-		);
+		},
+		tokenData
+	);
+}
 
-		const pubSubClient = new PubSubClient();
-		const userId = await pubSubClient.registerUserListener(authProvider);
-		const apiClient = new ApiClient({ authProvider });
-		redemptions.setApiClient(apiClient);
-		loyalty.setup(apiClient);
-		const listener = await redemptions.setup(pubSubClient, userId); // check io
+function setApiClient(newApiClient) {
+	apiClient = newApiClient;
+}
+
+async function getApiClient() {
+	if (!apiClient) {
+		await setup();
 	}
+	return apiClient;
 }
 
 exports.setup = setup;
+exports.getApiClient = getApiClient;
