@@ -66,6 +66,6 @@ let versions = [
 	},
 ];
 
-const deaths = new TimerCommand(commandResponse, versions);
+const deaths = new TimerCommand(commandResponse, versions, cooldown);
 
 exports.command = deaths;
