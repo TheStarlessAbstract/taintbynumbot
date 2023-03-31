@@ -128,7 +128,7 @@ describe("delMessage", () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-		argument = {};
+		argument = undefined;
 
 		//Act
 		let result = await response({
