@@ -12,7 +12,7 @@ let commandLink = drinkBitch.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("drinkBitch", () => {
+describe("drinkBitch", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await drinkBitch.updateAudioLinks();
@@ -22,7 +22,7 @@ describe.skip("drinkBitch", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = {};
@@ -40,25 +40,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndNoUserInfo_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		userInfo = {};
-		commandLink.setTimer(currentDateTime - 6000);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBeUndefined();
-	});
-
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -78,7 +60,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndUserInDatabase_AndUsersBalanceNotEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -105,7 +87,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndHasUserInfo_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndUserInDatabase_AndUsersBalanceEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -129,25 +111,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndNoUserId_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		userInfo = {};
-		commandLink.setTimer(currentDateTime - 1000);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBeUndefined();
-	});
-
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -167,7 +131,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndUserInDatabase_AndUsersBalanceNotEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -194,7 +158,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndHasUserId_AndUserInDatabase_AndHasEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndUserInDatabase_AndUsersBalanceEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -218,25 +182,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toBe("@TheStarlessAbstract drink, bitch!");
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndNoUserId_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		userInfo = {};
-		commandLink.setTimer(currentDateTime - 6000);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBeUndefined();
-	});
-
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 12826, displayName: "Twitch" };
@@ -256,7 +202,7 @@ describe.skip("drinkBitch", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndUserInDatabase_AndUsersBalanceNotEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
@@ -283,7 +229,7 @@ describe.skip("drinkBitch", () => {
 		expect(result[0]).toMatch(/You lack the points to make Starless drink/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndHasUserId_AndUserInDatabase_AndNotEnoughBalance_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndUserInDatabase_AndUsersBalanceEnough_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
