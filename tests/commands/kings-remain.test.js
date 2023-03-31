@@ -23,7 +23,7 @@ describe("kingsRemain", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
@@ -40,7 +40,7 @@ describe("kingsRemain", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterFalse_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 6000);
@@ -57,7 +57,7 @@ describe("kingsRemain", () => {
 		expect(result[0]).toBe("Cards remaing in this game 52");
 	});
 
-	test("IsBroadcasterIsTrue_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterTrue_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
@@ -74,7 +74,7 @@ describe("kingsRemain", () => {
 		expect(result[0]).toBe("Cards remaing in this game 52");
 	});
 
-	test("IsBroadcasterIsTrue_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterTrue_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 6000);
