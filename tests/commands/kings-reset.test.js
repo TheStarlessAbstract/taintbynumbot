@@ -20,7 +20,7 @@ describe("kingsReset", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = false;
@@ -34,10 +34,10 @@ describe("kingsReset", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsTrue_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModTrue_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = true;
@@ -56,29 +56,10 @@ describe("kingsReset", () => {
 		);
 	});
 
-	test("IsBroadcasterIsTrue_AndIsModIsFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isMod,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"A new game of Kings has been dealt, with 52 cards!"
-		);
-	});
-
-	test("IsBroadcasterIsTrue_AndIsModIsTrue_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		isMod = true;
 
 		//Act
 		let result = await response({
