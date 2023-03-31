@@ -18,7 +18,6 @@ const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/message-add");
 const messagesDelete = require("./commands/message-delete");
 const messagesEdit = require("./commands/message-edit");
-const messagesUpdate = require("./commands/messages-update");
 const modAbuseAdd = require("./commands/modabuse-add");
 const modAbuseDelete = require("./commands/modabuse-delete");
 const modAbuseEdit = require("./commands/modabuse-edit");
@@ -30,7 +29,6 @@ const quoteEdit = require("./commands/quote-edit");
 const quote = require("./commands/quote");
 const so = require("./commands/so");
 const tinderAdd = require("./commands/tinder-add");
-const tinderEditAuthor = require("./commands/tinder-editauthor");
 const tinder = require("./commands/tinder");
 const title = require("./commands/title");
 
@@ -96,7 +94,6 @@ const commands = {
 	editmessage: messagesEdit.command,
 	editmodabuse: modAbuseEdit.command,
 	editquote: quoteEdit.command,
-	edittinderauthor: tinderEditAuthor.command,
 	f: f.command,
 	followage: followage.command,
 	kingsremain: kingsRemain.command,
@@ -109,7 +106,6 @@ const commands = {
 	so: so.command,
 	tinderquote: tinder.command,
 	// title: title.command,
-	updatemessages: messagesUpdate.command,
 };
 
 async function setup() {
