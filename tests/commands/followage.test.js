@@ -9,7 +9,7 @@ let userInfo;
 let commandLink = followage.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("followage", () => {
+describe("followage", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
@@ -18,22 +18,7 @@ describe.skip("followage", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsNotBroadcaster_AndNoUserInfo_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		userInfo = {};
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			userInfo,
-		});
-
-		//Assert
-		expect(result[0]).toBeUndefined();
-	});
-
-	test("IsNotBroadcaster_AndHasUserInfo_AndUserIsNotFollower_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndUserIsNotFollower_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 19264788, displayName: "Nightbot" };
@@ -45,13 +30,12 @@ describe.skip("followage", () => {
 		});
 
 		//Assert
-		expect(
-			result[0] ==
-				"@Nightbot hit that follow button, otherwise this command is doing a whole lot of nothing for you"
-		).toBe(true);
+		expect(result[0]).toBe(
+			"@Nightbot hit that follow button, otherwise this command is doing a whole lot of nothing for you"
+		);
 	});
 
-	test("IsNotBroadcaster_AndHasUserInfo_AndUserIsFollower_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndUserIsFollower_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 676625589, displayName: "design_by_rose" };
@@ -68,10 +52,13 @@ describe.skip("followage", () => {
 		);
 	});
 
-	test("IsBroadcaster_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
-		userInfo = {};
+		userInfo = {
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 
 		//Act
 		let result = await response({
