@@ -21,7 +21,7 @@ describe("deaths", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
@@ -38,7 +38,7 @@ describe("deaths", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 11000);
@@ -55,7 +55,7 @@ describe("deaths", () => {
 		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
@@ -72,7 +72,7 @@ describe("deaths", () => {
 		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 11000);
