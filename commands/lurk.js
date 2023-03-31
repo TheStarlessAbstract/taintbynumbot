@@ -8,7 +8,10 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (helper.isValuePresentAndString(config.userInfo.displayName)) {
+			if (
+				helper.isValuePresentAndString(config.userInfo.displayName) &&
+				!helper.isStreamer(config)
+			) {
 				result.push(
 					"@" +
 						config.userInfo.displayName +
