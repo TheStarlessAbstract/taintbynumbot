@@ -19,12 +19,12 @@ let commandResponse = () => {
 			if (
 				helper.isVersionActive(versions, 0) &&
 				!helper.isValuePresentAndString(config.argument) &&
-				(helper.isCooldownPassed(
+				helper.isCooldownPassed(
 					currentTime,
 					points.getTimer(),
 					points.getCooldown()
-				) ||
-					helper.isStreamer(config))
+				) &&
+				!helper.isStreamer(config)
 			) {
 				points.setTimer(currentTime);
 
@@ -49,29 +49,29 @@ let commandResponse = () => {
 				}
 			} else if (
 				helper.isVersionActive(versions, 1) &&
-				helper.isStreamer(config)
+				helper.isStreamer(config) &&
+				helper.isValuePresentAndString(config.argument)
 			) {
-				if (helper.isValuePresentAndString(config.argument)) {
-					let username = helper.getCommandArgumentKey(config, 0);
-					let newPoints = helper.getCommandArgumentKey(config, 1);
+				let username = helper.getCommandArgumentKey(config, 0);
+				let newPoints = helper.getCommandArgumentKey(config, 1);
 
+				if (
+					helper.isValuePresentAndString(username) &&
+					helper.isValuePresentAndNumber(newPoints)
+				) {
 					if (username.startsWith("@")) {
 						username = username.substring(1);
 					}
 
-					if (
-						helper.isValuePresentAndString(username) &&
-						isNaN(username) &&
-						helper.isValuePresentAndNumber(newPoints)
-					) {
-						const apiClient = await chatClient.getApiClient();
-						user = await apiClient.users.getUserByName(username.toLowerCase());
+					const apiClient = await chatClient.getApiClient();
+					user = await apiClient.users.getUserByName(username.toLowerCase());
+
+					if (user) {
+						user = await LoyaltyPoint.findOne({
+							userId: user.id,
+						});
 
 						if (user) {
-							user = await LoyaltyPoint.findOne({
-								userId: user.id,
-							});
-
 							user.points += Number(newPoints);
 							await user.save();
 
@@ -84,28 +84,29 @@ let commandResponse = () => {
 							);
 						} else {
 							result.push(
-								"@TheStarlessAbstract no user found called " + username
+								"@TheStarlessAbstract doesn't look like @" +
+									username +
+									" can be given points just yet"
 							);
 						}
 					} else {
 						result.push(
-							"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
+							"@TheStarlessAbstract no user found called " + username
 						);
 					}
-				} else if (helper.isValuePresentAndNumber(config.argument)) {
+				} else {
 					result.push(
-						"@TheStarlessAbstract you used the command wrong, you utter swine"
+						"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
 					);
 				}
 			} else if (
 				!helper.isStreamer(config) &&
-				(helper.isValuePresentAndString(config.argument) ||
-					helper.isValuePresentAndNumber(config.argument))
+				helper.isValuePresentAndString(config.argument)
 			) {
 				result.push(
 					"@" +
 						config.userInfo.displayName +
-						" you aren't allowed to this command like that"
+						" you aren't allowed to use this command like that"
 				);
 			}
 
