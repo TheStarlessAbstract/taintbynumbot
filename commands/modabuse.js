@@ -1,6 +1,9 @@
 const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const Title = require("../models/title");
+
+const helper = new Helper();
 
 let cooldown = 30000;
 
@@ -11,47 +14,90 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				currentTime - modabuse.getTimer() > modabuse.getCooldown() ||
-				config.isBroadcaster
+				helper.isCooldownPassed(
+					currentTime,
+					modAbuse.getTimer(),
+					modAbuse.getCooldown()
+				) ||
+				helper.isStreamer(config)
 			) {
 				let entries = [];
 				let index;
-				let quote;
-				modabuse.setTimer(currentTime);
+				modAbuse.setTimer(currentTime);
 
-				if (versions[0].active && !config.argument) {
-					entries = await Title.find({});
+				if (
+					helper.isVersionActive(versions, 0) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					entries = await Title.aggregate([{ $sample: { size: 1 } }]);
 
-					if (!entries) {
+					if (entries.length == 0) {
 						result.push(
-							"The mods don't seem to have been very abusive lately...with titles"
+							"The mods don't seem to have been very abusive lately...with titles at least"
 						);
 					}
-				} else {
-					if (versions[1].active && !isNaN(config.argument)) {
-						quote = await Title.findOne({ index: config.argument });
+				} else if (helper.isValuePresentAndString(config.argument)) {
+					if (helper.isVersionActive(versions, 1) && !isNaN(config.argument)) {
+						let quote = await Title.findOne({ index: config.argument });
+
 						if (quote) {
 							entries.push(quote);
 						} else {
-							result.push("There is no title number " + config.argument);
+							result.push("There is no ModAbuse " + config.argument);
 						}
 					} else if (
-						versions[2].active &&
-						config.argument &&
+						helper.isVersionActive(versions, 2) &&
 						isNaN(config.argument)
 					) {
 						entries = await Title.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
 
-						if (!entries) {
-							result.push("No Title found mentioning: " + config.argument);
+						if (entries.length == 0) {
+							result.push("No ModAbuse found mentioning: " + config.argument);
 						}
+					} else if (
+						helper.isVersionActive(versions, 1) &&
+						isNaN(config.argument)
+					) {
+						result.push("To get a ModAbsue by its ID use !modAbuse [number]");
+					} else if (
+						helper.isVersionActive(versions, 2) &&
+						!isNaN(config.argument)
+					) {
+						result.push(
+							"To get a random ModAbuse that includes specic text, use !modAbuse [text]"
+						);
+					} else if (helper.isVersionActive(versions, 0)) {
+						result.push("To get a random ModAbuse, use !modAbuse");
 					}
+				} else if (
+					!helper.isVersionActive(versions, 0) &&
+					helper.isVersionActive(versions, 1) &&
+					helper.isVersionActive(versions, 2) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					result.push("Use !modAbuse [text], or !modAbuse [number]");
+				} else if (
+					!helper.isVersionActive(versions, 0) &&
+					helper.isVersionActive(versions, 1) &&
+					!helper.isVersionActive(versions, 2) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					result.push("To get a ModAbsue by its ID use !modAbuse [number]");
+				} else if (
+					!helper.isVersionActive(versions, 0) &&
+					!helper.isVersionActive(versions, 1) &&
+					helper.isVersionActive(versions, 2) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					result.push(
+						"To get a random ModAbuse that includes specific text, use !modAbuse [text]"
+					);
 				}
 
 				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
+					index = helper.getRandomBetweenExclusiveMax(0, entries.length);
 					result.push(entries[index].index + `. ` + entries[index].text);
 				}
 			}
@@ -63,29 +109,25 @@ let commandResponse = () => {
 let versions = [
 	{
 		description: "Gets a random title",
-		usage: "!modabuse",
+		usage: "!modAbuse",
 		usableBy: "users",
 		active: true,
 	},
 	{
 		description: "Gets title number 69",
-		usage: "!modabuse 69",
+		usage: "!modAbuse 69",
 		usableBy: "users",
 		active: true,
 	},
 	{
 		description:
 			"Gets a random title that includes the string 'sit on my face' uwu",
-		usage: "!modabuse sit on my face",
+		usage: "!modAbuse sit on my face",
 		usableBy: "users",
 		active: true,
 	},
 ];
 
-const modabuse = new TimerCommand(commandResponse, versions, cooldown);
+const modAbuse = new TimerCommand(commandResponse, versions, cooldown);
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-exports.command = modabuse;
+exports.command = modAbuse;
