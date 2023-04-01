@@ -1,6 +1,9 @@
 const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const Quote = require("../models/quote");
+
+const helper = new Helper();
 
 let cooldown = 30000;
 
@@ -11,49 +14,47 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				currentTime - quote.getTimer() > quote.getCooldown() ||
-				config.isBroadcaster
+				helper.isCooldownPassed(
+					currentTime,
+					quote.getTimer(),
+					quote.getCooldown()
+				) ||
+				helper.isStreamer(config)
 			) {
 				let entries = [];
 				let index;
 				quote.setTimer(currentTime);
 
-				if (versions[0].active && !config.argument) {
-					entries = await Quote.find({});
-
-					if (!entries) {
+				if (
+					helper.isVersionActive(versions, 0) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					entries = await Quote.aggregate([{ $sample: { size: 1 } }]);
+					if (entries.length == 0) {
 						result.push("Starless has never said anything of note");
 					}
-				} else {
-					if (versions[1].active && !isNaN(config.argument)) {
+				} else if (helper.isValuePresentAndString(config.argument)) {
+					if (helper.isVersionActive(versions, 1) && !isNaN(config.argument)) {
 						let quote = await Quote.findOne({ index: config.argument });
 
 						if (quote) {
 							entries.push(quote);
 						} else {
-							result.push(
-								"There is no Starless quote number " + config.argument
-							);
+							result.push("There is no Quote " + config.argument);
 						}
-					} else if (
-						versions[2].active &&
-						config.argument &&
-						isNaN(config.argument)
-					) {
+					} else if (helper.isVersionActive(versions, 2)) {
 						entries = await Quote.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
 
 						if (!entries) {
-							result.push(
-								"No Starless quote found mentioning: " + config.argument
-							);
+							result.push("No Quote found mentioning: " + config.argument);
 						}
 					}
 				}
 
 				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
+					index = helper.getRandomBetweenExclusiveMax(0, entries.length);
 					result.push(entries[index].index + `. ` + entries[index].text);
 				}
 			}
@@ -85,9 +86,5 @@ let versions = [
 ];
 
 const quote = new TimerCommand(commandResponse, versions, cooldown);
-
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
 
 exports.command = quote;
