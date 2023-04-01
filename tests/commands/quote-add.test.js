@@ -24,7 +24,7 @@ describe("addQuote", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		isMod = false;
