@@ -1,8 +1,8 @@
 require("dotenv").config();
 
-const points = require("../../commands/points");
-
 const db = require("../../bot-mongoose.js");
+const points = require("../../commands/points");
+const LoyaltyPoint = require("../../models/loyaltypoint");
 
 let isBroadcaster;
 let isModUp;
@@ -17,20 +17,47 @@ describe("points", () => {
 		db.connectToMongoDB();
 	});
 
-	beforeEach(() => {
-		argument = undefined;
-		userInfo = {};
-		commandLink.setTimer(currentDateTime - 1000);
+	beforeEach(async () => {
+		for (let i = 0; i < 2; i++) {
+			if (!commandLink.getVersionActivity(i)) {
+				commandLink.setVersionActive(i);
+			}
+		}
 	});
 
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("ArgumentUndefined_AndIsBroadcasterIsFalse_AndCoolDownNotElapsed_AndUserNotInDB_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = false;
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+		commandLink.setVersionActive(1);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 12826, displayName: "Twitch" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(1);
 
 		//Act
 		let result = await response({
@@ -41,13 +68,24 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toMatch(/@Twitch I hate to say it,/);
 	});
 
-	test("ArgumentUndefined_AndIsBroadcasterIsFalse_AndCoolDownNotElapsed_AndUserInDB_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(1);
+
+		let user = await LoyaltyPoint.findOne({
+			userId: userInfo.userId,
+		});
+
+		user.points = 69000;
+		await user.save();
 
 		//Act
 		let result = await response({
@@ -58,14 +96,40 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toMatch(/@design_by_rose has 69000 Tainty Points/);
 	});
 
-	test("ArgumentUndefined_AndIsBroadcasterIsFalse_AndCoolDownElapsed_AndUserNotInDB_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		argument = "@design_by_rose 2000";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(1);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@design_by_rose you aren't allowed to use this command like that/
+		);
+	});
+
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 12826, displayName: "Twitch" };
+		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
 
 		//Act
 		let result = await response({
@@ -76,13 +140,37 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("@Twitch I hate to say it")).toBe(true);
+		expect(result[0]).toBeUndefined();
 	});
 
-	test("ArgumentUndefined_AndIsBroadcasterIsFalse_AndCoolDownElapsed_AndUserInDB_ShouldReturnString", async () => {
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		argument = "@design_by_rose 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@design_by_rose you aren't allowed to use this command like that/
+		);
+	});
+
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		userInfo = { userId: 12826, displayName: "Twitch" };
+		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
@@ -94,31 +182,65 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("@design_by_rose has")).toBe(true);
+		expect(result[0]).toMatch(/@Twitch I hate to say it,/);
 	});
 
-	// needs to remove me from database at start, then readd
-	// test("ArgumentUndefined_IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndUserNotInDB_ShouldReturnString", async () => {
-	// 	//Assemble
-	// 	isBroadcaster = true;
-	// 	userInfo = { userId: 12826, displayName: "Twitch" };
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
 
-	// 	//Act
-	// 	let result = await response({
-	// 		isBroadcaster,
-	// 		isModUp,
-	// 		userInfo,
-	// 		argument,
-	// 	});
+		let user = await LoyaltyPoint.findOne({
+			userId: userInfo.userId,
+		});
 
-	// 	//Assert
-	// 	expect(result[0].startsWith("@TheStarlessAbstract has")).toBe(true);
-	// });
+		user.points = 69000;
+		await user.save();
 
-	test("ArgumentUndefined_IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndUserInDB_ShouldReturnString", async () => {
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/@design_by_rose has 69000 Tainty Points/);
+	});
+
+	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		argument = "@design_by_rose 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@design_by_rose you aren't allowed to use this command like that/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+		commandLink.setVersionActive(1);
 
 		//Act
 		let result = await response({
@@ -129,32 +251,401 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("@TheStarlessAbstract has")).toBe(true);
+		expect(result[0]).toBeUndefined();
 	});
 
-	// needs to remove me from database at start, then readd
-	// test("ArgumentUndefined_IsBroadcasterIsTrue_AndCoolDownElapsed_AndUserNotInDB_ShouldReturnString", async () => {
-	// 	//Assemble
-	// 	isBroadcaster = true;
-	// 	userInfo = { userId: 12826, displayName: "Twitch" };
-	// 	commandLink.setTimer(currentDateTime - 6000);
-
-	// 	//Act
-	// 	let result = await response({
-	// 		isBroadcaster,
-	// 		isModUp,
-	// 		userInfo,
-	// 		argument,
-	// 	});
-
-	// 	//Assert
-	// 	expect(result[0].startsWith("@TheStarlessAbstract has")).toBe(true);
-	// });
-
-	test("ArgumentUndefined_IsBroadcasterIsTrue_AndCoolDownElapsed_AndUserInDB_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionZeroActive_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = true;
 		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(1);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "2000 a";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@a 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@twitch 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@TheStarlessAbstract doesn't look like @twitch can be given points just yet/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@design_by_rose 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/Our glorious leader Starless, has given @design_by_rose 420 Tainty Points/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "2000 a";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@a 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@twitch 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@TheStarlessAbstract doesn't look like @twitch can be given points just yet/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@design_by_rose 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/Our glorious leader Starless, has given @design_by_rose 420 Tainty Points/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
+		commandLink.setVersionActive(1);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionZeroActive_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(1);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "2000 a";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@a 420";
+		commandLink.setTimer(currentDateTime - 1000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@twitch 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@TheStarlessAbstract doesn't look like @twitch can be given points just yet/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@design_by_rose 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		commandLink.setVersionActive(0);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/Our glorious leader Starless, has given @design_by_rose 420 Tainty Points/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
@@ -166,34 +657,14 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0].startsWith("@TheStarlessAbstract has")).toBe(true);
+		expect(result[0]).toBeUndefined();
 	});
 
-	test("ArgumentValid_AndIsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
-		argument = "@design_by_rose 420";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"@design_by_rose you aren't allowed to this command like that"
-		);
-	});
-
-	test("ArgumentValid_AndIsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
-		argument = "@design_by_rose 420";
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "2000 a";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
@@ -206,13 +677,54 @@ describe("points", () => {
 
 		//Assert
 		expect(result[0]).toBe(
-			"@design_by_rose you aren't allowed to this command like that"
+			"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
 		);
 	});
 
-	test("ArgumentValid_AndIsBroadcasterIsTrue_AndCoolDownnNotElapsed_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@a 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		argument = "@twitch 420";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isModUp,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(
+			/@TheStarlessAbstract doesn't look like @twitch can be given points just yet/
+		);
+	});
+
+	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -225,72 +737,8 @@ describe("points", () => {
 		});
 
 		//Assert
-		expect(result[0]).toBe(
-			"Our glorious leader Starless, has given @design_by_rose 420 Tainty Points"
-		);
-	});
-
-	test("ArgumentValid_AndIsBroadcasterIsTrue_AndCoolDownnElapsed_ShouldReturnString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		argument = "@design_by_rose 420";
-		commandLink.setTimer(currentDateTime - 6000);
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"Our glorious leader Starless, has given @design_by_rose 420 Tainty Points"
-		);
-	});
-
-	////
-
-	test("IsBroadcasterIsTrue_AndArgumentValidNo@_AndCoolDownNotElapsed_ShouldReturnPositveString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		argument = "design_by_rose 420";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"Our glorious leader Starless, has given @design_by_rose 420 Tainty Points"
-		);
-	});
-
-	test("IsBroadcasterIsTrue_AndArgumentValidNo@_AndCoolDownNotElapsed_ShouldReturnPositveString", async () => {
-		//Assemble
-		isBroadcaster = true;
-		argument = "design_by_rose 420";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0]).toBe(
-			"Our glorious leader Starless, has given @design_by_rose 420 Tainty Points"
+		expect(result[0]).toMatch(
+			/Our glorious leader Starless, has given @design_by_rose 420 Tainty Points/
 		);
 	});
 });
-
-// if (process.env.JEST_WORKER_ID == 69) {
-// 	console.log(1);
-// }
