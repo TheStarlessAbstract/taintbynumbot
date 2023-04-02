@@ -109,7 +109,7 @@ async function setup(newIo) {
 			let redirectUri = "http://localhost:5000/test";
 			let scope =
 				"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
-				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions";
+				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
 
 			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
