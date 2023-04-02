@@ -1,6 +1,9 @@
 const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
 const Tinder = require("../models/tinder");
+
+const helper = new Helper();
 
 let cooldown = 30000;
 
@@ -11,39 +14,41 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				currentTime - tinder.getTimer() > tinder.getCooldown() ||
-				config.isBroadcaster
+				helper.isCooldownPassed(
+					currentTime,
+					tinder.getTimer(),
+					tinder.getCooldown()
+				) ||
+				helper.isStreamer(config)
 			) {
 				let entries = [];
 				let index;
 				tinder.setTimer(currentTime);
 
-				if (versions[0].active && !config.argument) {
-					entries = await Tinder.find({});
-
-					if (!entries) {
+				if (
+					helper.isVersionActive(versions, 0) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					entries = await Tinder.aggregate([{ $sample: { size: 1 } }]);
+					if (entries.length == 0) {
 						result.push("Nobody has ever created Tinder bio for Starless");
 					}
-				} else {
-					if (versions[1].active && !isNaN(config.argument)) {
-						let quote;
+				} else if (helper.isValuePresentAndString(config.argument)) {
+					if (helper.isVersionActive(versions, 1) && !isNaN(config.argument)) {
+						let tinder;
 
 						if (config.argument == 0) {
-							quote = await Tinder.findOne({}).sort("-index").exec();
+							tinder = await Tinder.findOne({}).sort("-index").exec();
 						} else {
-							quote = await Tinder.findOne({ index: config.argument });
+							tinder = await Tinder.findOne({ index: config.argument });
 						}
 
-						if (quote) {
-							entries.push(quote);
+						if (tinder) {
+							entries.push(tinder);
 						} else {
-							result.push("There is no Tinder bio number " + config.argument);
+							result.push("There is no Tinder bio " + config.argument);
 						}
-					} else if (
-						versions[2].active &&
-						config.argument &&
-						isNaN(config.argument)
-					) {
+					} else if (helper.isVersionActive(versions, 2)) {
 						entries = await Tinder.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
@@ -55,14 +60,8 @@ let commandResponse = () => {
 				}
 
 				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
+					index = helper.getRandomBetweenExclusiveMax(0, entries.length);
 					result.push(entries[index].index + `. ` + entries[index].text);
-
-					if (entries[index].user != "") {
-						result.push(
-							`This Tinder bio was brought to you by the glorious, and taint-filled @${entries[index].user}`
-						);
-					}
 				}
 			}
 
