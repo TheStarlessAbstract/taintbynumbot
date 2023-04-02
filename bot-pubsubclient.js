@@ -9,6 +9,7 @@ const loyalty = require("./bot-loyalty");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
+let userId = process.env.TWITCH_USER_ID;
 
 let apiClient;
 let token;
@@ -18,9 +19,8 @@ async function setup() {
 
 	if (token) {
 		const tokenData = initializeTokenData(token);
-		const authProvider = createAuthProvider(tokenData);
-		const pubSubClient = new PubSubClient();
-		const userId = await pubSubClient.registerUserListener(authProvider);
+		const authProvider = await createAuthProvider(tokenData);
+		const pubSubClient = new PubSubClient({ authProvider });
 		const apiClient = new ApiClient({ authProvider });
 
 		setApiClient(apiClient);
@@ -40,25 +40,26 @@ function initializeTokenData(token) {
 	};
 }
 
-function createAuthProvider(tokenData) {
-	return new RefreshingAuthProvider(
-		{
-			clientId,
-			clientSecret,
-			onRefresh: async (newTokenData) => {
-				if (process.env.JEST_WORKER_ID == undefined) {
-					token.accessToken = newTokenData.accessToken;
-					token.refreshToken = newTokenData.refreshToken;
-					token.scope = newTokenData.scope;
-					token.expiresIn = newTokenData.expiresIn;
-					token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
+async function createAuthProvider(tokenData) {
+	let authProvider = new RefreshingAuthProvider({
+		clientId,
+		clientSecret,
+		onRefresh: async (userId, newTokenData) => {
+			if (process.env.JEST_WORKER_ID == undefined) {
+				token.accessToken = newTokenData.accessToken;
+				token.refreshToken = newTokenData.refreshToken;
+				token.scope = newTokenData.scope;
+				token.expiresIn = newTokenData.expiresIn;
+				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
-					await token.save();
-				}
-			},
+				await token.save();
+			}
 		},
-		tokenData
-	);
+	});
+
+	await authProvider.addUserForToken(tokenData, ["chat"]);
+
+	return authProvider;
 }
 
 function setApiClient(newApiClient) {
