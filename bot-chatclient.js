@@ -33,7 +33,7 @@ async function setup() {
 
 	if (token) {
 		const tokenData = initializeTokenData(token);
-		const authProvider = createAuthProvider(tokenData);
+		const authProvider = await createAuthProvider(tokenData);
 		const chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 
@@ -53,7 +53,7 @@ async function connected() {
 }
 
 async function setupChatClientListeners(apiClient, chatClient) {
-	chatClient.onRegister(async () => {
+	chatClient.onAuthenticationSuccess(async () => {
 		connected();
 
 		checkLive(apiClient, chatClient);
@@ -172,25 +172,26 @@ function initializeTokenData(token) {
 	};
 }
 
-function createAuthProvider(tokenData) {
-	return new RefreshingAuthProvider(
-		{
-			clientId,
-			clientSecret,
-			onRefresh: async (newTokenData) => {
-				if (process.env.JEST_WORKER_ID == undefined) {
-					token.accessToken = newTokenData.accessToken;
-					token.refreshToken = newTokenData.refreshToken;
-					token.scope = newTokenData.scope;
-					token.expiresIn = newTokenData.expiresIn;
-					token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
+async function createAuthProvider(tokenData) {
+	let authProvider = new RefreshingAuthProvider({
+		clientId,
+		clientSecret,
+		onRefresh: async (userId, newTokenData) => {
+			if (process.env.JEST_WORKER_ID == undefined) {
+				token.accessToken = newTokenData.accessToken;
+				token.refreshToken = newTokenData.refreshToken;
+				token.scope = newTokenData.scope;
+				token.expiresIn = newTokenData.expiresIn;
+				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
-					await token.save();
-				}
-			},
+				await token.save();
+			}
 		},
-		tokenData
-	);
+	});
+
+	await authProvider.addUserForToken(tokenData, ["chat"]);
+
+	return authProvider;
 }
 
 function createChatClient(authProvider) {
