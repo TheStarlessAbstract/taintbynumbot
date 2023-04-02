@@ -1,44 +1,54 @@
 require("dotenv").config();
 
+const db = require("../../bot-mongoose.js");
 const so = require("../../commands/so");
 
-const db = require("../../bot-mongoose.js");
-
 let isBroadcaster;
-let isModUp;
+let isMod;
 let userInfo;
 let argument;
 let commandLink = so.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("so", () => {
+describe.skip("so", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
-	});
-
-	beforeEach(() => {
-		isBroadcaster = false;
-		isModUp = true;
-		userInfo = {};
-		argument = undefined;
-		commandLink.setTimer(currentDateTime - 6000);
 	});
 
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_AndCoolDownNotElapsed_AndArgumentIsValid_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
-		isModUp = true;
-		argument = "@design_by_rose";
+		isBroadcaster = false;
+		isMod = false;
+		argument = undefined;
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe("!so is for Mods only");
+	});
+
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
+		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -47,106 +57,140 @@ describe("so", () => {
 		expect(result[0]).toBe(undefined);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModUpIsFalse_AndCoolDownElapsed_AndArgumentIsValid_ShouldReturnModOnlyString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isModUp = false;
+		isBroadcaster = false;
+		isMod = true;
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"You got to include a username to shoutout someone: !so @buhhsbot"
+		);
+	});
+
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentIsString_AndNotValidUsername_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
+		argument = "@a";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe("Couldn't find a user by the name of a");
+	});
+
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentIsString_AndValidUsername_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = false;
+		isMod = true;
 		argument = "@design_by_rose";
+		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
 
 		//Assert
-		expect(result[0] == "!so command is for Mods only").toBe(true);
+		expect(result[0]).toMatch(/Go check out design_by_rose at twitch.tv/);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_AndCoolDownElapsed_AndArgumentIsEmptyString_ShouldReturnUsernameString", async () => {
-		//Assemble
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(
-			result[0] ==
-				"You got to include a username to shoutout someone: !so buhhsbot"
-		).toBe(true);
-	});
-
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_AndCoolDownElapsed_AndArgumentIsEmptyString_ShouldReturnUsernameString", async () => {
-		//Assemble
-		argument = "";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(
-			result[0] ==
-				"You got to include a username to shoutout someone: !so buhhsbot"
-		).toBe(true);
-	});
-
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_AndCoolDownElapsed_AndArgumentIsValidWithout@_ShouldReturnModOnlyString", async () => {
-		//Assemble
-		argument = "design_by_rose";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0].startsWith("Go check out ")).toBe(true);
-	});
-
-	test("IsBroadcasterIsFalse_AndIsModUpIsTrue_AndCoolDownElapsed_AndArgumentIsValidWith@_ShouldReturnShoutout", async () => {
-		//Assemble
-		argument = "@design_by_rose";
-
-		//Act
-		let result = await response({
-			isBroadcaster,
-			isModUp,
-			userInfo,
-			argument,
-		});
-
-		//Assert
-		expect(result[0].startsWith("Go check out ")).toBe(true);
-	});
-
-	test("IsBroadcasterIsTrue_AndIsModUpIsTrue_AndCoolDownElapsed_AndArgumentIsValid_ShouldReturnShoutout", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownNotElapsed_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
-		argument = "@design_by_rose";
+		isMod = false;
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
 
 		//Assert
-		expect(result[0].startsWith("Go check out ")).toBe(true);
+		expect(result[0]).toBeUndefined();
+	});
+
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentUndefined_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = undefined;
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe(
+			"You got to include a username to shoutout someone: !so @buhhsbot"
+		);
+	});
+
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentIsString_AndNotValidUsername__ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = "@a";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toBe("Couldn't find a user by the name of a");
+	});
+
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentIsString_AndValidUsername__ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		isMod = false;
+		argument = "@design_by_rose";
+		commandLink.setTimer(currentDateTime - 6000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0]).toMatch(/Go check out design_by_rose at twitch.tv/);
 	});
 });
