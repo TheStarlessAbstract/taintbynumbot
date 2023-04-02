@@ -15,11 +15,11 @@ let commandResponse = () => {
 			let stream;
 			let streamed;
 
-			if (helper.isValidModeratorOrStreamer(config)) {
-				if (
-					helper.isValuePresentAndString(config.argument) &&
-					helper.isCooldownPassed(currentTime, so.timer, cooldown)
-				) {
+			if (
+				helper.isValidModeratorOrStreamer(config) &&
+				helper.isCooldownPassed(currentTime, so.timer, cooldown)
+			) {
+				if (helper.isValuePresentAndString(config.argument)) {
 					so.setTimer(currentTime);
 
 					let username = config.argument;
@@ -50,16 +50,13 @@ let commandResponse = () => {
 								". I hear they love the Taint"
 						);
 					}
-				} else if (
-					!helper.isValuePresentAndString(config.argument) &&
-					helper.isCooldownPassed(currentTime, so.timer, cooldown)
-				) {
+				} else if (!helper.isValuePresentAndString(config.argument)) {
 					result.push(
-						"You got to include a username to shoutout someone: !so buhhsbot"
+						"You got to include a username to shoutout someone: !so @buhhsbot"
 					);
 				}
-			} else {
-				result.push("!so command is for Mods only");
+			} else if (!helper.isValidModeratorOrStreamer(config)) {
+				result.push("!so is for Mods only");
 			}
 
 			return result;
