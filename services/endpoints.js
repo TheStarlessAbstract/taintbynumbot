@@ -1,9 +1,9 @@
-// const axios = require("axios");
+const axios = require("axios");
 const express = require("express");
 const path = require("path");
-// const querystring = require("querystring");
+const querystring = require("querystring");
 
-// const Token = require("../models/token");
+const Token = require("../models/token");
 
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
@@ -16,70 +16,69 @@ router.get("/", (req, res) => {
 	res.send("Hello Twitch!");
 });
 
-// router.get("/test", async (req, res) => {
-// 	console.log("hello twitch");
+router.get("/test", async (req, res) => {
+	console.log("hello twitch");
 
-// 	const code = req.query.code;
-// 	const scope = req.query.scope;
+	const code = req.query.code;
+	const scope = req.query.scope;
 
-// 	let clientId = process.env.TWITCH_CLIENT_ID;
-// 	let clientSecret = process.env.TWITCH_CLIENT_SECRET;
-// 	let redirectUri = "http://localhost:5000/test";
+	let clientId = process.env.TWITCH_CLIENT_ID;
+	let clientSecret = process.env.TWITCH_CLIENT_SECRET;
+	let redirectUri = "http://localhost:5000/test";
 
-// 	const response = await axios.post(
-// 		"https://id.twitch.tv/oauth2/token",
-// 		querystring.stringify({
-// 			client_id: clientId,
-// 			client_secret: clientSecret,
-// 			grant_type: "authorization_code",
-// 			code: code,
-// 			redirect_uri: redirectUri,
-// 		}),
-// 		{
-// 			headers: {
-// 				"Content-Type": "application/x-www-form-urlencoded",
-// 			},
-// 		}
-// 	);
+	const response = await axios.post(
+		"https://id.twitch.tv/oauth2/token",
+		querystring.stringify({
+			client_id: clientId,
+			client_secret: clientSecret,
+			grant_type: "authorization_code",
+			code: code,
+			redirect_uri: redirectUri,
+		}),
+		{
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+		}
+	);
 
-// 	// const accessToken = response.data;
+	// const accessToken = response.data;
 
-// 	let token = await Token.findOne({ name: "pubSubClientTest" });
-// 	if (token) {
-// 		token = {
-// 			scope: response.data.scope,
-// 			accessToken: response.data.access_token,
-// 			refreshToken: response.data.refresh_token,
-// 			expiresIn: 0,
-// 			obtainmentTimestamp: 0,
-// 		};
-// 	} else {
-// 		token = new Token({
-// 			name: "pubSubClientTest",
-// 			scope: response.data.scope,
-// 			accessToken: response.data.access_token,
-// 			refreshToken: response.data.refresh_token,
-// 			expiresIn: 0,
-// 			obtainmentTimestamp: 0,
-// 		});
-// 	}
+	let token = await Token.findOne({ name: "pubSubClientTest" });
 
-// 	token.save();
+	if (token) {
+		token.scope = response.data.scope;
+		token.accessToken = response.data.access_token;
+		token.refreshToken = response.data.refresh_token;
+		token.expiresIn = 0;
+		token.obtainmentTimestamp = 0;
+	} else {
+		token = new Token({
+			name: "pubSubClientTest",
+			scope: response.data.scope,
+			accessToken: response.data.access_token,
+			refreshToken: response.data.refresh_token,
+			expiresIn: 0,
+			obtainmentTimestamp: 0,
+		});
+	}
 
-// 	// res.send("Hello code!");
-// 	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
-// });
+	token.save();
 
-// router.get("/auth", (req, res) => {
-// 	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
-// });
+	// res.send("Hello code!");
+	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
+});
 
-// router.get("/oauth/callback", (req, res) => {
-// 	const code = req.query.code;
-// 	const scope = req.query.scope;
+router.get("/auth", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
+});
 
-// 	// Use the code and scope to make a request for an access token
-// });
+router.get("/oauth/callback", (req, res) => {
+	const code = req.query.code;
+	const scope = req.query.scope;
+
+	// Use the code and scope to make a request for an access token
+});
 
 router.get("/channelpointoverlay", (req, res) => {
 	res.sendFile(
