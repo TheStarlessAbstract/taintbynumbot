@@ -5,7 +5,7 @@ const f = require("../../commands/f");
 const db = require("../../bot-mongoose.js");
 
 let isBroadcaster;
-let isModUp;
+let isMod;
 let userInfo;
 let argument;
 let commandLink = f.command;
@@ -18,14 +18,6 @@ describe.skip("f", () => {
 		await f.setup();
 	});
 
-	beforeEach(() => {
-		isBroadcaster = true;
-		isModUp = true;
-		userInfo = {};
-		argument = undefined;
-		commandLink.setTimer(currentDateTime - 1000);
-	});
-
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
 	});
@@ -33,11 +25,12 @@ describe.skip("f", () => {
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
+		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -46,7 +39,7 @@ describe.skip("f", () => {
 		expect(result[0]).toBe(undefined);
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 11000);
@@ -54,7 +47,7 @@ describe.skip("f", () => {
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
 			userInfo,
 			argument,
 		});
@@ -63,13 +56,32 @@ describe.skip("f", () => {
 		expect(result[0].startsWith("Starless has now died/failed")).toBe(true);
 	});
 
-	test("IsBroadcasterIsTrue_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnString", async () => {
 		//Assemble
+		isBroadcaster = true;
+		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
 			isBroadcaster,
-			isModUp,
+			isMod,
+			userInfo,
+			argument,
+		});
+
+		//Assert
+		expect(result[0].startsWith("Starless has now died/failed")).toBe(true);
+	});
+
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnString", async () => {
+		//Assemble
+		isBroadcaster = true;
+		commandLink.setTimer(currentDateTime - 11000);
+
+		//Act
+		let result = await response({
+			isBroadcaster,
+			isMod,
 			userInfo,
 			argument,
 		});
