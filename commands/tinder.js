@@ -95,8 +95,4 @@ let versions = [
 
 const tinder = new TimerCommand(commandResponse, versions, cooldown);
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
 exports.command = tinder;
