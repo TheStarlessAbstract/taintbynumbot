@@ -19,7 +19,7 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				helper.isValuePresentAndNumber(config.userInfo.userId) &&
+				helper.isValuePresentAndString(config.userInfo.userId) &&
 				helper.isValuePresentAndString(config.userInfo.displayName) &&
 				(helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
 					helper.isStreamer(config))
