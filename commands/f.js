@@ -185,7 +185,7 @@ let versions = [
 	},
 ];
 
-const f = new TimerCommand(commandResponse, versions);
+const f = new TimerCommand(commandResponse, versions, cooldown);
 
 const getDeathCounter = async (gameName, streamDate, gameStreamDeaths) => {
 	let gameDeathCounter;
