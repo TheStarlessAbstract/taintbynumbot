@@ -27,6 +27,7 @@ function chatInterval() {
 
 		let currentPageUsers = await chatPaginated.getNext();
 		let currentUsersList = [];
+
 		while (currentPageUsers.length > 0) {
 			currentUsersList = currentUsersList.concat(currentPageUsers);
 			currentPageUsers = await chatPaginated.getNext();
@@ -54,24 +55,25 @@ function chatInterval() {
 					!!!existingUsers.find((exUser) => exUser.userId == user.userId)
 			);
 
-			createUser(newUsers);
+			await createUser(newUsers);
 		} else {
-			createUser(currentUsersList);
+			await createUser(currentUsersList);
 		}
 
+		let channelFollower;
 		for (let i = 0; i < existingUsers.length; i++) {
 			followingUser = currentUsersList.find(
 				(chatUser) => chatUser.userId == existingUsers[i].userId
 			);
 
 			if (!existingUsers[i].follower) {
-				let channelFollower = await apiClient.channels.getChannelFollowers(
+				channelFollower = await apiClient.channels.getChannelFollowers(
 					twitchUserId,
 					twitchUserId,
 					followingUser.userId
 				);
 
-				if (channelFollower.total == 1) {
+				if (channelFollower.data.length == 1) {
 					newFollowBonus = 2000;
 					existingUsers[i].follower = true;
 				} else {
@@ -85,7 +87,8 @@ function chatInterval() {
 
 			await existingUsers[i].save();
 		}
-	}, 300000);
+		// }, 300000);
+	}, 20000);
 }
 
 async function createUser(array) {
@@ -103,7 +106,7 @@ async function createUser(array) {
 			array[i].userId
 		);
 
-		if (channelFollower.total == 1) {
+		if (channelFollower.data.length == 1) {
 			following = true;
 			newFollowBonus = 2000;
 		} else {
