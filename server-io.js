@@ -9,7 +9,6 @@ let io;
 let url = process.env.BOT_DOMAIN;
 let interval;
 let deathCounterInterval;
-let lastPlayFinished = true;
 let isLive = false;
 let deaths;
 let gameDeaths;
@@ -34,10 +33,6 @@ async function setup(newIo) {
 				console.log("/channelpointoverlay disconnected");
 				isLive = false;
 				clearInterval(interval);
-			});
-
-			socket.on("ended", () => {
-				lastPlayFinished = true;
 			});
 		}
 
@@ -121,12 +116,7 @@ function getRandomBetween(min, max) {
 }
 
 function playAudio(audioLink) {
-	if (lastPlayFinished) {
-		io.emit("playAudio", audioLink);
-		lastPlayFinished = false;
-	} else {
-		console.log(3);
-	}
+	io.emit("playAudio", audioLink);
 }
 
 function setDeaths(newDeaths, newGameDeaths, newAllDeaths, newAverage) {
