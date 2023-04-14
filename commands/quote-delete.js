@@ -17,10 +17,15 @@ let commandResponse = () => {
 				let quoteIndex = config.argument;
 
 				if (!isNaN(quoteIndex)) {
+					// let quote = await Quote.deleteOne({ index: quoteIndex });
 					let quote = await Quote.findOne({ index: quoteIndex });
 					if (quote) {
-						result.push("Quote " + quoteIndex + " was: " + quote.text);
-						await quote.remove();
+						let deletion = await Quote.deleteOne({ index: quoteIndex });
+						if (deletion.deletedCount == 1) {
+							result.push("Quote " + quoteIndex + " was: " + quote.text);
+						} else {
+							result.push("Quote " + quoteIndex + " was not deleted");
+						}
 					} else {
 						result.push("No Quote " + quoteIndex + " found");
 					}
