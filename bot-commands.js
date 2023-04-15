@@ -156,7 +156,6 @@ function setCommandTimers() {
 	commands.kingsremain.setTimer(currentDateTime);
 	commands.deaths.setTimer(currentDateTime);
 	commands.so.setTimer(currentDateTime);
-	commands.kings.setTimer(currentDateTime);
 }
 
 exports.getCommands = getCommands;
