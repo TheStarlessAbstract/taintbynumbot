@@ -11,10 +11,6 @@ let loyaltyInterval;
 
 async function setup(apiClient) {
 	setApiClient(apiClient);
-
-	if (process.env.JEST_WORKER_ID == undefined) {
-		chatInterval();
-	}
 }
 
 function chatInterval() {
