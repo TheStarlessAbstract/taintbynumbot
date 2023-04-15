@@ -14,22 +14,32 @@ let cardsToDraw;
 let cooldown = 5000;
 let cost = 100;
 let kingsCount;
+let currentTime = new Date();
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let currentTime = new Date();
+			currentTime = new Date();
+
+			console.log(config);
+
+			console.log(
+				"Is cooldown passed " +
+					helper.isCooldownPassed(
+						currentTime,
+						kings.getTimer(),
+						kings.getCooldown()
+					)
+			);
 
 			if (
-				helper.isValuePresentAndString(config.userInfo.userId) &&
-				helper.isValuePresentAndString(config.userInfo.displayName) &&
-				(helper.isCooldownPassed(
+				helper.isCooldownPassed(
 					currentTime,
 					kings.getTimer(),
 					kings.getCooldown()
 				) ||
-					helper.isStreamer(config))
+				helper.isStreamer(config)
 			) {
 				kings.setTimer(currentTime);
 				let redeemUser = config.userInfo.displayName;
@@ -130,6 +140,8 @@ let versions = [
 ];
 
 const kings = new TimerCommand(commandResponse, versions, cooldown);
+
+kings.setTimer(currentTime);
 
 async function resetKings() {
 	let gameState = await KingsSaveState.findOne({});
