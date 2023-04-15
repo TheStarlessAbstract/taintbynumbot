@@ -124,6 +124,9 @@ async function checkLive(apiClient, chatClient) {
 
 		if (streamLiveFlag && !isLive) {
 			setTimedMessages(chatClient);
+			if (process.env.JEST_WORKER_ID == undefined) {
+				loyalty.start();
+			}
 			isLive = true;
 		} else if (!streamLiveFlag && isLive) {
 			clearInterval(timedMessagesInterval);
