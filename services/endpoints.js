@@ -24,7 +24,7 @@ router.get("/test", async (req, res) => {
 
 	let clientId = process.env.TWITCH_CLIENT_ID;
 	let clientSecret = process.env.TWITCH_CLIENT_SECRET;
-	let redirectUri = "http://localhost:5000/test";
+	let redirectUri = "https://taintbynumbot.herokuapp.com/test";
 
 	const response = await axios.post(
 		"https://id.twitch.tv/oauth2/token",
