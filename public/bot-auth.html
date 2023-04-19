@@ -27,9 +27,6 @@
             var x = document.getElementById("login-with-twitch"); 
 
             var twitchAuthUrl;
-            
-            var redirect_uri = "&redirect_uri=http://localhost:5000"
-            var url = "https://id.twitch.tv/oauth2/authorize?"
 
             socket.on("setDetails", details => {
                 clientId = details.clientId;
@@ -45,9 +42,9 @@
 
             $(document).ready(function() {
             $("#login-with-twitch").click(function() {
-              window.location = twitchAuthUrl;
+                window.location = twitchAuthUrl;
             });
-          });
+        });
         </script>
     </body>
 </html>
