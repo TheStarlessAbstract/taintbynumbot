@@ -6,7 +6,7 @@ const DeathSaveState = require("./models/deathsavestate");
 let clientId = process.env.TWITCH_CLIENT_ID;
 
 let io;
-let url = process.env.BOT_DOMAIN;
+let botDomain = process.env.BOT_DOMAIN;
 let interval;
 let deathCounterInterval;
 let isLive = false;
@@ -26,7 +26,7 @@ async function setup(newIo) {
 			isLive = true;
 
 			interval = setInterval(() => {
-				ssl.get(url, (res) => {});
+				ssl.get(botDomain, (res) => {});
 			}, getRandomBetween(600000, 900000));
 
 			socket.on("disconnect", () => {
@@ -101,7 +101,8 @@ async function setup(newIo) {
 		if (socket.handshake.headers.referer.includes("auth")) {
 			console.log("/auth connected");
 
-			let redirectUri = "http://localhost:5000/test";
+			let redirectUri = botDomain + "/test";
+
 			let scope =
 				"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
 				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
