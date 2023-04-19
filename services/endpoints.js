@@ -22,9 +22,10 @@ router.get("/test", async (req, res) => {
 	const code = req.query.code;
 	const scope = req.query.scope;
 
+	let botDomain = process.env.BOT_DOMAIN;
 	let clientId = process.env.TWITCH_CLIENT_ID;
 	let clientSecret = process.env.TWITCH_CLIENT_SECRET;
-	let redirectUri = "https://taintbynumbot.herokuapp.com/test";
+	let redirectUri = botDomain + "/test";
 
 	const response = await axios.post(
 		"https://id.twitch.tv/oauth2/token",
