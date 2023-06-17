@@ -13,8 +13,8 @@ class Helper {
 		return value != undefined && typeof value === "number";
 	}
 
-	isStreamer(config) {
-		return config.isBroadcaster;
+	isStreamer(userInfo) {
+		return userInfo.isBroadcaster;
 	}
 
 	isValidModeratorOrStreamer(config) {
