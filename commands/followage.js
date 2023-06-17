@@ -12,11 +12,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (
-				!helper.isStreamer(config) &&
-				helper.isValuePresentAndNumber(config.userInfo?.userId) &&
-				helper.isValuePresentAndString(config.userInfo?.displayName)
-			) {
+			if (!helper.isStreamer(config.userInfo)) {
 				const apiClient = await chatClient.getApiClient();
 				const follow = await apiClient.users.getFollowFromUserToBroadcaster(
 					config.userInfo.userId,
