@@ -71,43 +71,39 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		if (shouldIgnoreMessage(user, botUsername, message)) return;
 
-		const userInfo = msg.userInfo;
-		const { isBroadcaster, isMod, isVip, isSub } = userInfo;
-		const isModUp = isBroadcaster || isMod;
+		// const userInfo = msg.userInfo;
 
-		let [command, argument] = message.slice(1).split(/\s(.+)/);
+		if (userInfoCheck(msg.userInfo)) {
+			const userInfo = msg.userInfo;
+			let [command, argument] = message.slice(1).split(/\s(.+)/);
+			let commandLink = commands.list[command.toLowerCase()];
 
-		let commandLink = commands.list[command.toLowerCase()];
+			if (commandLink == undefined) return;
 
-		if (commandLink == undefined) return;
+			const { response } = (await commandLink.getCommand()) || {};
+			let versions = commandLink.getVersions();
+			let hasActiveVersions =
+				versions.filter(function (version) {
+					return version.active;
+				}).length > 0;
+			if (hasActiveVersions) {
+				if (typeof response === "function") {
+					let result = await response({
+						userInfo,
+						argument,
+					});
 
-		const { response } = (await commandLink.getCommand()) || {};
-
-		let versions = commandLink.getVersions();
-
-		let hasActiveVersions =
-			versions.filter(function (version) {
-				return version.active;
-			}).length > 0;
-
-		if (hasActiveVersions) {
-			if (typeof response === "function") {
-				let result = await response({
-					isBroadcaster,
-					isMod,
-					isModUp,
-					userInfo,
-					argument,
-				});
-
-				if (result) {
-					for (let i = 0; i < result.length; i++) {
-						chatClient.say(channel, result[i]);
+					if (result) {
+						for (let i = 0; i < result.length; i++) {
+							chatClient.say(channel, result[i]);
+						}
 					}
+				} else if (typeof response === "string") {
+					chatClient.say(channel, response);
 				}
-			} else if (typeof response === "string") {
-				chatClient.say(channel, response);
 			}
+		} else {
+			console.log("userInfo types changed");
 		}
 	});
 }
@@ -232,6 +228,64 @@ async function getApiClient() {
 		await setup();
 	}
 	return apiClient;
+}
+
+function userInfoCheck(userInfo) {
+	let check = true;
+
+	if (!(userInfo.badgeInfo instanceof Map)) {
+		check == false;
+	}
+
+	if (!(userInfo.badges instanceof Map)) {
+		check == false;
+	}
+
+	if (typeof userInfo.color != "string") {
+		check == false;
+	}
+
+	if (typeof userInfo.displayName != "string") {
+		check == false;
+	}
+
+	if (typeof userInfo.isArtist != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.isBroadcaster != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.isFounder != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.isMod != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.isSubscriber != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.isVip != "boolean") {
+		check == false;
+	}
+
+	if (typeof userInfo.userId != "string") {
+		check == false;
+	}
+
+	if (typeof userInfo.userName != "string") {
+		check == false;
+	}
+
+	if (typeof userInfo.userType != "string") {
+		check == false;
+	}
+
+	return check;
 }
 
 exports.setup = setup;
