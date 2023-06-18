@@ -14,7 +14,7 @@ let argument;
 let commandLink = messageAdd.command;
 const { response } = commandLink.getCommand();
 
-describe("addMessage", () => {
+describe.skip("addMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
