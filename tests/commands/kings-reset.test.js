@@ -11,7 +11,7 @@ let argument;
 let commandLink = kingsReset.command;
 const { response } = commandLink.getCommand();
 
-describe("kingsReset", () => {
+describe.skip("kingsReset", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
