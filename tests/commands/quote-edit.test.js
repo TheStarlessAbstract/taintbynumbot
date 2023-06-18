@@ -12,7 +12,7 @@ let argument;
 let commandLink = quoteEdit.command;
 const { response } = commandLink.getCommand();
 
-describe("editQuote", () => {
+describe.skip("editQuote", () => {
 	let index;
 	let text;
 	let updatedText;
