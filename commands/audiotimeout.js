@@ -11,7 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (helper.isValidModeratorOrStreamer(config.userInfo)) {
-				let time = helper.getCommandArgumentKey(config, 0);
+				let time = helper.getCommandArgumentKey(config.argument, 0);
 
 				if (helper.isVersionActive(versions, 0) && time == null) {
 					audio.setAudioTimeout();
