@@ -18,7 +18,7 @@ describe("followage", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndUserIsNotFollower_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndUserIsNotFollower_ShouldReturnString", async () => {
 		//Assemble
 		userInfo = {
 			isBroadcaster: false,
@@ -38,7 +38,7 @@ describe("followage", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndUserIsFollower_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndUserIsFollower_ShouldReturnString", async () => {
 		//Assemble
 		userInfo = {
 			isBroadcaster: false,
@@ -58,7 +58,7 @@ describe("followage", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_ShouldReturnString", async () => {
 		//Assemble
 		userInfo = {
 			isBroadcaster: true,
