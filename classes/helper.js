@@ -41,9 +41,9 @@ class Helper {
 		return "";
 	}
 
-	getCommandArgumentKey(config, index) {
-		if (this.isValuePresentAndString(config.argument)) {
-			let splitData = config.argument.split(/\s(.+)/);
+	getCommandArgumentKey(argument, index) {
+		if (this.isValuePresentAndString(argument)) {
+			let splitData = argument.split(/\s(.+)/);
 
 			if (this.isValuePresentAndString(splitData[index])) {
 				if (!isNaN(splitData[index])) {
@@ -53,7 +53,7 @@ class Helper {
 			} else if (this.isValuePresentAndNumber(splitData[index])) {
 				return splitData[index];
 			}
-		} else if (config.argument == undefined) {
+		} else if (argument == undefined) {
 			return null;
 		}
 
