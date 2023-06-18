@@ -10,7 +10,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (helper.isValidModeratorOrStreamer(config)) {
+			if (helper.isValidModeratorOrStreamer(config.userInfo)) {
 				let time = helper.getCommandArgumentKey(config, 0);
 
 				if (helper.isVersionActive(versions, 0) && time == null) {
@@ -64,7 +64,7 @@ let commandResponse = () => {
 				} else if (helper.isVersionActive(versions, 1) && time == null) {
 					result.push("To set audioTimeout length use !audioTimeout [number]");
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!audioTimeout command is for Mods only");
 			}
 
