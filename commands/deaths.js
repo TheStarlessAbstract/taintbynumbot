@@ -23,7 +23,7 @@ let commandResponse = () => {
 					deaths.getTimer(),
 					deaths.getCooldown()
 				) ||
-				helper.isStreamer(config)
+				helper.isStreamer(config.userInfo)
 			) {
 				deaths.setTimer(currentTime);
 				let apiClient = await chatClient.getApiClient();
