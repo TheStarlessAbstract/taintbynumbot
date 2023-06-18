@@ -7,8 +7,6 @@ const Command = require("../../models/command");
 const commands = require("../../bot-commands");
 const commandDelete = require("../../commands/command-delete");
 
-let isBroadcaster;
-let isMod;
 let userInfo = {};
 let argument;
 let commandLink = commandDelete.command;
@@ -17,7 +15,7 @@ const { response } = commandLink.getCommand();
 let commandName;
 let commandText;
 
-describe.skip("delComm", () => {
+describe("delComm", () => {
 	let commandNames = [];
 	beforeAll(async () => {
 		db.connectToMongoDB();
@@ -29,16 +27,16 @@ describe.skip("delComm", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
 		argument = undefined;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -47,16 +45,16 @@ describe.skip("delComm", () => {
 		expect(result[0]).toBe("!delComm Command is for Mods only");
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		argument = undefined;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -65,17 +63,17 @@ describe.skip("delComm", () => {
 		expect(result[0]).toBe("To delete a Command, use !delComm ![command name]");
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		commandName = "delCommTest3";
 		argument = commandName;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -86,16 +84,16 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		argument = "!";
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -106,17 +104,17 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		commandName = "delCommTest5";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -127,17 +125,17 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandNotDeletable_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandNotDeletable_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		commandName = "kings";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -148,20 +146,20 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandIsDeletable_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandIsDeletable_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
 		commandName = "delCommTest7";
 		commandText = "this is delCommTest7";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		await dbSetup(commandName, commandText);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -172,16 +170,16 @@ describe.skip("delComm", () => {
 		expect(result[0]).toBe("!delcommtest7 has been deleted");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		argument = undefined;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -190,17 +188,17 @@ describe.skip("delComm", () => {
 		expect(result[0]).toBe("To delete a Command, use !delComm ![command name]");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringNoPrefix_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		commandName = "delCommTest11";
 		argument = commandName;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -211,16 +209,16 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndAndIsModTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		argument = "!";
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -231,17 +229,17 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandNameNotInCommandList_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		commandName = "delCommTest11";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -252,17 +250,17 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandNotDeletable_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandNotDeletable_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		commandName = "kings";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -273,20 +271,20 @@ describe.skip("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandIsDeletable_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringHasPrefix_AndStringHasCommandName_AndCommandInCommandList_AndCommandIsDeletable_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
 		commandName = "delCommTest13";
 		commandText = "this is delCommTest13";
 		argument = "!" + commandName;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		await dbSetup(commandName, commandText);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
