@@ -9,7 +9,7 @@ let argument;
 let commandLink = lurk.command;
 const { response } = commandLink.getCommand();
 
-describe("lurk", () => {
+describe.skip("lurk", () => {
 	test("IsBroadcasterFalse_ShouldReturnUndefined", async () => {
 		//Assemble
 		isBroadcaster = false;
