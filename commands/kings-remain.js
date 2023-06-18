@@ -28,7 +28,7 @@ let commandResponse = () => {
 					return card.isDrawn == false;
 				});
 
-				result.push("Cards remaing in this game " + cardsRemain.length);
+				result.push("Cards remaining in this game " + cardsRemain.length);
 			}
 			return result;
 		},
