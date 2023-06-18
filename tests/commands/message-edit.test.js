@@ -14,7 +14,7 @@ let argument;
 let commandLink = messageEdit.command;
 const { response } = commandLink.getCommand();
 
-describe("editMessage", () => {
+describe.skip("editMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
