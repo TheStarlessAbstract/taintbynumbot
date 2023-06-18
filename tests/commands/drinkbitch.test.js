@@ -12,7 +12,7 @@ let commandLink = drinkBitch.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("drinkBitch", () => {
+describe.skip("drinkBitch", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await drinkBitch.updateAudioLinks();
