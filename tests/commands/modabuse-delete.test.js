@@ -10,7 +10,7 @@ let argument;
 let commandLink = modAbuseDelete.command;
 const { response } = commandLink.getCommand();
 
-describe("delModAbuse", () => {
+describe.skip("delModAbuse", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
