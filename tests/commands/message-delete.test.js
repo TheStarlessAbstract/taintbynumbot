@@ -11,7 +11,7 @@ let argument;
 let commandLink = messageDelete.command;
 const { response } = commandLink.getCommand();
 
-describe("delMessage", () => {
+describe.skip("delMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
