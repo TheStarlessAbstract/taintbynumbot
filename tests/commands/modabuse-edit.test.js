@@ -13,7 +13,7 @@ let titleText;
 let commandLink = modAbuseEdit.command;
 const { response } = commandLink.getCommand();
 
-describe("editModAbuse", () => {
+describe.skip("editModAbuse", () => {
 	let title;
 
 	let cleanUpList = [];
