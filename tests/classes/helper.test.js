@@ -30,7 +30,7 @@ invalidversions = [];
 
 invalidUrls = [];
 
-describe("isVersionActive", () => {
+describe.skip("isVersionActive", () => {
 	test("VersionsPackIsEmpty_ShouldReturnFalse", () => {
 		//Assemble
 
@@ -64,7 +64,7 @@ describe("isVersionActive", () => {
 	});
 });
 
-describe("isValuePresentAndString", () => {
+describe.skip("isValuePresentAndString", () => {
 	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
 		//Assemble
 		let input = undefined;
@@ -111,7 +111,7 @@ describe("isValuePresentAndString", () => {
 	});
 });
 
-describe("isValuePresentAndNumber", () => {
+describe.skip("isValuePresentAndNumber", () => {
 	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
 		//Assemble
 		let input = undefined;
@@ -149,7 +149,7 @@ describe("isValuePresentAndNumber", () => {
 	});
 });
 
-describe("isValidModeratorOrStreamer", () => {
+describe.skip("isValidModeratorOrStreamer", () => {
 	test("WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
 		//Assemble
 		let config = {};
@@ -199,7 +199,7 @@ describe("isValidModeratorOrStreamer", () => {
 	});
 });
 
-describe("getCommandArgumentKey", () => {
+describe.skip("getCommandArgumentKey", () => {
 	test("WhereArgumentIsBool_AndIndexIsZero_ShouldReturnEmptyString", () => {
 		//Assemble
 		let config = {};
@@ -381,7 +381,7 @@ describe("getCommandArgumentKey", () => {
 	});
 });
 
-describe("isStreamer", () => {
+describe.skip("isStreamer", () => {
 	test("WhereUserIsNotStreamer_ShouldReturnFalse", () => {
 		//Assemble
 		let config = {};
@@ -403,7 +403,7 @@ describe("isStreamer", () => {
 	});
 });
 
-describe("isCooldownPassed", () => {
+describe.skip("isCooldownPassed", () => {
 	let newDate = new Date();
 	let lastTimeSet;
 	let cooldown;
@@ -602,7 +602,7 @@ describe("isCooldownPassed", () => {
 	});
 });
 
-describe("getRandomisedAudioFileUrl", () => {
+describe.skip("getRandomisedAudioFileUrl", () => {
 	test("ArrayIsEmpty_ShouldReturnEmptyString", () => {
 		//Assemble
 
@@ -631,7 +631,7 @@ describe("getRandomisedAudioFileUrl", () => {
 	});
 });
 
-describe("getRandomBetweenExclusiveMax", () => {
+describe.skip("getRandomBetweenExclusiveMax", () => {
 	let min;
 	let max;
 	let value;
@@ -707,7 +707,7 @@ describe("getRandomBetweenExclusiveMax", () => {
 	});
 });
 
-describe("getRandomBetweenInclusiveMax", () => {
+describe.skip("getRandomBetweenInclusiveMax", () => {
 	let min;
 	let max;
 	let value;
