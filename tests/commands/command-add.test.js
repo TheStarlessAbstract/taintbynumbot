@@ -7,8 +7,6 @@ const Command = require("../../models/command");
 const commands = require("../../bot-commands");
 const commandAdd = require("../../commands/command-add");
 
-let isBroadcaster;
-let isMod;
 let userInfo = {};
 let argument;
 let commandLink = commandAdd.command;
