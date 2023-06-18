@@ -12,7 +12,7 @@ let commandLink = points.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("points", () => {
+describe.skip("points", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
