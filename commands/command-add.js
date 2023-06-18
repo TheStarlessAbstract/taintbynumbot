@@ -19,10 +19,10 @@ let commandResponse = () => {
 			) {
 				if (config.argument.startsWith("!")) {
 					let commandName = helper
-						.getCommandArgumentKey(config, 0)
+						.getCommandArgumentKey(config.argument, 0)
 						.slice(1)
 						.toLowerCase();
-					let commandText = helper.getCommandArgumentKey(config, 1);
+					let commandText = helper.getCommandArgumentKey(config.argument, 1);
 
 					if (commandText) {
 						const { response } = commands.list[commandName]?.getCommand() || {};
