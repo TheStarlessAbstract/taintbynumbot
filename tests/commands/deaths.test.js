@@ -4,15 +4,13 @@ const db = require("../../bot-mongoose.js");
 
 const deaths = require("../../commands/deaths");
 
-let isBroadcaster;
-let isMod = false;
 let userInfo = {};
 let argument = undefined;
 let commandLink = deaths.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("deaths", () => {
+describe("deaths", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
@@ -21,15 +19,16 @@ describe.skip("deaths", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo = {
+			isBroadcaster: false,
+		};
+
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -38,15 +37,16 @@ describe.skip("deaths", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo = {
+			isBroadcaster: false,
+		};
+
 		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -55,15 +55,16 @@ describe.skip("deaths", () => {
 		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
+
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -72,15 +73,16 @@ describe.skip("deaths", () => {
 		expect(result[0]).toMatch(/Starless has died a grand total of/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
+
 		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
