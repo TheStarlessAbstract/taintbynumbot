@@ -17,8 +17,8 @@ class Helper {
 		return userInfo.isBroadcaster;
 	}
 
-	isValidModeratorOrStreamer(config) {
-		return config.isBroadcaster || config.isModUp || config.isMod;
+	isValidModeratorOrStreamer(userInfo) {
+		return userInfo.isBroadcaster || userInfo.isMod;
 	}
 
 	isVersionActive(array, index) {
