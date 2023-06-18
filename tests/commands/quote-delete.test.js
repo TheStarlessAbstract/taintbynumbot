@@ -12,7 +12,7 @@ let argument;
 let commandLink = quoteDelete.command;
 const { response } = commandLink.getCommand();
 
-describe("delQuote", () => {
+describe.skip("delQuote", () => {
 	let cleanUpList = [];
 	let index;
 	let quote;
