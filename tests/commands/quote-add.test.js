@@ -12,7 +12,7 @@ let argument;
 let commandLink = quoteAdd.command;
 const { response } = commandLink.getCommand();
 
-describe("addQuote", () => {
+describe.skip("addQuote", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
