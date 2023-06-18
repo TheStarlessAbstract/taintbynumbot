@@ -14,12 +14,12 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				if (config.argument.startsWith("!")) {
 					let commandName = helper
-						.getCommandArgumentKey(config, 0)
+						.getCommandArgumentKey(config.argument, 0)
 						.slice(1)
 						.toLowerCase();
 
@@ -74,7 +74,7 @@ let commandResponse = () => {
 						"To delete a Command, command name must start with '!' - !delComm ![command name]"
 					);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!delComm Command is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To delete a Command, use !delComm ![command name]");
