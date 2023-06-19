@@ -19,10 +19,8 @@ let commandResponse = () => {
 			let currentTime = new Date();
 
 			if (
-				helper.isValuePresentAndString(config.userInfo.userId) &&
-				helper.isValuePresentAndString(config.userInfo.displayName) &&
-				(helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
-					helper.isStreamer(config))
+				helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
+				helper.isStreamer(config.userInfo)
 			) {
 				drinkBitch.setTimer(currentTime);
 				let user = await LoyaltyPoint.findOne({
