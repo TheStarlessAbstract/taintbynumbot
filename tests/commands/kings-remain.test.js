@@ -5,15 +5,12 @@ const db = require("../../bot-mongoose.js");
 const kingsRemain = require("../../commands/kings-remain");
 const kings = require("../../commands/kings");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
-let argument;
 let commandLink = kingsRemain.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("kingsRemain", () => {
+describe("kingsRemain", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
@@ -25,15 +22,15 @@ describe.skip("kingsRemain", () => {
 
 	test("IsBroadcasterFalse_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
+		userInfo = {
+			isBroadcaster: false,
+		};
 		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
@@ -42,52 +39,49 @@ describe.skip("kingsRemain", () => {
 
 	test("IsBroadcasterFalse_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo = {
+			isBroadcaster: false,
+		};
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
-		expect(result[0]).toBe("Cards remaing in this game 52");
+		expect(result[0]).toBe("Cards remaining in this game 52");
 	});
 
 	test("IsBroadcasterTrue_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
-		expect(result[0]).toBe("Cards remaing in this game 52");
+		expect(result[0]).toBeUndefined();
 	});
 
 	test("IsBroadcasterTrue_AndCooldownElapsed_ShouldReturnPositiveString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
-		expect(result[0]).toBe("Cards remaing in this game 52");
+		expect(result[0]).toBe("Cards remaining in this game 52");
 	});
 });
