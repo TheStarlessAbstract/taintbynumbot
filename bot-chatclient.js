@@ -233,57 +233,33 @@ async function getApiClient() {
 function userInfoCheck(userInfo) {
 	let check = true;
 
-	if (!(userInfo.badgeInfo instanceof Map)) {
-		check == false;
-	}
-
-	if (!(userInfo.badges instanceof Map)) {
-		check == false;
-	}
-
-	if (typeof userInfo.color != "string") {
-		check == false;
-	}
-
-	if (typeof userInfo.displayName != "string") {
-		check == false;
-	}
-
-	if (typeof userInfo.isArtist != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.isBroadcaster != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.isFounder != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.isMod != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.isSubscriber != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.isVip != "boolean") {
-		check == false;
-	}
-
-	if (typeof userInfo.userId != "string") {
-		check == false;
-	}
-
-	if (typeof userInfo.userName != "string") {
-		check == false;
-	}
-
-	if (typeof userInfo.userType != "string") {
-		check == false;
-	}
+	check = !(userInfo.badgeInfo instanceof Map)
+		? false
+		: !(userInfo.badges instanceof Map)
+		? false
+		: typeof userInfo.color != "string"
+		? false
+		: typeof userInfo.displayName != "string"
+		? false
+		: typeof userInfo.isArtist != "boolean"
+		? false
+		: typeof userInfo.isBroadcaster != "boolean"
+		? false
+		: typeof userInfo.isFounder != "boolean"
+		? false
+		: typeof userInfo.isMod != "boolean"
+		? false
+		: typeof userInfo.isSubscriber != "boolean"
+		? false
+		: typeof userInfo.isVip != "boolean"
+		? false
+		: typeof userInfo.userId != "string"
+		? false
+		: typeof userInfo.userName != "string"
+		? false
+		: typeof userInfo.userType != "string"
+		? false
+		: true;
 
 	return check;
 }

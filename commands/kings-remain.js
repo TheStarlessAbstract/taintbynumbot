@@ -5,11 +5,11 @@ const kings = require("./kings");
 
 const helper = new Helper();
 
-let cooldown = 5000;
+let cooldown = 3000;
 
 let commandResponse = () => {
 	return {
-		response: async (config) => {
+		response: async () => {
 			let result = [];
 			let currentTime = new Date();
 
@@ -18,8 +18,7 @@ let commandResponse = () => {
 					currentTime,
 					kingsRemain.getTimer(),
 					kingsRemain.getCooldown()
-				) ||
-				helper.isStreamer(config)
+				)
 			) {
 				kingsRemain.setTimer(currentTime);
 

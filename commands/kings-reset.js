@@ -10,7 +10,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (helper.isValidModeratorOrStreamer(config)) {
+			if (helper.isValidModeratorOrStreamer(config.userInfo)) {
 				await kings.resetKings();
 				let cardsToDraw = kings.getCardsToDraw();
 
