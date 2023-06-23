@@ -28,19 +28,17 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			try {
-				let stream = await getStreamData();
-				if (stream == null) {
-					result.push(
-						"Starless doesn't seem to be streaming right now, come back later"
-					);
-				} else {
-					let currentTime = new Date();
-					if (
-						helper.isCooldownPassed(currentTime, f.timer, cooldown) ||
-						helper.isStreamer(config)
-					) {
-						timer = currentTime;
+			let currentTime = new Date();
+			if (helper.isCooldownPassed(currentTime, f.timer, cooldown)) {
+				timer = currentTime;
+
+				try {
+					let stream = await getStreamData(config);
+					if (stream == null) {
+						result.push(
+							"Starless doesn't seem to be streaming right now, come back later"
+						);
+					} else {
 						let gameName = stream.gameName;
 						let streamDate = stream.startDate;
 						let timeSinceStartAsMs = Math.floor(currentTime - streamDate);
@@ -162,12 +160,12 @@ let commandResponse = () => {
 							}
 						}
 					}
+				} catch (err) {
+					console.log(err);
+					result.push(
+						"Twitch says no, and Starless should really sort this out some time after stream"
+					);
 				}
-			} catch (err) {
-				console.log(err);
-				result.push(
-					"Twitch says no, and Starless should really sort this out some time after stream"
-				);
 			}
 
 			return result;
@@ -236,8 +234,15 @@ async function updateAudioLinks() {
 	audioLinks = await AudioLink.find({ command: "f" }).exec();
 }
 
-async function getStreamData() {
-	return await apiClient.streams.getStreamByUserId(twitchId);
+async function getStreamData(config) {
+	let streamData;
+
+	if (helper.isTest() && config?.testOptions) {
+		streamData = config.testOptions;
+	} else {
+		streamData = await apiClient.streams.getStreamByUserId(twitchId);
+	}
+	return streamData;
 }
 
 async function setAllTimeStreamDeaths() {
