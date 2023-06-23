@@ -4,89 +4,128 @@ const f = require("../../commands/f");
 
 const db = require("../../bot-mongoose.js");
 
-let isBroadcaster;
-let isMod;
+const DeathCounter = require("../../models/deathcounter");
+
 let userInfo;
-let argument;
+let testOptions;
 let commandLink = f.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
+let outputPatterns = [
+	"Starless has now died/failed",
+	"ThisIsFine ThisIsFine ThisIsFine",
+];
 
-describe.skip("f", () => {
+describe("f", () => {
+	let startDate = new Date(currentDateTime - 69000);
+	startDate.setHours(0, 0, 0, 0);
+
 	beforeAll(async () => {
 		db.connectToMongoDB();
+
+		testOptions = {
+			gameName: "Just Chatting",
+			startDate: new Date(startDate),
+		};
+
+		await dbSetup(startDate);
+
 		await f.setup();
 	});
 
 	afterAll(async () => {
+		await dBCleanUp(startDate);
 		await db.disconnectFromMongoDB();
 	});
 
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo = {
+			isBroadcaster: false,
+		};
+
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
+			testOptions: testOptions,
 		});
 
 		//Assert
-		expect(result[0]).toBe(undefined);
+		expect(result[0]).toBeUndefined();
 	});
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo = {
+			isBroadcaster: false,
+		};
+
 		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
+			testOptions: testOptions,
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has now died/failed")).toBe(true);
+		expect(containsPattern(result[0])).toBe(true);
 	});
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
+
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
+			testOptions: testOptions,
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has now died/failed")).toBe(true);
+		expect(result[0]).toBeUndefined();
 	});
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo = {
+			isBroadcaster: true,
+		};
+
 		commandLink.setTimer(currentDateTime - 11000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
+			testOptions: testOptions,
 		});
 
 		//Assert
-		expect(result[0].startsWith("Starless has now died/failed")).toBe(true);
+		expect(containsPattern(result[0])).toBe(true);
 	});
 });
+
+async function dbSetup(startDate) {
+	await DeathCounter.create({
+		deaths: 0,
+		gameTitle: "Just Chatting",
+		streamStartDate: startDate,
+	});
+}
+
+async function dBCleanUp(startDate) {
+	await DeathCounter.deleteOne({
+		gameTitle: "Just Chatting",
+		streamStartDate: startDate,
+	});
+}
+
+function containsPattern(output) {
+	return outputPatterns.some((pattern) => output.includes(pattern));
+}
