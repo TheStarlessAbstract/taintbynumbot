@@ -29,8 +29,8 @@ let commandResponse = () => {
 			let result = [];
 
 			let currentTime = new Date();
-			if (helper.isCooldownPassed(currentTime, f.timer, cooldown)) {
-				timer = currentTime;
+			if (helper.isCooldownPassed(currentTime, f.getTimer(), f.getCooldown())) {
+				f.setTimer(currentTime);
 
 				try {
 					let stream = await getStreamData(config);
