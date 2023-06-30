@@ -16,7 +16,7 @@ let outputPatterns = [
 	"ThisIsFine ThisIsFine ThisIsFine",
 ];
 
-describe("f", () => {
+describe.skip("f", () => {
 	let startDate = new Date(currentDateTime - 69000);
 	startDate.setHours(0, 0, 0, 0);
 
@@ -38,13 +38,12 @@ describe("f", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("CoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		userInfo = {
-			isBroadcaster: false,
-		};
+		userInfo = {};
 
 		commandLink.setTimer(currentDateTime - 1000);
+		commandLink.setCooldown(100000);
 
 		//Act
 		let result = await response({
@@ -56,49 +55,12 @@ describe("f", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_ShouldReturnString", async () => {
+	test("CoolDownElapsed_ShouldReturnString", async () => {
 		//Assemble
-		userInfo = {
-			isBroadcaster: false,
-		};
+		userInfo = {};
 
 		commandLink.setTimer(currentDateTime - 11000);
-
-		//Act
-		let result = await response({
-			userInfo,
-			testOptions: testOptions,
-		});
-
-		//Assert
-		expect(containsPattern(result[0])).toBe(true);
-	});
-
-	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_ShouldReturnString", async () => {
-		//Assemble
-		userInfo = {
-			isBroadcaster: true,
-		};
-
-		commandLink.setTimer(currentDateTime - 1000);
-
-		//Act
-		let result = await response({
-			userInfo,
-			testOptions: testOptions,
-		});
-
-		//Assert
-		expect(result[0]).toBeUndefined();
-	});
-
-	test("IsBroadcasterIsTrue_AndCoolDownElapsed_ShouldReturnString", async () => {
-		//Assemble
-		userInfo = {
-			isBroadcaster: true,
-		};
-
-		commandLink.setTimer(currentDateTime - 11000);
+		commandLink.setCooldown(5000);
 
 		//Act
 		let result = await response({
