@@ -73,7 +73,7 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		// const userInfo = msg.userInfo;
 
-		if (userInfoCheck(msg.userInfo)) {
+		if (!userInfoCheck(msg.userInfo)) {
 			const userInfo = msg.userInfo;
 			let [command, argument] = message.slice(1).split(/\s(.+)/);
 			let commandLink = commands.list[command.toLowerCase()];
@@ -231,37 +231,66 @@ async function getApiClient() {
 }
 
 function userInfoCheck(userInfo) {
-	let check = true;
+	const stringTypes = [
+		userInfo.color,
+		userInfo.displayName,
+		userInfo.userId,
+		userInfo.userName,
+		userInfo.userType,
+	];
 
-	check = !(userInfo.badgeInfo instanceof Map)
-		? false
-		: !(userInfo.badges instanceof Map)
-		? false
-		: typeof userInfo.color != "string"
-		? false
-		: typeof userInfo.displayName != "string"
-		? false
-		: typeof userInfo.isArtist != "boolean"
-		? false
-		: typeof userInfo.isBroadcaster != "boolean"
-		? false
-		: typeof userInfo.isFounder != "boolean"
-		? false
-		: typeof userInfo.isMod != "boolean"
-		? false
-		: typeof userInfo.isSubscriber != "boolean"
-		? false
-		: typeof userInfo.isVip != "boolean"
-		? false
-		: typeof userInfo.userId != "string"
-		? false
-		: typeof userInfo.userName != "string"
-		? false
-		: typeof userInfo.userType != "string"
-		? false
-		: true;
+	const stringUndefinedTypes = [userInfo.color, userInfo.userType];
+
+	const boolTypes = [
+		userInfo.isArtist,
+		userInfo.isBroadcaster,
+		userInfo.isFounder,
+		userInfo.isMod,
+		userInfo.isSubscriber,
+		userInfo.isVip,
+	];
+	const mappedTypes = [userInfo.badgeInfo, userInfo.badges];
+
+	let issuesRaised = false;
+
+	stringTypes.forEach(confirmStrings);
+
+	if (!issuesRaised) {
+		stringUndefinedTypes.forEach(confirmStringsOrUndefined);
+	}
+
+	if (!issuesRaised) {
+		boolTypes.forEach(confirmBools);
+	}
+	if (!issuesRaised) {
+		mappedTypes.forEach(confirmMaps);
+	}
 
 	return check;
+}
+
+function confirmStrings(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "string";
+	}
+}
+
+function confirmStringsOrUndefined(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "string" || item == undefined;
+	}
+}
+
+function confirmBools(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "boolean";
+	}
+}
+
+function confirmMaps(item) {
+	if (!issuesRaised) {
+		issuesRaised = item instanceof Map;
+	}
 }
 
 exports.setup = setup;
