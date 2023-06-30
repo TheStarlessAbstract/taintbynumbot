@@ -22,106 +22,104 @@ let commandResponse = () => {
 			let result = [];
 			currentTime = new Date();
 
-			console.log(config);
-
-			console.log(
-				"Is cooldown passed " +
-					helper.isCooldownPassed(
-						currentTime,
-						kings.getTimer(),
-						kings.getCooldown()
-					)
-			);
-
 			if (
 				helper.isCooldownPassed(
 					currentTime,
 					kings.getTimer(),
 					kings.getCooldown()
 				) ||
-				helper.isStreamer(config)
+				helper.isStreamer(config.userInfo)
 			) {
 				kings.setTimer(currentTime);
 				let redeemUser = config.userInfo.displayName;
+				let canDraw = false;
 
-				let user = await LoyaltyPoint.findOne({
-					userId: config.userInfo.userId,
-				});
+				if (!helper.isStreamer(config.userInfo)) {
+					let user = await LoyaltyPoint.findOne({
+						userId: config.userInfo.userId,
+					});
 
-				if (user) {
-					if (user.points >= cost) {
-						user.points -= cost;
+					if (user) {
+						if (user.points >= cost) {
+							user.points -= cost;
 
-						await user.save();
+							await user.save();
 
-						let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
-						let cardDrawn;
-
-						if (drawFrom.length == 1) {
-							cardDrawn = drawFrom[0];
-							resetKings();
+							canDraw = true;
 						} else {
-							cardDrawn =
-								drawFrom[
-									helper.getRandomBetweenInclusiveMax(0, drawFrom.length - 1)
-								];
-						}
-
-						cardDrawn.isDrawn = true;
-
-						if (cardDrawn.value == "King") {
-							kingsCount++;
-						}
-
-						result.push(
-							"@" +
-								redeemUser +
-								" You have drawn the " +
-								cardDrawn.value +
-								" of " +
-								cardDrawn.suit
-						);
-
-						if (kingsCount != 4) {
 							result.push(
-								"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
-							);
-
-							switch (cardDrawn.value) {
-								case "Queen":
-									playAudio("Check out the big brain Brad");
-									break;
-								case "Ace":
-									playAudio("The Greater Good");
-									break;
-							}
-
-							if (cardDrawn.bonusJager) {
-								playAudio("jager");
-								result.push(
-									"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
-								);
-							}
-						} else {
-							kingsCount = 0;
-
-							result.push(
-								"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
+								"@" +
+									config.userInfo.displayName +
+									" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
 							);
 						}
 					} else {
 						result.push(
 							"@" +
 								config.userInfo.displayName +
-								" You lack the points to draw a card, hang about stream if you have nothing better to do, eventually you may be able to find a Jagerbomb"
+								" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
 						);
 					}
 				} else {
+					canDraw = true;
+				}
+
+				if (canDraw) {
+					let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
+					let cardDrawn;
+
+					if (drawFrom.length == 1) {
+						cardDrawn = drawFrom[0];
+						deal();
+					} else {
+						cardDrawn =
+							drawFrom[
+								helper.getRandomBetweenInclusiveMax(0, drawFrom.length - 1)
+							];
+					}
+
+					cardDrawn.isDrawn = true;
+
+					if (cardDrawn.value == "King") {
+						kingsCount++;
+					}
+
 					result.push(
 						"@" +
-							config.userInfo.displayName +
-							" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
+							redeemUser +
+							" You have drawn the " +
+							cardDrawn.value +
+							" of " +
+							cardDrawn.suit
 					);
+
+					if (kingsCount != 4) {
+						result.push(
+							"Rule: " + cardDrawn.rule + " || " + cardDrawn.explanation
+						);
+
+						switch (cardDrawn.value) {
+							case "Queen":
+								playAudio("Check out the big brain Brad");
+								break;
+							case "Ace":
+								playAudio("The Greater Good");
+								break;
+						}
+
+						if (cardDrawn.bonusJager) {
+							playAudio("jager");
+							result.push(
+								"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
+							);
+						}
+					} else {
+						kingsCount = 0;
+
+						result.push(
+							"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
+						);
+					}
 				}
 			}
 			return result;
@@ -154,6 +152,22 @@ async function resetKings() {
 	}
 }
 
+function deal() {
+	let jagerBonusCards = [];
+	cardsToDraw.forEach((card, index) => {
+		card.isDrawn = false;
+		card.bonusJager = false;
+
+		if (card.explanation === "Hydrate you fools") {
+			jagerBonusCards.push(index);
+		}
+	});
+
+	jagerBonus(jagerBonusCards);
+
+	shuffle();
+}
+
 async function initializeGameState() {
 	let deck = await createDeck();
 
@@ -176,12 +190,7 @@ async function initializeGameState() {
 		});
 	}
 
-	let index;
-	for (let i = 0; i < 2; i++) {
-		index = helper.getRandomBetweenExclusiveMax(0, jagerBonusCards.length);
-		cardsToDraw[jagerBonusCards[index]].bonusJager = true;
-		jagerBonusCards.splice(index, 1);
-	}
+	jagerBonus(jagerBonusCards);
 
 	shuffle();
 }
@@ -197,6 +206,15 @@ function shuffle() {
 		t = cardsToDraw[m];
 		cardsToDraw[m] = cardsToDraw[i];
 		cardsToDraw[i] = t;
+	}
+}
+
+function jagerBonus(bonusArray) {
+	let index;
+	for (let i = 0; i < 2; i++) {
+		index = helper.getRandomBetweenExclusiveMax(0, bonusArray.length);
+		cardsToDraw[bonusArray[index]].bonusJager = true;
+		bonusArray.splice(index, 1);
 	}
 }
 
@@ -229,11 +247,11 @@ function getCardsToDraw() {
 }
 
 async function playAudio(audioName) {
-	let audioLink = await AudioLink.findOne({
-		name: audioName,
-	});
-
 	if (!helper.isTest()) {
+		let audioLink = await AudioLink.findOne({
+			name: audioName,
+		});
+
 		audio.play(audioLink.url);
 	}
 }
