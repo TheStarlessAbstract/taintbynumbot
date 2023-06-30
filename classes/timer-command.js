@@ -3,12 +3,12 @@ const BaseCommand = require("../classes/base-command");
 class TimerCommand extends BaseCommand {
 	constructor(getCommand, versions, cooldown) {
 		super(getCommand, versions);
-		this.COOLDOWN = cooldown;
+		this.cooldown = cooldown;
 		this.timer = 0;
 	}
 
 	getCooldown() {
-		return this.COOLDOWN;
+		return this.cooldown;
 	}
 
 	getTimer() {
@@ -16,7 +16,7 @@ class TimerCommand extends BaseCommand {
 	}
 
 	setCooldown(cooldown) {
-		this.COOLDOWN = cooldown;
+		this.cooldown = cooldown;
 	}
 
 	setTimer(timer) {
