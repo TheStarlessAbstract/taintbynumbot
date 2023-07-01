@@ -12,7 +12,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				let argumentText = config.argument;
@@ -34,7 +34,7 @@ let commandResponse = () => {
 				} else {
 					result.push("This Message has already been added");
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!addMessage command is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To add a Message use !addMessage [message output]");
