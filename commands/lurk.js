@@ -10,7 +10,7 @@ let commandResponse = () => {
 
 			if (
 				helper.isValuePresentAndString(config.userInfo.displayName) &&
-				!helper.isStreamer(config)
+				!helper.isStreamer(config.userInfo)
 			) {
 				result.push(
 					"@" +
