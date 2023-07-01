@@ -3,18 +3,15 @@ const db = require("../../bot-mongoose.js");
 const Title = require("../../models/title");
 const modAbuse = require("../../commands/modabuse");
 
-let isBroadcaster;
-let isMod = false;
 let userInfo;
 let argument;
 let commandLink = modAbuse.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("modAbuse", () => {
+describe("modAbuse", () => {
 	let index;
 	let title;
-
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -39,16 +36,14 @@ describe.skip("modAbuse", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -57,9 +52,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 		commandLink.setVersionActive(0);
@@ -68,8 +63,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -78,9 +71,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 		commandLink.setVersionActive(1);
@@ -90,8 +83,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -102,9 +93,9 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = "modAbuseTest1304";
 		commandLink.setVersionActive(1);
@@ -112,8 +103,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -122,9 +111,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBe("To get a random ModAbuse, use !modAbuse");
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 
@@ -133,8 +122,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -145,9 +132,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1306";
 		argument = index;
@@ -157,8 +144,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -167,9 +152,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1306/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1307";
 		title = "This is modAbuseTest1307";
@@ -182,8 +167,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -194,9 +177,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1307. /);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		title = "This is modAbuseTest1308";
 		argument = title;
@@ -206,8 +189,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -218,9 +199,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 
@@ -229,8 +210,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -241,9 +220,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1310";
 		argument = index;
@@ -253,8 +232,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -265,9 +242,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		title = "This is modAbuseTest1311";
 		argument = title;
@@ -277,8 +254,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -289,9 +264,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1312";
 		title = "This is modAbuseTest1312";
@@ -304,8 +279,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -315,9 +288,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1312. This is modAbuseTest1312/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = {};
 
@@ -326,8 +299,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -338,17 +309,15 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1314";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -357,9 +326,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1314/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1315";
 		title = "This is modAbuseTest1315";
@@ -369,8 +338,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -381,9 +348,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1315. This is modAbuseTest1315/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1316";
 		title = "This is modAbuseTest1316";
@@ -391,8 +358,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -403,9 +368,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1317";
 		title = "This is modAbuseTest1317";
@@ -415,8 +380,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -427,9 +390,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1317. This is modAbuseTest1317/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 		commandLink.setVersionActive(0);
@@ -438,8 +401,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -448,9 +409,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 		commandLink.setVersionActive(1);
@@ -460,8 +421,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -472,9 +431,9 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = "modAbuse1320";
 		commandLink.setVersionActive(1);
@@ -482,8 +441,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -492,9 +449,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBe("To get a random ModAbuse, use !modAbuse");
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 
@@ -503,8 +460,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -515,9 +470,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1322";
 		argument = index;
@@ -527,8 +482,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -537,9 +490,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1322/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1323";
 		title = "This is modAbuseTest1323";
@@ -552,8 +505,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -564,9 +515,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1323. /);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		title = "This is modAbuseTest1325";
 		argument = title;
@@ -576,8 +527,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -588,9 +537,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 
@@ -599,8 +548,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -611,9 +558,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1326";
 		argument = index;
@@ -623,8 +570,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -635,9 +580,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		title = "This is modAbuseTest1327";
 		argument = title;
@@ -647,8 +592,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -659,9 +602,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1328";
 		title = "This is modAbuseTest1328";
@@ -674,8 +617,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -685,9 +626,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBe("1328. This is modAbuseTest1328");
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 
@@ -696,8 +637,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -708,17 +647,15 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1330";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -727,9 +664,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1330/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1331";
 		title = "This is modAbuseTest1331";
@@ -739,8 +676,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -751,9 +686,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1331. This is modAbuseTest1331/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1332";
 		title = "This is modAbuseTest1332";
@@ -761,8 +696,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -773,9 +706,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1333";
 		title = "This is modAbuseTest1333";
@@ -785,8 +718,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -797,9 +728,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1333. This is modAbuseTest1333/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 		commandLink.setVersionActive(0);
@@ -808,8 +739,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -818,9 +747,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 		commandLink.setVersionActive(1);
@@ -830,8 +759,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -842,9 +769,9 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = "modAbuse1336";
 		commandLink.setVersionActive(1);
@@ -852,8 +779,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -862,9 +787,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toBe("To get a random ModAbuse, use !modAbuse");
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 
@@ -873,8 +798,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -885,9 +808,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1337";
 		argument = index;
@@ -897,8 +820,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -907,9 +828,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1337/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1338";
 		title = "This is modAbuseTest1338";
@@ -922,8 +843,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -934,9 +853,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1338. /);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndStringIsText_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		title = "This is modAbuseTest1338";
 		argument = title;
@@ -946,8 +865,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -958,9 +875,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 
@@ -969,8 +886,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -981,9 +896,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1340";
 		argument = index;
@@ -993,8 +908,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1005,9 +918,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		title = "This is modAbuseTest1341";
 		argument = title;
@@ -1017,8 +930,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1029,9 +940,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1342";
 		title = "This is modAbuseTest1342";
@@ -1044,8 +955,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1055,9 +964,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1342. This is modAbuseTest1342/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 
@@ -1066,8 +975,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1078,17 +985,15 @@ describe.skip("modAbuse", () => {
 		expect(expectedValues).toContain(result);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1344";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1097,9 +1002,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/There is no ModAbuse 1344/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1344";
 		title = "This is modAbuseTest1344";
@@ -1109,8 +1014,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1121,9 +1024,9 @@ describe.skip("modAbuse", () => {
 		expect(result[0]).toMatch(/1344. This is modAbuseTest1344/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1345";
 		title = "This is modAbuseTest1345";
@@ -1131,8 +1034,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1143,9 +1044,9 @@ describe.skip("modAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndStringIsText_AndModAbuseTextInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1346";
 		title = "This is modAbuseTest1346";
@@ -1155,8 +1056,6 @@ describe.skip("modAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
