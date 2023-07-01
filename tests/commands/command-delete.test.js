@@ -15,7 +15,7 @@ const { response } = commandLink.getCommand();
 let commandName;
 let commandText;
 
-describe.skip("delComm", () => {
+describe("delComm", () => {
 	let commandNames = [];
 	beforeAll(async () => {
 		db.connectToMongoDB();
