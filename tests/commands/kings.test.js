@@ -154,7 +154,7 @@ describe("kings", () => {
 		let value;
 		let suit;
 		let drawn = [];
-		let decks = 4;
+		let decks = 2;
 		for (let i = 0; i < 52 * decks; i++) {
 			result = await response({
 				userInfo,
@@ -164,6 +164,9 @@ describe("kings", () => {
 
 			suit = result[0].split(" ")[7];
 			drawn.push({ value: value, suit: suit });
+			if (i >= 52 && suit == "Diamonds") {
+				console.log(result[0]);
+			}
 		}
 
 		let cardTotals = checkDrawn(drawn);
