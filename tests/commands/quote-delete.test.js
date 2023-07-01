@@ -5,14 +5,12 @@ const Quote = require("../../models/quote");
 
 const quoteDelete = require("../../commands/quote-delete");
 
-let isBroadcaster;
-let isMod;
 let userInfo = {};
 let argument;
 let commandLink = quoteDelete.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("delQuote", () => {
+describe("delQuote", () => {
 	let cleanUpList = [];
 	let index;
 	let quote;
@@ -26,16 +24,14 @@ describe.skip("delQuote", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -44,16 +40,14 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toMatch(/!delQuote is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -62,16 +56,14 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toBe("To delete a Quote, use !delQuote [quote number]");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "delQuote03";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -80,17 +72,15 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toBe("To delete a Quote, use !delQuote [quote number]");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndQuoteNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndQuoteNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		index = "1104";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -99,10 +89,10 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toMatch(/No Quote 1104 found/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndQuoteInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndQuoteInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		index = "1105";
 		quote = "This is test delQuote05";
 		argument = index;
@@ -111,8 +101,6 @@ describe.skip("delQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -123,16 +111,14 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toMatch(/Quote 1105 was: This is test delQuote05/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -141,16 +127,14 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toBe("To delete a Quote, use !delQuote [quote number]");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = "delQuote07";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -159,17 +143,15 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toBe("To delete a Quote, use !delQuote [quote number]");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndQuoteNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndQuoteNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		index = "1108";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -178,10 +160,10 @@ describe.skip("delQuote", () => {
 		expect(result[0]).toMatch(/No Quote 1108 found/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndQuoteInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndQuoteInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		index = "1109";
 		quote = "This is test delQuote09";
 		argument = index;
@@ -190,8 +172,6 @@ describe.skip("delQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
