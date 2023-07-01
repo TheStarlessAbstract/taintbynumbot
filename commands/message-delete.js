@@ -11,7 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				if (!isNaN(config.argument)) {
@@ -20,7 +20,7 @@ let commandResponse = () => {
 					let message = await Message.findOne({ index: index });
 					if (message) {
 						result.push("Message deleted - " + index + " was: " + message.text);
-						await message.remove();
+						await message.deleteOne();
 					} else {
 						result.push("No Message " + config.argument + " found");
 					}
@@ -29,7 +29,7 @@ let commandResponse = () => {
 						"!delMessage [index] - index is a number - !delMessage 69"
 					);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!delMessage is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To delete a Message use !delMessage [index]");
