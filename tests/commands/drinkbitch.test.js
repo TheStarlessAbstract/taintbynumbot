@@ -14,11 +14,11 @@ describe("drinkBitch", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await drinkBitch.updateAudioLinks();
-	});
+	}, 10000);
 
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
-	});
+	}, 10000);
 
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
