@@ -3,8 +3,6 @@ const db = require("../../bot-mongoose.js");
 const Title = require("../../models/title");
 const modAbuseEdit = require("../../commands/modabuse-edit");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let titleIndex;
@@ -13,9 +11,7 @@ let titleText;
 let commandLink = modAbuseEdit.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("editModAbuse", () => {
-	let title;
-
+describe("editModAbuse", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -32,16 +28,14 @@ describe.skip("editModAbuse", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -50,16 +44,14 @@ describe.skip("editModAbuse", () => {
 		expect(result[0]).toMatch(/!editModAbuse is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -70,17 +62,15 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotStartsWithModAbuseId_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNotStartsWithModAbuseId_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		titleIndex = "editModAbuse3";
 		argument = titleIndex;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -91,17 +81,15 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringNotHaveModAbuseText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringNotHaveModAbuseText_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		titleIndex = "1104";
 		argument = titleIndex;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -112,18 +100,16 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		titleIndex = "1105";
 		titleUpdatedText = "5This is editModAbuseTest";
 		argument = titleIndex + " " + titleUpdatedText;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -132,10 +118,10 @@ describe.skip("editModAbuse", () => {
 		expect(result[0]).toMatch(/No ModAbuse 1105 found/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		titleIndex = "1106";
 		titleText = "This is editModAbuseTest6";
 		titleUpdatedText = titleText;
@@ -145,8 +131,6 @@ describe.skip("editModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -158,10 +142,10 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextIsUnique_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		titleIndex = "1107";
 		titleText = "This is editModAbuseTest7";
 		titleUpdatedText = "7This is editModAbuseTest";
@@ -171,8 +155,6 @@ describe.skip("editModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -185,16 +167,14 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -205,17 +185,15 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotStartsWithModAbuseId_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringNotStartsWithModAbuseId_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		titleIndex = "editModAbuse9";
 		argument = titleIndex;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -226,17 +204,15 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringNotHaveModAbuseText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringNotHaveModAbuseText_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		titleIndex = "1110";
 		argument = titleIndex;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -247,18 +223,16 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		titleIndex = "1111";
 		titleUpdatedText = "11This is editModAbuseTest";
 		argument = titleIndex + " " + titleUpdatedText;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -267,10 +241,10 @@ describe.skip("editModAbuse", () => {
 		expect(result[0]).toMatch(/No ModAbuse 1111 found/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		titleIndex = "1112";
 		titleText = "This is editModAbuseTest12";
 		titleUpdatedText = titleText;
@@ -280,8 +254,6 @@ describe.skip("editModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -294,10 +266,10 @@ describe.skip("editModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithModAbuseId_AndStringHasModAbuseText_AndModAbuseIdInDatabase_AndModAbuseTextIsUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		titleIndex = "1113";
 		titleText = "This is editModAbuseTest13";
 		titleUpdatedText = "13This is editModAbuseTest";
@@ -307,8 +279,6 @@ describe.skip("editModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
