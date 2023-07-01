@@ -24,7 +24,7 @@ let commandResponse = () => {
 					points.getTimer(),
 					points.getCooldown()
 				) &&
-				!helper.isStreamer(config)
+				!helper.isStreamer(config.userInfo)
 			) {
 				points.setTimer(currentTime);
 
@@ -49,11 +49,11 @@ let commandResponse = () => {
 				}
 			} else if (
 				helper.isVersionActive(versions, 1) &&
-				helper.isStreamer(config) &&
+				helper.isStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let username = helper.getCommandArgumentKey(config, 0);
-				let newPoints = helper.getCommandArgumentKey(config, 1);
+				let username = helper.getCommandArgumentKey(config.argument, 0);
+				let newPoints = helper.getCommandArgumentKey(config.argument, 1);
 
 				if (
 					helper.isValuePresentAndString(username) &&
@@ -100,7 +100,7 @@ let commandResponse = () => {
 					);
 				}
 			} else if (
-				!helper.isStreamer(config) &&
+				!helper.isStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				result.push(
