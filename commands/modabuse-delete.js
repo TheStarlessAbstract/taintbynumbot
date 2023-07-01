@@ -11,16 +11,16 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let index = helper.getCommandArgumentKey(config, 0);
+				let index = helper.getCommandArgumentKey(config.argument, 0);
 
 				if (helper.isValuePresentAndNumber(index)) {
 					let title = await Title.findOne({ index: index });
 					if (title) {
 						result.push("ModAbuse  deleted - " + index + " was: " + title.text);
-						await title.remove();
+						await title.deleteOne();
 					} else {
 						result.push("No ModAbuse " + config.argument + " found");
 					}
@@ -29,7 +29,7 @@ let commandResponse = () => {
 						"!delModAbuse [index] - index is a number - !delModAbuse 69"
 					);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!delModAbuse is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To delete a ModAbuse, use !delModAbuse ![index]");
