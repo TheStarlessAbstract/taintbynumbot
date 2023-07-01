@@ -15,7 +15,7 @@ const { response } = commandLink.getCommand();
 let commandName;
 let commandText;
 
-describe.skip("addComm", () => {
+describe("addComm", () => {
 	let commandNames = [];
 
 	beforeAll(async () => {
