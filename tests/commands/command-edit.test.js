@@ -16,7 +16,7 @@ let commandName;
 let commandText;
 let editedCommandText;
 
-describe.skip("editComm", () => {
+describe("editComm", () => {
 	let commandNames = [];
 
 	beforeAll(async () => {
