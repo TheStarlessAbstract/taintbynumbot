@@ -3,14 +3,12 @@ const db = require("../../bot-mongoose.js");
 const Title = require("../../models/title");
 const modAbuseDelete = require("../../commands/modabuse-delete");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let commandLink = modAbuseDelete.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("delModAbuse", () => {
+describe("delModAbuse", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -27,16 +25,14 @@ describe.skip("delModAbuse", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -45,16 +41,14 @@ describe.skip("delModAbuse", () => {
 		expect(result[0]).toMatch(/!delModAbuse is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -63,16 +57,14 @@ describe.skip("delModAbuse", () => {
 		expect(result[0]).toBe("To delete a ModAbuse, use !delModAbuse ![index]");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "delAbuseTest3";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -83,16 +75,14 @@ describe.skip("delModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "1004";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -101,10 +91,10 @@ describe.skip("delModAbuse", () => {
 		expect(result[0]).toMatch(/No ModAbuse 1004 found/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		title = "This is delAbuseTest5";
 		argument = "1005";
 
@@ -112,8 +102,6 @@ describe.skip("delModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -126,16 +114,14 @@ describe.skip("delModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -144,16 +130,14 @@ describe.skip("delModAbuse", () => {
 		expect(result[0]).toBe("To delete a ModAbuse, use !delModAbuse ![index]");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = "delAbuseTest7";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -164,16 +148,14 @@ describe.skip("delModAbuse", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndModAbuseIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = "1008";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -182,10 +164,10 @@ describe.skip("delModAbuse", () => {
 		expect(result[0]).toMatch(/No ModAbuse 1008 found/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndModAbuseIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		title = "This is delAbuseTest9";
 		argument = "1009";
 
@@ -193,8 +175,6 @@ describe.skip("delModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
