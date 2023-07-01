@@ -10,7 +10,7 @@ let commandLink = kingsRemain.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("kingsRemain", () => {
+describe("kingsRemain", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
