@@ -7,14 +7,12 @@ const messageAdd = require("../../commands/message-add");
 
 const helper = new Helper();
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let commandLink = messageAdd.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("addMessage", () => {
+describe("addMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -30,15 +28,14 @@ describe.skip("addMessage", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -47,15 +44,14 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/!addMessage command is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -64,16 +60,14 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/To add a Message use !addMessage/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "This is addMessageTest3";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -84,18 +78,16 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This is addMessageTest3/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "This is addMessageTest4";
 
 		await dbSetup(argument);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -106,16 +98,14 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This Message has already been added/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
-		argument = {};
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -124,16 +114,14 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toBe("To add a Message use !addMessage [message output]");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsString_AndMessageNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = "This is addMessageTest6";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -144,18 +132,16 @@ describe.skip("addMessage", () => {
 		expect(result[0]).toMatch(/This is addMessageTest6/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsString_AndMessageInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		argument = "This is addMessageTest7";
 
 		await dbSetup(argument);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
