@@ -18,12 +18,12 @@ describe("delMessage", () => {
 			userId: 100612361,
 			displayName: "TheStarlessAbstract",
 		};
-	});
+	}, 10000);
 
 	afterAll(async () => {
 		await dBCleanUp(cleanUpList);
 		await db.disconnectFromMongoDB();
-	});
+	}, 10000);
 
 	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
