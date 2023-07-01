@@ -16,7 +16,7 @@ let outputPatterns = [
 	"ThisIsFine ThisIsFine ThisIsFine",
 ];
 
-describe.skip("f", () => {
+describe("f", () => {
 	let startDate = new Date(currentDateTime - 69000);
 	startDate.setHours(0, 0, 0, 0);
 
