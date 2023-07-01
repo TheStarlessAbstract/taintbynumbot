@@ -6,7 +6,7 @@ let userInfo = {};
 let commandLink = audioTimeout.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("audioTimeout", () => {
+describe("audioTimeout", () => {
 	beforeEach(() => {
 		userInfo = {};
 
