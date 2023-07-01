@@ -19,7 +19,7 @@ let commandResponse = () => {
 					quote.getTimer(),
 					quote.getCooldown()
 				) ||
-				helper.isStreamer(config)
+				helper.isStreamer(config.userInfo)
 			) {
 				let entries = [];
 				let index;
