@@ -13,11 +13,11 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				let index = helper.getCommandArgumentKey(config, 0);
-				let text = helper.getCommandArgumentKey(config, 1);
+				let index = helper.getCommandArgumentKey(config.argument, 0);
+				let text = helper.getCommandArgumentKey(config.argument, 1);
 
 				if (
 					helper.isValuePresentAndNumber(index) &&
@@ -54,7 +54,7 @@ let commandResponse = () => {
 						"To edit a Message, you must include the updated text - !editMessage [index] [updated text]"
 					);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!editMessage is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push(
