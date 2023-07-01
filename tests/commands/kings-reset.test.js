@@ -4,10 +4,7 @@ const db = require("../../bot-mongoose.js");
 
 const kingsReset = require("../../commands/kings-reset");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
-let argument;
 let commandLink = kingsReset.command;
 const { response } = commandLink.getCommand();
 
@@ -20,34 +17,32 @@ describe.skip("kingsReset", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = {
+			isBroadcaster: false,
+			isMod: true,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
@@ -56,17 +51,16 @@ describe.skip("kingsReset", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = {
+			isBroadcaster: true,
+			isMod: false,
+		};
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
-			argument,
 		});
 
 		//Assert
