@@ -5,15 +5,13 @@ const Quote = require("../../models/quote");
 
 const quote = require("../../commands/quote");
 
-let isBroadcaster;
-let isMod = false;
 let userInfo = {};
 let argument;
 let commandLink = quote.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("quote", () => {
+describe("quote", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -40,14 +38,12 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
-		argument = {};
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -58,17 +54,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 		commandLink.setVersionActive(2);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -79,7 +73,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = undefined;
 		commandLink.setVersionActive(1);
@@ -89,8 +83,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -104,7 +96,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentIsString_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = "quoteTest1304";
 		commandLink.setVersionActive(1);
@@ -112,8 +104,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -124,17 +114,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(2);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -145,7 +133,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1306";
 		title = "This is quoteTest1306";
@@ -156,8 +144,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -168,7 +154,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1307";
 		text = "This is quoteTest1307";
@@ -181,8 +167,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -195,17 +179,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -216,7 +198,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsNumber_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1310";
 		argument = index;
@@ -226,8 +208,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -238,7 +218,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		title = "This is quoteTest1311";
 		argument = title;
@@ -248,8 +228,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -260,7 +238,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1312";
 		text = "This is quoteTest1312";
@@ -273,8 +251,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -286,17 +262,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		const quotes = await Quote.find({ text: { $exists: true } }).lean();
 		const expectedValues = quotes.map((obj) => obj.text);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -309,15 +283,13 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1314";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -328,7 +300,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1315";
 		text = "This is quoteTest1315";
@@ -338,8 +310,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -352,16 +322,14 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1316";
 		text = "This is quoteTest1316";
-		argument = title;
+		argument = text;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -370,9 +338,9 @@ describe.skip("quote", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1317";
 		text = "This is quoteTest1317";
@@ -382,8 +350,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -396,17 +362,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
-		argument = {};
+		argument = undefined;
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 		commandLink.setVersionActive(2);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -417,7 +381,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 		commandLink.setVersionActive(1);
@@ -427,8 +391,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -441,7 +403,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionZeroActive_AndArgumentIsString_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = "quote1320";
 		commandLink.setVersionActive(1);
@@ -449,8 +411,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -461,7 +421,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		argument = undefined;
 
@@ -470,8 +430,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -482,7 +440,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1322";
 		text = "This is quoteTest1322";
@@ -493,8 +451,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -505,7 +461,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1323";
 		text = "This is quoteTest1323";
@@ -518,8 +474,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -532,7 +486,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsString_ShouldReturnUndefined", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		text = "This is quoteTest1325";
 		argument = text;
@@ -542,8 +496,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -554,17 +506,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
-		argument = {};
+		argument = undefined;
 
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -575,7 +525,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsNumber_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1326";
 		argument = index;
@@ -585,8 +535,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -597,7 +545,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		text = "This is quoteTest1327";
 		argument = text;
@@ -607,8 +555,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -619,7 +565,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1328";
 		text = "This is quoteTest1328";
@@ -632,8 +578,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -645,17 +589,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
-		argument = {};
+		argument = undefined;
 
 		const quotes = await Quote.find({ text: { $exists: true } }).lean();
 		const expectedValues = quotes.map((obj) => obj.text);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -668,15 +610,13 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1330";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -687,7 +627,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1331";
 		text = "This is quoteTest1331";
@@ -697,8 +637,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -711,7 +649,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1332";
 		text = "This is quoteTest1332";
@@ -719,8 +657,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -731,7 +667,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 1000);
 		index = "1333";
 		text = "This is quoteTest1333";
@@ -741,8 +677,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -755,17 +689,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 		commandLink.setVersionActive(2);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -776,9 +708,9 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 		commandLink.setVersionActive(1);
 		commandLink.setVersionActive(2);
 		const quotes = await Quote.find({ text: { $exists: true } }).lean();
@@ -786,8 +718,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -800,7 +730,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentIsString_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		argument = "quote1336";
 		commandLink.setVersionActive(1);
@@ -808,8 +738,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -820,17 +748,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(2);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -841,7 +767,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1337";
 		text = "This is quoteTest1337";
@@ -852,8 +778,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -864,7 +788,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1338";
 		text = "This is quoteTest1338";
@@ -877,8 +801,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -891,7 +813,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentIsString_AndStringIsString_ShouldReturnUndefined", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		text = "This is quoteTest1338";
 		argument = text;
@@ -901,8 +823,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -913,17 +833,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		commandLink.setVersionActive(0);
 		commandLink.setVersionActive(1);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -934,7 +852,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsNumber_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1340";
 		argument = index;
@@ -944,8 +862,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -956,7 +872,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		text = "This is quoteTest1341";
 		argument = text;
@@ -966,8 +882,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -978,7 +892,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionTwoActive_AndArgumentIsString_AndStringIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1342";
 		text = "This is quoteTest1342";
@@ -991,8 +905,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1004,17 +916,15 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = {};
+		argument = undefined;
 
 		const quotes = await Quote.find({ text: { $exists: true } }).lean();
 		const expectedValues = quotes.map((obj) => obj.text);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1027,15 +937,13 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1344";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1046,7 +954,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsNumber_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1344";
 		text = "This is quoteTest1344";
@@ -1056,8 +964,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1070,7 +976,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1345";
 		text = "This is quoteTest1345";
@@ -1078,8 +984,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -1090,7 +994,7 @@ describe.skip("quote", () => {
 
 	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentIsString_AndStringIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
+		userInfo.isBroadcaster = true;
 		commandLink.setTimer(currentDateTime - 31000);
 		index = "1346";
 		text = "This is quoteTest1346";
@@ -1100,8 +1004,6 @@ describe.skip("quote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
