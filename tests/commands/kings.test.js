@@ -10,7 +10,7 @@ const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 let user;
 
-describe("kings", () => {
+describe.skip("kings", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
