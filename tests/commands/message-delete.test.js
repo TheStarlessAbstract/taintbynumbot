@@ -4,14 +4,12 @@ const db = require("../../bot-mongoose.js");
 const Message = require("../../models/message");
 const messageDelete = require("../../commands/message-delete");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let commandLink = messageDelete.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("delMessage", () => {
+describe("delMessage", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -27,15 +25,14 @@ describe.skip("delMessage", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -44,16 +41,14 @@ describe.skip("delMessage", () => {
 		expect(result[0]).toMatch(/!delMessage is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -62,16 +57,14 @@ describe.skip("delMessage", () => {
 		expect(result[0]).toMatch(/To delete a Message use !delMessage/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "test 103";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -82,16 +75,14 @@ describe.skip("delMessage", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndMessageIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndMessageIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "104";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -100,18 +91,16 @@ describe.skip("delMessage", () => {
 		expect(result[0]).toBe("No Message 104 found");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringIsNumber_AndMessageIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringIsNumber_AndMessageIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		argument = "105";
 
 		await dbSetup(105, "This is a test message 105");
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -124,7 +113,7 @@ describe.skip("delMessage", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -142,7 +131,7 @@ describe.skip("delMessage", () => {
 		expect(result[0]).toMatch(/To delete a Message use !delMessage/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModIsFalse_AndArgumentString_AndStringNotNumber_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -162,7 +151,7 @@ describe.skip("delMessage", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringIsNumber_AndMessageIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndMessageIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
@@ -180,7 +169,7 @@ describe.skip("delMessage", () => {
 		expect(result[0]).toBe("No Message 108 found");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringIsNumber_AndMessageIdInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterTrue_AndIsModIsFalse_AndArgumentString_AndStringIsNumber_AndMessageIdInDatabase_ShouldReturnString", async () => {
 		//Assemble
 		isBroadcaster = true;
 		isMod = false;
