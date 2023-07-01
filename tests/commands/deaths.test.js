@@ -10,7 +10,7 @@ let commandLink = deaths.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("deaths", () => {
+describe("deaths", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
