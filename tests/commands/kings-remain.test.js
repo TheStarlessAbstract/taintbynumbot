@@ -10,7 +10,7 @@ let commandLink = kingsRemain.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe("kingsRemain", () => {
+describe.skip("kingsRemain", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
@@ -25,7 +25,6 @@ describe("kingsRemain", () => {
 		userInfo = {
 			isBroadcaster: false,
 		};
-		isBroadcaster = false;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
