@@ -5,14 +5,12 @@ const Quote = require("../../models/quote");
 
 const quoteEdit = require("../../commands/quote-edit");
 
-let isBroadcaster;
-let isMod;
 let userInfo = {};
 let argument;
 let commandLink = quoteEdit.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("editQuote", () => {
+describe("editQuote", () => {
 	let index;
 	let text;
 	let updatedText;
@@ -27,16 +25,13 @@ describe.skip("editQuote", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndIsModFalse_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo = { isBroadcaster: false, isMod: false };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -45,16 +40,13 @@ describe.skip("editQuote", () => {
 		expect(result[0]).toMatch(/!editQuote is for Mods only/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -65,16 +57,13 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringNotStartsWithQuoteId_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringNotStartsWithQuoteId_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = "editQuote3";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -85,17 +74,14 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringNotHaveQuoteText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringNotHaveQuoteText_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		index = "1204";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -106,18 +92,15 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		index = "1205";
 		updatedText = "5This is editQuoteTest";
 		argument = index + " " + updatedText;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -126,10 +109,9 @@ describe.skip("editQuote", () => {
 		expect(result[0]).toMatch(/No Quote 1205 found/);
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		index = "1206";
 		text = "This is editQuoteTest6";
 		updatedText = text;
@@ -139,8 +121,6 @@ describe.skip("editQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -151,10 +131,9 @@ describe.skip("editQuote", () => {
 		expect(result[0]).toBe("Quote 1206 already says: This is editQuoteTest6");
 	});
 
-	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextIsUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		index = "1207";
 		text = "This is editQuoteTest7";
 		updatedText = "7This is editQuoteTest";
@@ -164,8 +143,6 @@ describe.skip("editQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -179,16 +156,13 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -199,16 +173,13 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringNotStartsWithQuoteId_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringNotStartsWithQuoteId_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = "editQuote9";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -219,17 +190,14 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringNotHaveQuoteText_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringNotHaveQuoteText_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		index = "1210";
 		argument = index;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -240,18 +208,15 @@ describe.skip("editQuote", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		index = "1211";
 		updatedText = "11This is editQuoteTest";
 		argument = index + " " + updatedText;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -260,10 +225,9 @@ describe.skip("editQuote", () => {
 		expect(result[0]).toMatch(/No Quote 1211 found/);
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextNotUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextNotUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		index = "1212";
 		text = "This is editQuoteTest12";
 		updatedText = text;
@@ -273,8 +237,6 @@ describe.skip("editQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -285,10 +247,9 @@ describe.skip("editQuote", () => {
 		expect(result[0]).toBe("Quote 1212 already says: This is editQuoteTest12");
 	});
 
-	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextIsUnique_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringStartsWithQuoteId_AndStringHasQuoteText_AndQuoteIdInDatabase_AndQuoteTextIsUnique_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		index = "1213";
 		text = "This is editQuoteTest13";
 		updatedText = "13This is editQuoteTest";
@@ -298,8 +259,6 @@ describe.skip("editQuote", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
