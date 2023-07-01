@@ -13,7 +13,7 @@ let commandResponse = () => {
 		response: async (config) => {
 			let result = [];
 
-			if (helper.isValidModeratorOrStreamer(config)) {
+			if (helper.isValidModeratorOrStreamer(config.userInfo)) {
 				let title;
 
 				if (
@@ -21,7 +21,7 @@ let commandResponse = () => {
 					!helper.isValuePresentAndString(config.argument)
 				) {
 					let apiClient = await chatClient.getApiClient();
-					let channel = await apiClient.channels.getChannelInfo(twitchId);
+					let channel = await apiClient.channels.getChannelInfoById(twitchId);
 
 					if (channel == null) {
 						result.push(
