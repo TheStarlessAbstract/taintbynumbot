@@ -11,7 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				let quoteIndex = config.argument;
@@ -32,7 +32,7 @@ let commandResponse = () => {
 				} else {
 					result.push("To delete a Quote, use !delQuote [quote number]");
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!delQuote is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To delete a Quote, use !delQuote [quote number]");
