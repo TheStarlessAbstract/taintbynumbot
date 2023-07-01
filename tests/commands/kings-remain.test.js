@@ -14,11 +14,11 @@ describe("kingsRemain", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
-	});
+	}, 10000);
 
 	afterAll(async () => {
 		await db.disconnectFromMongoDB();
-	});
+	}, 10000);
 
 	test("IsBroadcasterFalse_AndCooldownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
