@@ -11,7 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				let quoteText = config.argument;
@@ -41,7 +41,7 @@ let commandResponse = () => {
 
 					result.push("Quote added: " + quoteText);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!addQuote is for Mods only");
 			} else if (!helper.isValuePresentAndString(config.argument)) {
 				result.push("To add a Quote use !addQuote [quote text]");
