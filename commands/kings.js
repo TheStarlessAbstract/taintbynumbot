@@ -65,10 +65,15 @@ let commandResponse = () => {
 				}
 
 				if (canDraw) {
-					let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
+					let indexCheck = "";
+					let drawFrom = cardsToDraw.filter((card, index) => {
+						indexCheck = index;
+						return card.isDrawn == false;
+					});
 					let cardDrawn;
 
 					if (drawFrom.length == 1) {
+						console.log("new deck");
 						cardDrawn = drawFrom[0];
 						deal();
 					} else {
@@ -153,6 +158,7 @@ async function resetKings() {
 }
 
 function deal() {
+	// console.log(checkDrawn(cardsToDraw));
 	let jagerBonusCards = [];
 	cardsToDraw.forEach((card, index) => {
 		card.isDrawn = false;
@@ -162,10 +168,12 @@ function deal() {
 			jagerBonusCards.push(index);
 		}
 	});
+	// console.log(checkDrawn(cardsToDraw));
 
 	jagerBonus(jagerBonusCards);
 
 	shuffle();
+	console.log(checkDrawn(cardsToDraw));
 }
 
 async function initializeGameState() {
@@ -348,6 +356,89 @@ async function saveKingsState() {
 function restoreGameState(gameState) {
 	cardsToDraw = gameState.cardsToDraw;
 	kingsCount = gameState.kingsCount;
+}
+
+function checkDrawn(drawn) {
+	let cards = {
+		clubs: 0,
+		diamonds: 0,
+		hearts: 0,
+		spades: 0,
+		two: 0,
+		three: 0,
+		four: 0,
+		five: 0,
+		six: 0,
+		seven: 0,
+		eight: 0,
+		nine: 0,
+		ten: 0,
+		jack: 0,
+		queen: 0,
+		king: 0,
+		ace: 0,
+	};
+
+	drawn.forEach((card) => {
+		switch (card.suit) {
+			case "Clubs":
+				cards.clubs++;
+				break;
+			case "Diamonds":
+				cards.diamonds++;
+				break;
+			case "Hearts":
+				cards.hearts++;
+				break;
+			case "Spades":
+				cards.spades++;
+				break;
+		}
+
+		switch (card.value) {
+			case "2":
+				cards.two++;
+				break;
+			case "3":
+				cards.three++;
+				break;
+			case "4":
+				cards.four++;
+				break;
+			case "5":
+				cards.five++;
+				break;
+			case "6":
+				cards.six++;
+				break;
+			case "7":
+				cards.seven++;
+				break;
+			case "8":
+				cards.eight++;
+				break;
+			case "9":
+				cards.nine++;
+				break;
+			case "10":
+				cards.ten++;
+				break;
+			case "Jack":
+				cards.jack++;
+				break;
+			case "Queen":
+				cards.queen++;
+				break;
+			case "King":
+				cards.king++;
+				break;
+			case "Ace":
+				cards.ace++;
+				break;
+		}
+	});
+
+	return cards;
 }
 
 exports.command = kings;
