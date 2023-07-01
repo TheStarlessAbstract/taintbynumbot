@@ -4,15 +4,13 @@ const db = require("../../bot-mongoose.js");
 const points = require("../../commands/points");
 const LoyaltyPoint = require("../../models/loyaltypoint");
 
-let isBroadcaster;
-let isModUp;
-let userInfo;
+let userInfo = {};
 let argument;
 let commandLink = points.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("points", () => {
+describe("points", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
@@ -29,9 +27,9 @@ describe.skip("points", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
+		userInfo.isBroadcaster = false;
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -40,8 +38,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -50,10 +46,9 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 12826, displayName: "Twitch" };
+		userInfo = { isBroadcaster: false, userId: 12826, displayName: "Twitch" };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -61,8 +56,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -71,10 +64,13 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@Twitch I hate to say it,/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		userInfo = {
+			isBroadcaster: false,
+			userId: 676625589,
+			displayName: "design_by_rose",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -89,8 +85,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -99,10 +93,13 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@design_by_rose has 69000 Tainty Points/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionZeroActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		userInfo = {
+			isBroadcaster: false,
+			userId: 676625589,
+			displayName: "design_by_rose",
+		};
 		argument = "@design_by_rose 2000";
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -110,8 +107,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -122,10 +117,9 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 12826, displayName: "Twitch" };
+		userInfo = { isBroadcaster: false, userId: 12826, displayName: "Twitch" };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -133,8 +127,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -143,10 +135,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		userInfo = {
+			isBroadcaster: false,
+			userId: 676625589,
+			displayName: "design_by_rose",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -154,8 +149,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -166,17 +159,14 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 12826, displayName: "Twitch" };
+		userInfo = { isBroadcaster: false, userId: 12826, displayName: "Twitch" };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -185,10 +175,13 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@Twitch I hate to say it,/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_AndUserInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		userInfo = {
+			isBroadcaster: false,
+			userId: 676625589,
+			displayName: "design_by_rose",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -201,8 +194,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -211,17 +202,18 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@design_by_rose has 69000 Tainty Points/);
 	});
 
-	test("IsBroadcasterFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_ShouldReturnString", async () => {
+	test("IsBroadcasterIsFalse_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		userInfo = { userId: 676625589, displayName: "design_by_rose" };
+		userInfo = {
+			isBroadcaster: false,
+			userId: 676625589,
+			displayName: "design_by_rose",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -232,10 +224,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -244,8 +239,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -254,10 +247,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionZeroActive_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionZeroActive_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -265,8 +261,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -275,10 +269,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -286,8 +283,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -296,10 +291,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "2000 a";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -307,8 +305,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -319,10 +315,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@a 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -330,8 +329,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -340,10 +337,13 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@twitch 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -351,8 +351,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -363,10 +361,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -374,8 +375,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -386,17 +385,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -405,17 +405,18 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "2000 a";
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -426,17 +427,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@a 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -445,17 +447,18 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@twitch 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -466,17 +469,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -487,10 +491,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownNotElapsed_AndNoVersionsActive_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -499,8 +506,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -509,10 +514,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionZeroActive_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionZeroActive_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -520,8 +528,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -530,10 +536,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -541,8 +550,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -551,10 +558,13 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "2000 a";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -562,8 +572,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -574,10 +582,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownNotElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@a 420";
 		commandLink.setTimer(currentDateTime - 1000);
 
@@ -585,8 +596,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -595,10 +604,13 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@twitch 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -606,8 +618,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -618,10 +628,13 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndVersionOneActive_AndArgumentString_AndValidArgument_AndIsTwitchUser_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
@@ -629,8 +642,6 @@ describe.skip("points", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -641,17 +652,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -660,17 +672,18 @@ describe.skip("points", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndNotValidArgument_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "2000 a";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -681,17 +694,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndNotTwitchUser_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@a 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -700,17 +714,18 @@ describe.skip("points", () => {
 		expect(result[0]).toMatch(/@TheStarlessAbstract no user found called a/);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@twitch 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
@@ -721,17 +736,18 @@ describe.skip("points", () => {
 		);
 	});
 
-	test("IsBroadcasterTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndCoolDownElapsed_AndAllVersionsActive_AndArgumentString_AndValidArgument_AndTwitchUser_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		userInfo = { userId: 100612361, displayName: "TheStarlessAbstract" };
+		userInfo = {
+			isBroadcaster: true,
+			userId: 100612361,
+			displayName: "TheStarlessAbstract",
+		};
 		argument = "@design_by_rose 420";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isModUp,
 			userInfo,
 			argument,
 		});
