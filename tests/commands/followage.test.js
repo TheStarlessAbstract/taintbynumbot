@@ -9,7 +9,7 @@ let userInfo;
 let commandLink = followage.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("followage", () => {
+describe("followage", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
