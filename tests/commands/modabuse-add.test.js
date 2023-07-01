@@ -9,14 +9,12 @@ const helper = new Helper();
 
 let twitchId = process.env.TWITCH_USER_ID;
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let commandLink = modAbuseAdd.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("addModAbuse", () => {
+describe("addModAbuse", () => {
 	jest.setTimeout(6000);
 	let apiClient;
 	let currentTitle;
@@ -27,7 +25,7 @@ describe.skip("addModAbuse", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		apiClient = await pubSubClient.getApiClient();
-		let channel = await apiClient.channels.getChannelInfo(twitchId);
+		let channel = await apiClient.channels.getChannelInfoById(twitchId);
 		currentTitle = channel.title;
 
 		userInfo = {
@@ -46,14 +44,12 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
-		argument = {};
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = false;
+		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -64,10 +60,10 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsUndefined_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		title = "This is modAbuseTest2";
-		argument = {};
+		argument = undefined;
 
 		await apiClient.channels.updateChannelInfo(twitchId, {
 			title: title,
@@ -75,8 +71,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -88,10 +82,10 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsUndefined_AndInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		title = "This is modAbuseTest3";
-		argument = {};
+		argument = undefined;
 
 		await dbSetup(title);
 		await apiClient.channels.updateChannelInfo(twitchId, {
@@ -100,8 +94,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -114,15 +106,13 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		title = "This is modAbuseTest4";
 		argument = title;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -135,8 +125,8 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo.isBroadcaster = false;
+		userInfo.isMod = true;
 		title = "This is modAbuseTest5";
 		argument = title;
 
@@ -144,8 +134,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -158,10 +146,10 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsUndefined_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		title = "This is modAbuseTest6";
-		argument = {};
+		argument = undefined;
 
 		await apiClient.channels.updateChannelInfo(twitchId, {
 			title: title,
@@ -169,8 +157,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -182,8 +168,8 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsUndefined_AndInDatabase_ShouldReturnString", async () => {
 		//Assemblej
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		title = "This is modAbuseTest7";
 		argument = {};
 
@@ -194,8 +180,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -208,15 +192,13 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		title = "This is modAbuseTest8";
 		argument = title;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -229,8 +211,8 @@ describe.skip("addModAbuse", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo.isBroadcaster = true;
+		userInfo.isMod = false;
 		title = "This is modAbuseTest9";
 		argument = title;
 
@@ -238,8 +220,6 @@ describe.skip("addModAbuse", () => {
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
