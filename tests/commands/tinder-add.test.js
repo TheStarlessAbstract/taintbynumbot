@@ -5,14 +5,12 @@ const Tinder = require("../../models/tinder");
 
 const tinderAdd = require("../../commands/tinder-add");
 
-let isBroadcaster;
-let isMod;
-let userInfo = {};
+let userInfo;
 let argument;
 let commandLink = tinderAdd.command;
 const { response } = commandLink.getCommand();
 
-describe.skip("addTinder", () => {
+describe("addTinder", () => {
 	let cleanUpList = [];
 
 	beforeAll(async () => {
@@ -26,14 +24,11 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterFalse_AndAndIsModFalse_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo = { isBroadcaster: false, isMod: false };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -44,14 +39,11 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -62,14 +54,11 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = "This is test addTinder3";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -82,16 +71,13 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterFalse_AndIsModTrue_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = "This is test addTinder4";
 
 		await dbSetup(1004, argument);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -104,14 +90,11 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -122,14 +105,11 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndNotInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = "This is test addTinder6";
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -142,16 +122,13 @@ describe.skip("addTinder", () => {
 
 	test("IsBroadcasterTrue_AndIsModFalse_AndArgumentIsString_AndInDatabase_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = "This is test addTinder7";
 
 		await dbSetup(1007, argument);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
