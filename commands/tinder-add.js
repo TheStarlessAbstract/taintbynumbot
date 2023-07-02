@@ -11,7 +11,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				let tinderText = config.argument;
@@ -40,7 +40,7 @@ let commandResponse = () => {
 
 					result.push("New Tinder bio added: " + tinderText);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!addTinder is for Mods only");
 			} else if (!config.argument) {
 				result.push("To add a Tinder bio use !addTinder [tinder bio]");
