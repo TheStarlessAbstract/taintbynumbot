@@ -19,10 +19,10 @@ let commandResponse = () => {
 						title: config.argument,
 					});
 
-					result.push(["Title has been set to " + config.argument]);
+					result.push("Title has been set to " + config.argument);
 				}
 			} else if (!config.isModUp) {
-				result.push(["!title command is for Mods only"]);
+				result.push("!title command is for Mods only");
 			}
 
 			return result;
