@@ -1,7 +1,7 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const chatClient = require("../bot-chatclient");
+const pubSubClient = require("../bot-pubsubclient");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
@@ -25,13 +25,14 @@ let commandResponse = () => {
 			) {
 				title.setTimer(currentTime);
 				let apiClient;
+				let channel;
 
 				if (
 					helper.isVersionActive(versions, 0) &&
 					!helper.isValuePresentAndString(config.argument)
 				) {
-					apiClient = await chatClient.getApiClient();
-					let channel = await apiClient.channels.getChannelInfoById(twitchId);
+					apiClient = await pubSubClient.getApiClient();
+					channel = await apiClient.channels.getChannelInfoById(twitchId);
 
 					if (channel == null) {
 						result.push(
@@ -42,22 +43,31 @@ let commandResponse = () => {
 					result.push("The curent title is: " + channel.title);
 				} else if (
 					helper.isVersionActive(versions, 1) &&
-					helper.isValuePresentAndString(config.argument)
+					helper.isValuePresentAndString(config.argument) &&
+					helper.isValidModeratorOrStreamer(config.userInfo)
 				) {
-					if (isValidModeratorOrStreamer(config.userInfo)) {
-						apiClient = chatClient.getApiClient();
+					apiClient = await pubSubClient.getApiClient();
 
+					try {
 						await apiClient.channels.updateChannelInfo(twitchId, {
 							title: config.argument,
 						});
-
-						result.push("Title has been set to " + config.argument);
-					} else if (!isValidModeratorOrStreamer(config.userInfo)) {
-						result.push("Only mods can change the title");
+					} catch (e) {
+						if (e.body.includes("banned words")) {
+							result.push(
+								"Twitch says you have used a no-no word - Title not updated"
+							);
+						} else {
+							result.push(
+								"Twitch has not updated the title for reasons - Try again later"
+							);
+						}
+						return result;
 					}
+
+					result.push("Title has been set to " + config.argument);
 				}
 			}
-
 			return result;
 		},
 	};
@@ -79,6 +89,5 @@ let versions = [
 ];
 
 const title = new TimerCommand(commandResponse, versions, cooldown);
-title.setTimer(currentTime);
 
 exports.command = title;
