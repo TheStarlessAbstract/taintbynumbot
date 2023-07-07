@@ -47,12 +47,6 @@ describe("title", () => {
 		await db.disconnectFromMongoDB();
 	});
 
-	//broacaster
-	//mod
-	//coooldown - get title, not mod
-	//version
-	//argument
-
 	test("IsBroadcasterIsFalse_AndIsModIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		userInfo.isBroadcaster = false;
@@ -197,8 +191,6 @@ describe("title", () => {
 		expect(result[0]).toBeUndefined();
 	});
 
-	///////
-
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		userInfo.isBroadcaster = false;
@@ -342,8 +334,6 @@ describe("title", () => {
 		//Assert
 		expect(result[0]).toBe("Title has been set to " + argument);
 	});
-
-	////////
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
