@@ -16,7 +16,7 @@ let commandResponse = () => {
 			let streamed;
 
 			if (
-				helper.isValidModeratorOrStreamer(config) &&
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isCooldownPassed(currentTime, so.timer, cooldown)
 			) {
 				if (helper.isValuePresentAndString(config.argument)) {
@@ -33,7 +33,7 @@ let commandResponse = () => {
 					if (!user) {
 						result.push("Couldn't find a user by the name of " + username);
 					} else {
-						stream = await apiClient.channels.getChannelInfo(user.id);
+						stream = await apiClient.channels.getChannelInfoById(user.id);
 
 						if (stream.gameName != "") {
 							streamed = ", they last streamed " + stream.gameName;
@@ -55,7 +55,7 @@ let commandResponse = () => {
 						"You got to include a username to shoutout someone: !so @buhhsbot"
 					);
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config)) {
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
 				result.push("!so is for Mods only");
 			}
 

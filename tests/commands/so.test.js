@@ -3,15 +3,13 @@ require("dotenv").config();
 const db = require("../../bot-mongoose.js");
 const so = require("../../commands/so");
 
-let isBroadcaster;
-let isMod;
 let userInfo;
 let argument;
 let commandLink = so.command;
 const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 
-describe.skip("so", () => {
+describe("so", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 	});
@@ -22,14 +20,11 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = false;
+		userInfo = { isBroadcaster: false, isMod: false };
 		argument = undefined;
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -40,15 +35,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -59,15 +51,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -80,15 +69,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentIsString_AndNotValidUsername_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = "@a";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -99,15 +85,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndCoolDownElapsed_AndArgumentIsString_AndValidUsername_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = false;
-		isMod = true;
+		userInfo = { isBroadcaster: false, isMod: true };
 		argument = "@design_by_rose";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -118,15 +101,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownNotElapsed_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 1000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -137,15 +117,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentUndefined_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = undefined;
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -158,15 +135,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentIsString_AndNotValidUsername__ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = "@a";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});
@@ -177,15 +151,12 @@ describe.skip("so", () => {
 
 	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndCoolDownElapsed_AndArgumentIsString_AndValidUsername__ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
-		isMod = false;
+		userInfo = { isBroadcaster: true, isMod: false };
 		argument = "@design_by_rose";
 		commandLink.setTimer(currentDateTime - 6000);
 
 		//Act
 		let result = await response({
-			isBroadcaster,
-			isMod,
 			userInfo,
 			argument,
 		});

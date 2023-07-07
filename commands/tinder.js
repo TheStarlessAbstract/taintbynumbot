@@ -19,7 +19,7 @@ let commandResponse = () => {
 					tinder.getTimer(),
 					tinder.getCooldown()
 				) ||
-				helper.isStreamer(config)
+				helper.isStreamer(config.userInfo)
 			) {
 				let entries = [];
 				let index;
