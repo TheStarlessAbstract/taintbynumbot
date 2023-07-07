@@ -32,7 +32,7 @@ describe("title", () => {
 	});
 
 	beforeEach(async () => {
-		for (let i = 0; i < 2; i++) {
+		for (let i = 0; i < commandLink.getVersions().length; i++) {
 			if (!commandLink.getVersionActivity(i)) {
 				commandLink.setVersionActive(i);
 			}
