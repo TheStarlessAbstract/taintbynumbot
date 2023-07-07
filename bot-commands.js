@@ -107,7 +107,7 @@ const commands = {
 	so: so.command,
 	steam: steam.command,
 	tinderquote: tinder.command,
-	// title: title.command,
+	title: title.command,
 };
 
 async function setup() {
