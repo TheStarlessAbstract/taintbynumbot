@@ -27,6 +27,7 @@ let intervalMessages;
 let messageCount = 0;
 let timedMessagesInterval;
 let token;
+let issuesRaised;
 
 async function setup() {
 	token = await Token.findOne({ name: "chatClient" });
@@ -251,7 +252,7 @@ function userInfoCheck(userInfo) {
 	];
 	const mappedTypes = [userInfo.badgeInfo, userInfo.badges];
 
-	let issuesRaised = false;
+	issuesRaised = false;
 
 	stringTypes.forEach(confirmStrings);
 
@@ -262,11 +263,12 @@ function userInfoCheck(userInfo) {
 	if (!issuesRaised) {
 		boolTypes.forEach(confirmBools);
 	}
+
 	if (!issuesRaised) {
 		mappedTypes.forEach(confirmMaps);
 	}
 
-	return check;
+	return issuesRaised;
 }
 
 function confirmStrings(item) {
@@ -289,7 +291,7 @@ function confirmBools(item) {
 
 function confirmMaps(item) {
 	if (!issuesRaised) {
-		issuesRaised = item instanceof Map;
+		issuesRaised = !(item instanceof Map);
 	}
 }
 
