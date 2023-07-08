@@ -27,97 +27,92 @@ let commandResponse = () => {
 				steamNextGame.setTimer(currentTime);
 
 				let steamUsername = config.argument;
-
 				let steamUserId;
-				let userFoundFlag;
 
 				try {
 					steamUserId = await steamApi.resolve(
 						"https://steamcommunity.com/id/" + steamUsername
 					);
-					userFoundFlag = true;
 				} catch (e) {
 					if (e.message == "No match") {
-						userFoundFlag = false;
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" Username not found, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL"
+						);
+					} else if (e.message == "Invalid format") {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								"Steam says your URL is an invalid format, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL"
+						);
+					}
+					return result;
+				}
+
+				let steamUserGames;
+				try {
+					steamUserGames = await steamApi.getUserOwnedGames(steamUserId);
+				} catch (e) {
+					if (e.message == "No games found") {
+						result.push(
+							"@" +
+								config.userInfo.displayName +
+								" Your Steam Profile or Game Details are set to private. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public"
+						);
+					}
+					return result;
+				}
+
+				if (steamUserGames.length > 100) {
+					steamUserGames = gameRandomiser(steamUserGames);
+				}
+
+				let selectGames = [];
+				let gamesNotPublic = [];
+
+				for (let i = 0; i < steamUserGames.length; i++) {
+					try {
+						if (await userAchievements(steamUserId, steamUserGames[i])) {
+							selectGames.push(steamUserGames[i].name);
+						}
+					} catch (e) {
+						if (e instanceof Error) {
+							if (e.message.includes("Requested app has no stats")) {
+							} else {
+								gamesNotPublic.push(steamUserGames[i].name);
+							}
+						} else {
+							console.log(e);
+						}
 					}
 				}
 
-				if (userFoundFlag) {
-					let steamUserGames;
-					try {
-						steamUserGames = await steamApi.getUserOwnedGames(steamUserId);
-					} catch (e) {
-						if (e.message == "No games found") {
-							result.push(
-								"@" +
-									config.userInfo.displayName +
-									" Your Steam Profile or Game Details are set to private. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public"
-							);
-							steamUserGames = [];
-						}
-					}
-
-					if (steamUserGames.length > 0) {
-						if (steamUserGames.length > 100) {
-							steamUserGames = gameRandomiser(steamUserGames);
-						}
-
-						let selectGames = [];
-						let gamesNotPublic = [];
-
-						for (let i = 0; i < steamUserGames.length; i++) {
-							try {
-								if (await userAchievements(steamUserId, steamUserGames[i])) {
-									selectGames.push(steamUserGames[i].name);
-								}
-							} catch (e) {
-								if (e instanceof Error) {
-									if (e.message.includes("Requested app has no stats")) {
-									} else {
-										gamesNotPublic.push(steamUserGames[i].name);
-									}
-								} else {
-									console.log(e);
-								}
-							}
-						}
-
-						if (steamUserGames.length == gamesNotPublic.length) {
-							result.push(
-								"@" +
-									config.userInfo.displayName +
-									" Your Steam Profile or Game Details are set to private. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public"
-							);
-						} else if (selectGames.length > 0) {
-							let index = helper.getRandomBetweenExclusiveMax(
-								0,
-								selectGames.length
-							);
-
-							result.push(
-								"@" +
-									config.userInfo.displayName +
-									" You should play " +
-									selectGames[index] +
-									" next"
-							);
-						} else {
-							result.push(
-								"@" +
-									config.userInfo.displayName +
-									" No games with 0% achievments"
-							);
-						}
-					}
-				} else {
+				if (steamUserGames.length == gamesNotPublic.length) {
 					result.push(
 						"@" +
 							config.userInfo.displayName +
-							" Username not found, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL"
+							" Your Steam Profile or Game Details are set to private. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public"
+					);
+				} else if (selectGames.length > 0) {
+					let index = helper.getRandomBetweenExclusiveMax(
+						0,
+						selectGames.length
+					);
+
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" You should play " +
+							selectGames[index] +
+							" next"
+					);
+				} else {
+					result.push(
+						"@" + config.userInfo.displayName + " No games with 0% achievments"
 					);
 				}
 			}
-
 			return result;
 		},
 	};
@@ -133,8 +128,6 @@ let versions = [
 ];
 
 const steamNextGame = new TimerCommand(commandResponse, versions, cooldown);
-
-steamNextGame.setTimer(currentTime - steamNextGame.getCooldown());
 
 async function userAchievements(steamUserId, steamGame) {
 	let userGameAchievments = await steamApi.getUserAchievements(
