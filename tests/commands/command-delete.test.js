@@ -209,7 +209,7 @@ describe("delComm", () => {
 		);
 	});
 
-	test("IsBroadcasterIsFalse_AndIsModIsTrue_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
+	test("IsBroadcasterIsTrue_AndIsModIsFalse_AndArgumentString_AndStringHasPrefix_AndStringHasNoCommandName_ShouldReturnString", async () => {
 		//Assemble
 		argument = "!";
 		userInfo = {
