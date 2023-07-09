@@ -135,15 +135,15 @@ async function userAchievements(steamUserId, steamGame) {
 		steamGame.appID
 	);
 	let totalGameAchievments = userGameAchievments.achievements.length;
-	let userTotalGameAchievements = 0;
+	let userCompletedGameAchievements = 0;
 
 	for (let j = 0; j < totalGameAchievments; j++) {
 		if (userGameAchievments.achievements[j].achieved) {
-			userTotalGameAchievements += 1;
+			userCompletedGameAchievements += 1;
 		}
 	}
 
-	return userTotalGameAchievements < 1 ? true : false;
+	return userCompletedGameAchievements < 1 ? true : false;
 }
 
 function gameRandomiser(gameArray) {
