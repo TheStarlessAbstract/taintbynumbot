@@ -4,7 +4,7 @@ const chatClient = require("./bot-chatclient");
 const pubnub = require("./bot-pubnub");
 const pubSubClient = require("./bot-pubsubclient");
 const discord = require("./bot-discord");
-const kings = require("./commands/kings");
+const gamebuilder = require("./gamebuilder");
 const db = require("./bot-mongoose.js");
 
 init();
@@ -29,10 +29,10 @@ function setupSignalHandlers() {
 
 async function handleSignal(signal) {
 	if (signal === "SIGTERM") {
-		await kings.saveKingsState();
+		await gamebuilder.saveKingsState();
 		process.exit(0);
 	} else if (signal === "SIGINT") {
-		await kings.saveKingsState();
+		await gamebuilder.saveKingsState();
 		process.exit(0);
 	}
 }
