@@ -10,7 +10,7 @@ const { response } = commandLink.getCommand();
 let currentDateTime = new Date();
 let user;
 
-describe.skip("kings", () => {
+describe("kings", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
 		await kings.resetKings();
@@ -128,16 +128,10 @@ describe.skip("kings", () => {
 		};
 		commandLink.setTimer(currentDateTime - 6000);
 
-		user.points = 0;
-		await user.save();
-
 		//Act
 		let result = await response({
 			userInfo,
 		});
-
-		user.points = 69000;
-		await user.save();
 
 		//Assert
 		expect(result[0]).toMatch(/You have drawn the/);
@@ -154,15 +148,15 @@ describe.skip("kings", () => {
 		let value;
 		let suit;
 		let drawn = [];
-		let decks = 2;
+		let decks = 5;
 		for (let i = 0; i < 52 * decks; i++) {
 			result = await response({
 				userInfo,
 			});
 
 			value = result[0].split(" ")[5];
-
 			suit = result[0].split(" ")[7];
+
 			drawn.push({ value: value, suit: suit });
 			if (i >= 52 && suit == "Diamonds") {
 				console.log(result[0]);
