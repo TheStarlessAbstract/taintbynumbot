@@ -1,11 +1,10 @@
 const audio = require("../bot-audio");
+const gameBuilder = require("../bot-gamebuilder");
 
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
 const AudioLink = require("../models/audiolink");
-const Deck = require("../models/deck");
-const KingsSaveState = require("../models/kingssavestate");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
 const helper = new Helper();
@@ -65,17 +64,12 @@ let commandResponse = () => {
 				}
 
 				if (canDraw) {
-					let indexCheck = "";
-					let drawFrom = cardsToDraw.filter((card, index) => {
-						indexCheck = index;
-						return card.isDrawn == false;
-					});
+					let drawFrom = cardsToDraw.filter((card) => card.isDrawn == false);
 					let cardDrawn;
 
 					if (drawFrom.length == 1) {
-						console.log("new deck");
 						cardDrawn = drawFrom[0];
-						deal();
+						await resetKings();
 					} else {
 						cardDrawn =
 							drawFrom[
@@ -127,6 +121,7 @@ let commandResponse = () => {
 					}
 				}
 			}
+
 			return result;
 		},
 	};
@@ -144,114 +139,9 @@ let versions = [
 
 const kings = new TimerCommand(commandResponse, versions, cooldown);
 
-kings.setTimer(currentTime);
-
 async function resetKings() {
-	let gameState = await KingsSaveState.findOne({});
-
-	if (!gameState) {
-		await initializeGameState();
-	} else {
-		restoreGameState(gameState);
-		await KingsSaveState.deleteOne({ _id: gameState._id });
-	}
-}
-
-function deal() {
-	// console.log(checkDrawn(cardsToDraw));
-	let jagerBonusCards = [];
-	cardsToDraw.forEach((card, index) => {
-		card.isDrawn = false;
-		card.bonusJager = false;
-
-		if (card.explanation === "Hydrate you fools") {
-			jagerBonusCards.push(index);
-		}
-	});
-	// console.log(checkDrawn(cardsToDraw));
-
-	jagerBonus(jagerBonusCards);
-
-	shuffle();
-	console.log(checkDrawn(cardsToDraw));
-}
-
-async function initializeGameState() {
-	let deck = await createDeck();
-
-	cardsToDraw = [];
-	kingsCount = 0;
-
-	let jagerBonusCards = [];
-	for (let i = 0; i < deck.cards.length; i++) {
-		if (deck.cards[i].explanation === "Hydrate you fools") {
-			jagerBonusCards.push(i);
-		}
-
-		cardsToDraw.push({
-			suit: deck.cards[i].suit,
-			value: deck.cards[i].value,
-			rule: deck.cards[i].rule,
-			explanation: deck.cards[i].explanation,
-			isDrawn: false,
-			bonusJager: false,
-		});
-	}
-
-	jagerBonus(jagerBonusCards);
-
-	shuffle();
-}
-
-function shuffle() {
-	let m = cardsToDraw.length,
-		t,
-		i;
-
-	while (m) {
-		i = Math.floor(Math.random() * m--);
-
-		t = cardsToDraw[m];
-		cardsToDraw[m] = cardsToDraw[i];
-		cardsToDraw[i] = t;
-	}
-}
-
-function jagerBonus(bonusArray) {
-	let index;
-	for (let i = 0; i < 2; i++) {
-		index = helper.getRandomBetweenExclusiveMax(0, bonusArray.length);
-		cardsToDraw[bonusArray[index]].bonusJager = true;
-		bonusArray.splice(index, 1);
-	}
-}
-
-async function createDeck() {
-	let deck = await Deck.findOne({});
-
-	if (!deck) {
-		let suits = getSuits();
-		let values = getValues();
-		deck = new Deck({ cards: [] });
-		suits.forEach((suit) => {
-			values.forEach((value) => {
-				deck.cards.push({
-					suit: suit,
-					value: value.value,
-					rule: value.rule,
-					explanation: value.explanation,
-				});
-			});
-		});
-
-		await deck.save();
-	}
-
-	return deck;
-}
-
-function getCardsToDraw() {
-	return cardsToDraw;
+	let gameState = await gameBuilder.getGameState();
+	restoreGameState(gameState);
 }
 
 async function playAudio(audioName) {
@@ -264,184 +154,10 @@ async function playAudio(audioName) {
 	}
 }
 
-function getSuits() {
-	return ["Clubs", "Diamonds", "Hearts", "Spades"];
-}
-
-function getValues() {
-	return [
-		{
-			value: "Ace",
-			rule: "Musketeers: All for one and one for all",
-			explanation: "Everybody drinks",
-		},
-		{
-			value: "2",
-			rule: "Fuck you!",
-			explanation:
-				"Choose someone to take a drink...but fuck Starless mainly amirite?!",
-		},
-		{
-			value: "3",
-			rule: "Fuck me!",
-			explanation: "You drew this card, so you drink!",
-		},
-		{
-			value: "4",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "5",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "6",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "7",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "8",
-			rule: "Pick a mate!",
-			explanation:
-				"You and a person of your choosing takes a drink...tell us why it is Starless",
-		},
-		{
-			value: "9",
-			rule: "Bust a rhyme!",
-			explanation:
-				"Quickfire rhyming between you and Starless, whoever takes too long has to drink",
-		},
-		{
-			value: "10",
-			rule: "Make a rule!",
-			explanation:
-				"You get to make a rule for Starless, and maybe chat. Rule last until the next 10 is drawn, stream ends, or Starless gets tired of it",
-		},
-		{
-			value: "Jack",
-			rule: "This card doesn't really have a rule",
-			explanation: "Hydrate you fools",
-		},
-		{
-			value: "Queen",
-			rule: "Ask a question!",
-			explanation:
-				"Ask Starless a general knowledge question. Starless gets it right, you drink, Starless gets it wrong, Starless drinks",
-		},
-		{
-			value: "King",
-			rule: "Kings!",
-			explanation:
-				"The first three Kings drawn mean nothing, Starless may offer a sympathy drink. Draw the fourth King, and Starless owes a 'Chug, but not a chug, because Starless can't chug'",
-		},
-	];
-}
-
-async function saveKingsState() {
-	let saveState = new KingsSaveState({
-		cardsToDraw: cardsToDraw,
-		kingsCount: kingsCount,
-	});
-
-	await saveState.save();
-}
-
 function restoreGameState(gameState) {
 	cardsToDraw = gameState.cardsToDraw;
 	kingsCount = gameState.kingsCount;
 }
 
-function checkDrawn(drawn) {
-	let cards = {
-		clubs: 0,
-		diamonds: 0,
-		hearts: 0,
-		spades: 0,
-		two: 0,
-		three: 0,
-		four: 0,
-		five: 0,
-		six: 0,
-		seven: 0,
-		eight: 0,
-		nine: 0,
-		ten: 0,
-		jack: 0,
-		queen: 0,
-		king: 0,
-		ace: 0,
-	};
-
-	drawn.forEach((card) => {
-		switch (card.suit) {
-			case "Clubs":
-				cards.clubs++;
-				break;
-			case "Diamonds":
-				cards.diamonds++;
-				break;
-			case "Hearts":
-				cards.hearts++;
-				break;
-			case "Spades":
-				cards.spades++;
-				break;
-		}
-
-		switch (card.value) {
-			case "2":
-				cards.two++;
-				break;
-			case "3":
-				cards.three++;
-				break;
-			case "4":
-				cards.four++;
-				break;
-			case "5":
-				cards.five++;
-				break;
-			case "6":
-				cards.six++;
-				break;
-			case "7":
-				cards.seven++;
-				break;
-			case "8":
-				cards.eight++;
-				break;
-			case "9":
-				cards.nine++;
-				break;
-			case "10":
-				cards.ten++;
-				break;
-			case "Jack":
-				cards.jack++;
-				break;
-			case "Queen":
-				cards.queen++;
-				break;
-			case "King":
-				cards.king++;
-				break;
-			case "Ace":
-				cards.ace++;
-				break;
-		}
-	});
-
-	return cards;
-}
-
 exports.command = kings;
-exports.getCardsToDraw = getCardsToDraw;
-exports.saveKingsState = saveKingsState;
 exports.resetKings = resetKings;
