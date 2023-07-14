@@ -30,6 +30,8 @@ const quote = require("./commands/quote");
 const so = require("./commands/so");
 const steam = require("./commands/steam");
 const tinderAdd = require("./commands/tinder-add");
+const tinderDelete = require("./commands/tinder-delete");
+const tinderEdit = require("./commands/tinder-edit");
 const tinder = require("./commands/tinder");
 const title = require("./commands/title");
 
@@ -90,11 +92,13 @@ const commands = {
 	delmessage: messagesDelete.command,
 	delmodabuse: modAbuseDelete.command,
 	delquote: quoteDelete.command,
+	deltinder: tinderDelete.command,
 	drinkbitch: drinkBitch.command,
 	editcomm: commandEdit.command,
 	editmessage: messagesEdit.command,
 	editmodabuse: modAbuseEdit.command,
 	editquote: quoteEdit.command,
+	edittinder: tinderEdit.command,
 	f: f.command,
 	followage: followage.command,
 	kingsremain: kingsRemain.command,
