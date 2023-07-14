@@ -144,6 +144,14 @@ async function resetKings() {
 	restoreGameState(gameState);
 }
 
+function getCardsToDraw() {
+	return cardsToDraw;
+}
+
+function getCardsToDrawLength() {
+	return cardsToDraw.length;
+}
+
 async function playAudio(audioName) {
 	if (!helper.isTest()) {
 		let audioLink = await AudioLink.findOne({
@@ -161,3 +169,5 @@ function restoreGameState(gameState) {
 
 exports.command = kings;
 exports.resetKings = resetKings;
+exports.getCardsToDraw = getCardsToDraw;
+exports.getCardsToDrawLength = getCardsToDrawLength;
