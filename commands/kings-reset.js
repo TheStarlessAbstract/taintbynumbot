@@ -12,12 +12,10 @@ let commandResponse = () => {
 
 			if (helper.isValidModeratorOrStreamer(config.userInfo)) {
 				await kings.resetKings();
-				let cardsToDraw = kings.getCardsToDraw();
+				let cardsToDraw = kings.getCardsToDrawLength();
 
 				result.push(
-					"A new game of Kings has been dealt, with " +
-						cardsToDraw.length +
-						" cards!"
+					"A new game of Kings has been dealt, with " + cardsToDraw + " cards!"
 				);
 			}
 
