@@ -143,7 +143,7 @@ async function setTimedMessages(chatClient) {
 				1
 			);
 
-			chatClient.say("#" + username, message.text);
+			chatClient.say("#" + username, message.index + ". " + message.text);
 
 			messageCount = 0;
 
