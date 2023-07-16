@@ -23,6 +23,7 @@ let commandResponse = () => {
 					title.getCooldown()
 				)
 			) {
+				console.log("cooldown passed");
 				title.setTimer(currentTime);
 				let apiClient;
 				let channel;
@@ -31,6 +32,7 @@ let commandResponse = () => {
 					helper.isVersionActive(versions, 0) &&
 					!helper.isValuePresentAndString(config.argument)
 				) {
+					console.log("get title");
 					apiClient = await pubSubClient.getApiClient();
 					channel = await apiClient.channels.getChannelInfoById(twitchId);
 
@@ -47,6 +49,7 @@ let commandResponse = () => {
 					helper.isValuePresentAndString(config.argument) &&
 					helper.isValidModeratorOrStreamer(config.userInfo)
 				) {
+					console.log("update title");
 					apiClient = await pubSubClient.getApiClient();
 
 					try {
