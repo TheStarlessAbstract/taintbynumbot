@@ -72,8 +72,6 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		if (shouldIgnoreMessage(user, botUsername, message)) return;
 
-		// const userInfo = msg.userInfo;
-
 		if (!userInfoCheck(msg.userInfo)) {
 			const userInfo = msg.userInfo;
 			let [command, argument] = message.slice(1).split(/\s(.+)/);
@@ -90,6 +88,7 @@ async function setupChatClientListeners(apiClient, chatClient) {
 			if (hasActiveVersions) {
 				if (typeof response === "function") {
 					let result = await response({
+						channelId: msg.channelId,
 						userInfo,
 						argument,
 					});
