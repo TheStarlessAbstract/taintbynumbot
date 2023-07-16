@@ -4,7 +4,7 @@ class TimerCommand extends BaseCommand {
 	constructor(getCommand, versions, cooldown) {
 		super(getCommand, versions);
 		this.cooldown = cooldown;
-		this.timer = 0;
+		this.timer = new Date(0);
 	}
 
 	getCooldown() {
