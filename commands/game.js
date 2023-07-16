@@ -49,8 +49,9 @@ let commandResponse = () => {
 							channel.gameName
 					);
 				} else if (
-					helper.isVersionActive(versions, 1) &&
 					helper.isValuePresentAndString(config.argument) &&
+					config.argument.length > 3 &&
+					helper.isVersionActive(versions, 1) &&
 					helper.isValidModeratorOrStreamer(config.userInfo)
 				) {
 					apiClient = await pubSubClient.getApiClient();
@@ -60,9 +61,10 @@ let commandResponse = () => {
 					);
 
 					let currentPageGames = await gamesPaginated.getNext();
+					let pages = 0;
 
 					let gameId;
-					while (currentPageGames.length > 0) {
+					while (currentPageGames.length > 0 && pages < 3) {
 						for (let i = 0; i < currentPageGames.length; i++) {
 							if (currentPageGames[i].name.startsWith(config.argument)) {
 								gameId = currentPageGames[i].id;
@@ -71,6 +73,7 @@ let commandResponse = () => {
 						}
 
 						currentPageGames = await gamesPaginated.getNext();
+						pages++;
 					}
 
 					if (gameId == undefined) {
