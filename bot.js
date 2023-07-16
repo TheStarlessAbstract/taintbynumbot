@@ -4,7 +4,7 @@ const chatClient = require("./bot-chatclient");
 const pubnub = require("./bot-pubnub");
 const pubSubClient = require("./bot-pubsubclient");
 const discord = require("./bot-discord");
-const gamebuilder = require("./gamebuilder");
+const gamebuilder = require("./bot-gamebuilder");
 const db = require("./bot-mongoose.js");
 
 init();
