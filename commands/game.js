@@ -55,9 +55,25 @@ let commandResponse = () => {
 				) {
 					apiClient = await pubSubClient.getApiClient();
 
-					let game = await apiClient.games.getGameByName(config.argument);
+					let gamesPaginated = await apiClient.search.searchCategoriesPaginated(
+						config.argument
+					);
 
-					if (game == null) {
+					let currentPageGames = await gamesPaginated.getNext();
+
+					let gameId;
+					while (currentPageGames.length > 0) {
+						for (let i = 0; i < currentPageGames.length; i++) {
+							if (currentPageGames[i].name.startsWith(config.argument)) {
+								gameId = currentPageGames[i].id;
+								break;
+							}
+						}
+
+						currentPageGames = await gamesPaginated.getNext();
+					}
+
+					if (gameId == undefined) {
 						result.push(
 							"@" + config.userInfo.displayName + " no game found by that name."
 						);
@@ -66,7 +82,7 @@ let commandResponse = () => {
 
 					try {
 						await apiClient.channels.updateChannelInfo(twitchId, {
-							gameId: game.id,
+							gameId: gameId,
 						});
 					} catch (e) {
 						result.push(
