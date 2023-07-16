@@ -11,6 +11,7 @@ const deaths = require("./commands/deaths");
 const drinkBitch = require("./commands/drinkbitch");
 const f = require("./commands/f");
 const followage = require("./commands/followage");
+const game = require("./commands/game");
 const kingsRemain = require("./commands/kings-remain");
 const kingsReset = require("./commands/kings-reset");
 const kings = require("./commands/kings");
@@ -101,6 +102,7 @@ const commands = {
 	edittinder: tinderEdit.command,
 	f: f.command,
 	followage: followage.command,
+	game: game.command,
 	kingsremain: kingsRemain.command,
 	kingsreset: kingsReset.command,
 	kings: kings.command,
