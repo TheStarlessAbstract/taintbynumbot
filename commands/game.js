@@ -69,16 +69,9 @@ let commandResponse = () => {
 							gameId: game.id,
 						});
 					} catch (e) {
-						console.log(e);
-						// if (e.body.includes("banned words")) {
-						// 	result.push(
-						// 		"Twitch says you have used a no-no word - Title not updated"
-						// 	);
-						// } else {
 						result.push(
-							"Twitch has not updated the title for reasons - Try again later"
+							"Twitch has not updated the game for reasons - Try again later"
 						);
-						// }
 						return result;
 					}
 
