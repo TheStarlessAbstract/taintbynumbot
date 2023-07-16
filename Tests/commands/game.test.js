@@ -447,6 +447,8 @@ describe("game", () => {
 		let result = await response({ channelId, userInfo, argument });
 
 		//Assert
-		expect(result[0]).toMatch(/The stream game has been updated to/);
+		expect(result[0]).toMatch(
+			"The stream game has been updated to: " + argument
+		);
 	});
 });
