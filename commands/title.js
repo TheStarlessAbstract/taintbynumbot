@@ -38,6 +38,7 @@ let commandResponse = () => {
 						result.push(
 							"Twitch says no, and Starless should really sort this out some time after stream"
 						);
+						return result;
 					}
 
 					result.push("The curent title is: " + channel.title);
@@ -75,13 +76,13 @@ let commandResponse = () => {
 
 let versions = [
 	{
-		description: "Gets current title",
+		description: "Gets current title of the stream",
 		usage: "!title",
 		usableBy: "users",
 		active: true,
 	},
 	{
-		description: "Sets the audio timeout to the specified amount of seconds",
+		description: "Updates the current title of the stream",
 		usage: "!title My mistakes bring all the bots to the yard",
 		usableBy: "mods",
 		active: true,
