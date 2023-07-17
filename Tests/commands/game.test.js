@@ -41,9 +41,9 @@ describe("game", () => {
 	});
 
 	afterAll(async () => {
-		await apiClient.channels.updateChannelInfo(twitchId, {
-			gameId: currentGameId,
-		});
+		// await apiClient.channels.updateChannelInfo(twitchId, {
+		// 	gameId: currentGameId,
+		// });
 
 		await db.disconnectFromMongoDB();
 	});
@@ -441,7 +441,7 @@ describe("game", () => {
 		userInfo.isBroadcaster = true;
 		userInfo.isMod = false;
 		commandLink.setTimer(currentDateTime - 31000);
-		argument = "Pools, Hot Tubs, and Beaches";
+		argument = "fuck";
 
 		//Act
 		let result = await response({ channelId, userInfo, argument });
