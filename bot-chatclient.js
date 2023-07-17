@@ -92,7 +92,6 @@ async function setupChatClientListeners(apiClient, chatClient) {
 						userInfo,
 						argument,
 					});
-					console.log(typeof result);
 
 					if (result) {
 						for (let i = 0; i < result.length; i++) {
