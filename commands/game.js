@@ -66,14 +66,23 @@ let commandResponse = () => {
 					let gameId;
 					while (currentPageGames.length > 0 && pages < 3) {
 						for (let i = 0; i < currentPageGames.length; i++) {
-							if (currentPageGames[i].name.startsWith(config.argument)) {
+							if (
+								helper.startsWithCaseInsensitive(
+									currentPageGames[i].name,
+									config.argument
+								)
+							) {
 								gameId = currentPageGames[i].id;
 								break;
 							}
 						}
 
-						currentPageGames = await gamesPaginated.getNext();
-						pages++;
+						if (gameId == undefined) {
+							currentPageGames = await gamesPaginated.getNext();
+							pages++;
+						} else {
+							break;
+						}
 					}
 
 					if (gameId == undefined) {
