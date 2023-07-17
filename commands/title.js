@@ -41,7 +41,7 @@ let commandResponse = () => {
 						return result;
 					}
 
-					result.push("The curent title is: " + channel.title);
+					result.push("The current title is: " + channel.title);
 				} else if (
 					helper.isVersionActive(versions, 1) &&
 					helper.isValuePresentAndString(config.argument) &&
