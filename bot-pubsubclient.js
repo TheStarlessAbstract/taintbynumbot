@@ -15,7 +15,7 @@ let apiClient;
 let token;
 
 async function setup() {
-	token = await Token.findOne({ name: "pubSubClientTest" });
+	token = await Token.findOne({ name: "nextAuthTest" });
 
 	if (token) {
 		const tokenData = initializeTokenData(token);
@@ -32,6 +32,7 @@ async function setup() {
 
 function initializeTokenData(token) {
 	return {
+		twitchId: token.twitchId,
 		accessToken: token.accessToken,
 		refreshToken: token.refreshToken,
 		scope: token.scope,
