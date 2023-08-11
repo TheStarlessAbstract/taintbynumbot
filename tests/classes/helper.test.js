@@ -30,380 +30,237 @@ invalidversions = [];
 
 invalidUrls = [];
 
-describe.skip("isVersionActive", () => {
-	test("VersionsPackIsEmpty_ShouldReturnFalse", () => {
-		//Assemble
+emptyArray = [];
 
-		//Act
-		let value = helper.isVersionActive(invalidversions, 0);
-		//Assert
-		expect(value).toBe(false);
-	});
+validUnshuffledArray = [
+	{
+		suit: "Clubs",
+		value: "Ace",
+		rule: "Musketeers: All for one and one for all",
+		explanation: "Everybody drinks",
+	},
+	{
+		suit: "Clubs",
+		value: "2",
+		rule: "Fuck you!",
+		explanation:
+			"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+	},
 
-	test("WhereIndexIsOutOfBounds_ShouldReturnFalse", () => {
-		//Assemble
+	{
+		suit: "Clubs",
+		value: "3",
+		rule: "Fuck me!",
+		explanation: "You drew this card, so you drink!",
+	},
+	{
+		suit: "Clubs",
+		value: "4",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-		//Act
-		let value = helper.isVersionActive(validversions, 100);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "5",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereIndexIsValid_AndSelectedVersionIsNotActive_ShouldReturnFalse", () => {
-		//Act
-		let value = helper.isVersionActive(validversions, 0);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "6",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => {
-		//Act
-		let value = helper.isVersionActive(validversions, 1);
-		//Assert
-		expect(value).toBe(true);
-	});
-});
+	{
+		suit: "Clubs",
+		value: "7",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
+	{
+		suit: "Clubs",
+		value: "8",
+		rule: "Pick a mate!",
+		explanation:
+			"You and a person of your choosing takes a drink...tell us why it is St…",
+	},
 
-describe.skip("isValuePresentAndString", () => {
-	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
-		//Assemble
-		let input = undefined;
-		//Act
-		let value = helper.isValuePresentAndString(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "9",
+		rule: "Bust a rhyme!",
+		explanation:
+			"Quickfire rhyming between you and Starless, whoever takes too long has…",
+	},
 
-	test("WhereArgumentIsEmptyString_ShouldReturnFalse", () => {
-		//Assemble
-		let input = "";
-		//Act
-		let value = helper.isValuePresentAndString(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "10",
+		rule: "Make a rule!",
+		explanation:
+			"You get to make a rule for Starless, and maybe chat. Rule last until t…",
+	},
+	{
+		suit: "Clubs",
+		value: "Jack",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereArgumentIsNumber_ShouldReturnFalse", () => {
-		//Assemble
-		let input = 123;
-		//Act
-		let value = helper.isValuePresentAndString(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "Queen",
+		rule: "Ask a question!",
+		explanation:
+			"Ask Starless a general knowledge question. Starless gets it right, you…",
+	},
 
-	test("WhereArgumentIsBool_ShouldReturnFalse", () => {
-		//Assemble
-		let input = false;
-		//Act
-		let value = helper.isValuePresentAndString(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Clubs",
+		value: "King",
+		rule: "Kings!",
+		explanation:
+			"The first three Kings drawn mean nothing, Starless may offer a sympath…",
+	},
 
-	test("WhereArgumentIsValidString_ShouldReturnTrue", () => {
-		//Assemble
-		let input = "validString";
-		//Act
-		let value = helper.isValuePresentAndString(input);
-		//Assert
-		expect(value).toBe(true);
-	});
-});
+	{
+		suit: "Diamonds",
+		value: "Ace",
+		rule: "Musketeers: All for one and one for all",
+		explanation: "Everybody drinks",
+	},
 
-describe.skip("isValuePresentAndNumber", () => {
-	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
-		//Assemble
-		let input = undefined;
-		//Act
-		let value = helper.isValuePresentAndNumber(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Diamonds",
+		value: "2",
+		rule: "Fuck you!",
+		explanation:
+			"Choose someone to take a drink...but fuck Starless mainly amirite?!",
+	},
 
-	test("WhereArgumentIsString_ShouldReturnTrue", () => {
-		//Assemble
-		let input = "string";
-		//Act
-		let value = helper.isValuePresentAndNumber(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Diamonds",
+		value: "3",
+		rule: "Fuck me!",
+		explanation: "You drew this card, so you drink!",
+	},
 
-	test("WhereArgumentIsBool_ShouldReturnFalse", () => {
-		//Assemble
-		let input = false;
-		//Act
-		let value = helper.isValuePresentAndNumber(input);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Diamonds",
+		value: "4",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereArgumentIsNumber_ShouldReturnFalse", () => {
-		//Assemble
-		let input = 123;
-		//Act
-		let value = helper.isValuePresentAndNumber(input);
-		//Assert
-		expect(value).toBe(true);
-	});
-});
+	{
+		suit: "Diamonds",
+		value: "5",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-describe.skip("isValidModeratorOrStreamer", () => {
-	test("WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
-		//Assemble
-		let config = {};
-		config.isMod = false;
-		config.isModUp = false;
-		config.isBroadcaster = false;
-		//Act
-		let value = helper.isValidModeratorOrStreamer(config);
-		//Assert
-		expect(value).toBe(false);
-	});
+	{
+		suit: "Diamonds",
+		value: "6",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereUserIsModerator_AndNotStreamer_ShouldReturnTrue", () => {
-		//Assemble
-		let config = {};
-		config.isMod = true;
-		// config.isModUp = true;
-		config.isBroadcaster = false;
-		//Act
-		let value = helper.isValidModeratorOrStreamer(config);
-		//Assert
-		expect(value).toBe(true);
-	});
+	{
+		suit: "Diamonds",
+		value: "7",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereUserNotModerator_AndIsStreamer_ShouldReturnTrue", () => {
-		//Assemble
-		let config = {};
-		config.isMod = false;
-		// config.isModUp = true;
-		config.isBroadcaster = true;
-		//Act
-		let value = helper.isValidModeratorOrStreamer(config);
-		//Assert
-		expect(value).toBe(true);
-	});
+	{
+		suit: "Diamonds",
+		value: "8",
+		rule: "Pick a mate!",
+		explanation:
+			"You and a person of your choosing takes a drink...tell us why it is St…",
+	},
 
-	test("WhereUserIsModerator_AndIsStreamer_ShouldReturnTrue", () => {
-		//Assemble
-		let config = {};
-		config.isMod = true;
-		// config.isModUp = true;
-		config.isBroadcaster = true;
-		//Act
-		let value = helper.isValidModeratorOrStreamer(config);
-		//Assert
-		expect(value).toBe(true);
-	});
-});
+	{
+		suit: "Diamonds",
+		value: "9",
+		rule: "Bust a rhyme!",
+		explanation:
+			"Quickfire rhyming between you and Starless, whoever takes too long has…",
+	},
 
-describe.skip("getCommandArgumentKey", () => {
-	test("WhereArgumentIsBool_AndIndexIsZero_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = false;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("");
-	});
+	{
+		suit: "Diamonds",
+		value: "10",
+		rule: "Make a rule!",
+		explanation:
+			"You get to make a rule for Starless, and maybe chat. Rule last until t…",
+	},
 
-	test("WhereArgumentIsNumber_AndIndexIsZero_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = 1;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("");
-	});
+	{
+		suit: "Diamonds",
+		value: "Jack",
+		rule: "This card doesn't really have a rule",
+		explanation: "Hydrate you fools",
+	},
 
-	test("WhereArgumentIsEmptyString_AndIndexIsZero_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = "";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("");
-	});
+	{
+		suit: "Diamonds",
+		value: "Queen",
+		rule: "Ask a question!",
+		explanation:
+			"Ask Starless a general knowledge question. Starless gets it right, you…",
+	},
 
-	test("WhereArgumentIsUndefined_AndIndexIsZero_ShouldReturnNull", () => {
-		//Assemble
-		let config = {};
-		config.argument = undefined;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe(null);
-	});
+	{
+		suit: "Diamonds",
+		value: "King",
+		rule: "Kings!",
+		explanation:
+			"The first three Kings drawn mean nothing, Starless may offer a sympath…",
+	},
+];
 
-	test("WhereArgumentIsValidString_AndIndexIsZero_AndMixedCapitals_ShouldReturnValidStringMixedCapitals", () => {
-		//Assemble
-		let config = {};
-		config.argument = "vAlIdStRiNgNoSpAcEs";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("vAlIdStRiNgNoSpAcEs");
-	});
+validNextIndices = [
+	{
+		index: 3,
+	},
+	{
+		index: 2,
+	},
+	{
+		index: 10,
+	},
+	{
+		index: 1,
+	},
+	{
+		index: 7,
+	},
+];
 
-	test("WhereArgumentIsValidString_AndIndexIsZero_AndAllCapitals_ShouldReturnValidStringAllCapitals", () => {
-		//Assemble
-		let config = {};
-		config.argument = "VALIDSTRINGNOSPACES";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("VALIDSTRINGNOSPACES");
-	});
+invalidNextIndices = [
+	{
+		name: 3,
+	},
+	{
+		name: 2,
+	},
+	{
+		name: 10,
+	},
+	{
+		name: 1,
+	},
+	{
+		name: 7,
+	},
+];
 
-	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnFirstPartAsGivenInMixedCaps", () => {
-		//Assemble
-		let config = {};
-		config.argument = "vAlIdStRiNg WithSpAcEs";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe("vAlIdStRiNg");
-	});
-
-	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnNumber", () => {
-		//Assemble
-		let config = {};
-		config.argument = "1 WithSpAcEs";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 0);
-		//Assert
-		expect(value).toBe(1);
-	});
-
-	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnFirstPartAsGivenInCaps", () => {
-		//Assemble
-		let config = {};
-		config.argument = "VALIDSTRING WITHSPACES";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("WITHSPACES");
-	});
-
-	test("WhereArgumentIsBool_AndIndexIsOne_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = false;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("");
-	});
-
-	test("WhereArgumentIsNumber_AndIndexIsOne_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = 1;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("");
-	});
-
-	test("WhereArgumentIsEmptyString_AndIndexIsOne_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = "";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("");
-	});
-
-	test("WhereArgumentIsUndefined_AndIndexIsZero_ShouldReturnNull", () => {
-		//Assemble
-		let config = {};
-		config.argument = undefined;
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe(null);
-	});
-
-	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndMixedCapitals_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = "vAlIdStRiNgNoSpAcEs";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("");
-	});
-
-	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnEmptyString", () => {
-		//Assemble
-		let config = {};
-		config.argument = "VALIDSTRINGNOSPACES";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("");
-	});
-
-	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnSecondPartAsGivenInMixedCaps", () => {
-		//Assemble
-		let config = {};
-		config.argument = "vAlIdStRiNg WithSpAcEs";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("WithSpAcEs");
-	});
-
-	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnSecondPartAsGivenInCaps", () => {
-		//Assemble
-		let config = {};
-		config.argument = "VALIDSTRING WITHSPACES";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe("WITHSPACES");
-	});
-
-	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnNumber", () => {
-		//Assemble
-		let config = {};
-		config.argument = "WithSpAcEs 1";
-		//Act
-		let value = helper.getCommandArgumentKey(config, 1);
-		//Assert
-		expect(value).toBe(1);
-	});
-});
-
-describe.skip("isStreamer", () => {
-	test("WhereUserIsNotStreamer_ShouldReturnFalse", () => {
-		//Assemble
-		let config = {};
-		config.isBroadcaster = false;
-		//Act
-		let value = helper.isStreamer(config);
-		//Assert
-		expect(value).toBe(false);
-	});
-
-	test("WhereUserIsStreamer_ShouldReturnTrue", () => {
-		//Assemble
-		let config = {};
-		config.isBroadcaster = true;
-		//Act
-		let value = helper.isStreamer(config);
-		//Assert
-		expect(value).toBe(true);
-	});
-});
-
-describe.skip("isCooldownPassed", () => {
+describe("isCooldownPassed", () => {
 	let newDate = new Date();
 	let lastTimeSet;
 	let cooldown;
@@ -602,36 +459,408 @@ describe.skip("isCooldownPassed", () => {
 	});
 });
 
-describe.skip("getRandomisedAudioFileUrl", () => {
+describe("isStreamer", () => {
+	test("WhereUserIsNotStreamer_ShouldReturnFalse", () => {
+		//Assemble
+		let config = {};
+		config.isBroadcaster = false;
+		//Act
+		let value = helper.isStreamer(config);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereUserIsStreamer_ShouldReturnTrue", () => {
+		//Assemble
+		let config = {};
+		config.isBroadcaster = true;
+		//Act
+		let value = helper.isStreamer(config);
+		//Assert
+		expect(value).toBe(true);
+	});
+});
+
+describe("isValidModeratorOrStreamer", () => {
+	test("WhereUserIsNotModerator_AndNotStreamer_ShouldReturnFalse", () => {
+		//Assemble
+		let config = {};
+		config.isMod = false;
+		config.isModUp = false;
+		config.isBroadcaster = false;
+		//Act
+		let value = helper.isValidModeratorOrStreamer(config);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereUserIsModerator_AndNotStreamer_ShouldReturnTrue", () => {
+		//Assemble
+		let config = {};
+		config.isMod = true;
+		// config.isModUp = true;
+		config.isBroadcaster = false;
+		//Act
+		let value = helper.isValidModeratorOrStreamer(config);
+		//Assert
+		expect(value).toBe(true);
+	});
+
+	test("WhereUserNotModerator_AndIsStreamer_ShouldReturnTrue", () => {
+		//Assemble
+		let config = {};
+		config.isMod = false;
+		// config.isModUp = true;
+		config.isBroadcaster = true;
+		//Act
+		let value = helper.isValidModeratorOrStreamer(config);
+		//Assert
+		expect(value).toBe(true);
+	});
+
+	test("WhereUserIsModerator_AndIsStreamer_ShouldReturnTrue", () => {
+		//Assemble
+		let config = {};
+		config.isMod = true;
+		// config.isModUp = true;
+		config.isBroadcaster = true;
+		//Act
+		let value = helper.isValidModeratorOrStreamer(config);
+		//Assert
+		expect(value).toBe(true);
+	});
+});
+
+describe("isValuePresentAndNumber", () => {
+	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
+		//Assemble
+		let input = undefined;
+		//Act
+		let value = helper.isValuePresentAndNumber(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsString_ShouldReturnTrue", () => {
+		//Assemble
+		let input = "string";
+		//Act
+		let value = helper.isValuePresentAndNumber(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsBool_ShouldReturnFalse", () => {
+		//Assemble
+		let input = false;
+		//Act
+		let value = helper.isValuePresentAndNumber(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsNumber_ShouldReturnFalse", () => {
+		//Assemble
+		let input = 123;
+		//Act
+		let value = helper.isValuePresentAndNumber(input);
+		//Assert
+		expect(value).toBe(true);
+	});
+});
+
+describe("isValuePresentAndString", () => {
+	test("WhereArgumentIsUndefined_ShouldReturnFalse", () => {
+		//Assemble
+		let input = undefined;
+		//Act
+		let value = helper.isValuePresentAndString(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsEmptyString_ShouldReturnFalse", () => {
+		//Assemble
+		let input = "";
+		//Act
+		let value = helper.isValuePresentAndString(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsNumber_ShouldReturnFalse", () => {
+		//Assemble
+		let input = 123;
+		//Act
+		let value = helper.isValuePresentAndString(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsBool_ShouldReturnFalse", () => {
+		//Assemble
+		let input = false;
+		//Act
+		let value = helper.isValuePresentAndString(input);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereArgumentIsValidString_ShouldReturnTrue", () => {
+		//Assemble
+		let input = "validString";
+		//Act
+		let value = helper.isValuePresentAndString(input);
+		//Assert
+		expect(value).toBe(true);
+	});
+});
+
+describe("isVersionActive", () => {
+	test("VersionsPackIsEmpty_ShouldReturnFalse", () => {
+		//Assemble
+
+		//Act
+		let value = helper.isVersionActive(invalidversions, 0);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereIndexIsOutOfBounds_ShouldReturnFalse", () => {
+		//Assemble
+
+		//Act
+		let value = helper.isVersionActive(validversions, 100);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereIndexIsValid_AndSelectedVersionIsNotActive_ShouldReturnFalse", () => {
+		//Act
+		let value = helper.isVersionActive(validversions, 0);
+		//Assert
+		expect(value).toBe(false);
+	});
+
+	test("WhereIndexIsValid_AndSelectedVersionIsActive_ShouldReturnTrue", () => {
+		//Act
+		let value = helper.isVersionActive(validversions, 1);
+		//Assert
+		expect(value).toBe(true);
+	});
+});
+
+describe("getCommandArgumentKey", () => {
+	test("WhereArgumentIsBool_AndIndexIsZero_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = false;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsNumber_AndIndexIsZero_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = 1;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsEmptyString_AndIndexIsZero_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = "";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsUndefined_AndIndexIsZero_ShouldReturnNull", () => {
+		//Assemble
+		argument = undefined;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe(null);
+	});
+
+	test("WhereArgumentIsValidString_AndIndexIsZero_AndMixedCapitals_ShouldReturnValidStringMixedCapitals", () => {
+		//Assemble
+		argument = "vAlIdStRiNgNoSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("vAlIdStRiNgNoSpAcEs");
+	});
+
+	test("WhereArgumentIsValidString_AndIndexIsZero_AndAllCapitals_ShouldReturnValidStringAllCapitals", () => {
+		//Assemble
+		argument = "VALIDSTRINGNOSPACES";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("VALIDSTRINGNOSPACES");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnFirstPartAsGivenInMixedCaps", () => {
+		//Assemble
+		argument = "vAlIdStRiNg WithSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe("vAlIdStRiNg");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsZero_AndMixedCapitals_ShouldReturnNumber", () => {
+		//Assemble
+		argument = "1 WithSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 0);
+		//Assert
+		expect(value).toBe(1);
+	});
+
+	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnFirstPartAsGivenInCaps", () => {
+		//Assemble
+		argument = "VALIDSTRING WITHSPACES";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("WITHSPACES");
+	});
+
+	test("WhereArgumentIsBool_AndIndexIsOne_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = false;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsNumber_AndIndexIsOne_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = 1;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsEmptyString_AndIndexIsOne_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = "";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsUndefined_AndIndexIsOne_ShouldReturnNull", () => {
+		//Assemble
+		argument = undefined;
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe(null);
+	});
+
+	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndMixedCapitals_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = "vAlIdStRiNgNoSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnEmptyString", () => {
+		//Assemble
+		argument = "VALIDSTRINGNOSPACES";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnSecondPartAsGivenInMixedCaps", () => {
+		//Assemble
+		argument = "vAlIdStRiNg WithSpAcEs";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("WithSpAcEs");
+	});
+
+	test("WhereArgumentIsValidStringWithNoSpaces_AndIndexIsOne_AndAllCapitals_ShouldReturnSecondPartAsGivenInCaps", () => {
+		//Assemble
+		argument = "VALIDSTRING WITHSPACES";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe("WITHSPACES");
+	});
+
+	test("WhereArgumentIsValidStringWithASpace_AndIndexIsOne_AndMixedCapitals_ShouldReturnNumber", () => {
+		//Assemble
+		argument = "WithSpAcEs 1";
+		//Act
+		let value = helper.getCommandArgumentKey(argument, 1);
+		//Assert
+		expect(value).toBe(1);
+	});
+});
+
+describe("getNextIndex", () => {
+	beforeAll(async () => {
+		// emptyArray = undefined;
+	});
+
 	test("ArrayIsEmpty_ShouldReturnEmptyString", () => {
 		//Assemble
 
 		//Act
-		let value = helper.getRandomisedAudioFileUrl(invalidUrls);
+		let value = helper.getNextIndex(emptyArray);
 		//Assert
 		expect(value).toBe("");
 	});
 
-	test("ArrayObjectsContainInvalidStrings_ShouldReturnEmptyString", () => {
+	test("ArrayIsUndefinded_ShouldReturnEmptyString", () => {
 		//Assemble
-		invalidUrls.push({ url: "test" }, { url: "array" });
+		emptyArray = undefined;
+
 		//Act
-		let value = helper.getRandomisedAudioFileUrl(invalidUrls);
+		let value = helper.getNextIndex(emptyArray);
 		//Assert
 		expect(value).toBe("");
 	});
 
-	test("ArrayIsValid_ShouldReturnTrue", () => {
+	test("ArrayIsString_ShouldReturnEmtyString", () => {
 		//Assemble
 
 		//Act
-		let value = helper.getRandomisedAudioFileUrl(validUrls);
+		let value = helper.getNextIndex("string");
+
 		//Assert
-		expect(value.startsWith("http")).toBe(true);
+
+		expect(value).toBe("");
+	});
+
+	test("ArrayIsValid_ShouldReturnString", () => {
+		//Assemble
+
+		//Act
+		nextIndex = helper.getNextIndex(validNextIndices);
+
+		//Assert
+		expect(nextIndex).toBe(11);
 	});
 });
 
-describe.skip("getRandomBetweenExclusiveMax", () => {
+describe("getRandomBetweenExclusiveMax", () => {
 	let min;
 	let max;
 	let value;
@@ -707,7 +936,7 @@ describe.skip("getRandomBetweenExclusiveMax", () => {
 	});
 });
 
-describe.skip("getRandomBetweenInclusiveMax", () => {
+describe("getRandomBetweenInclusiveMax", () => {
 	let min;
 	let max;
 	let value;
@@ -780,5 +1009,108 @@ describe.skip("getRandomBetweenInclusiveMax", () => {
 		value = helper.getRandomBetweenInclusiveMax(min, max);
 		//Assert
 		expect(value >= min && value <= max).toBe(true);
+	});
+});
+
+describe("getRandomisedAudioFileUrl", () => {
+	test("ArrayIsEmpty_ShouldReturnEmptyString", () => {
+		//Assemble
+
+		//Act
+		let value = helper.getRandomisedAudioFileUrl(invalidUrls);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("ArrayObjectsContainInvalidStrings_ShouldReturnEmptyString", () => {
+		//Assemble
+		invalidUrls.push({ url: "test" }, { url: "array" });
+		//Act
+		let value = helper.getRandomisedAudioFileUrl(invalidUrls);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("ArrayIsValid_ShouldReturnTrue", () => {
+		//Assemble
+
+		//Act
+		let value = helper.getRandomisedAudioFileUrl(validUrls);
+		//Assert
+		expect(value.startsWith("http")).toBe(true);
+	});
+});
+
+describe("shuffle", () => {
+	beforeAll(async () => {
+		emptyArray = undefined;
+	});
+
+	test("ArrayIsEmpty_ShouldReturnEmptyString", () => {
+		//Assemble
+
+		//Act
+		let value = helper.shuffle(emptyArray);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("ArrayIsUndefinded_ShouldReturnEmptyString", () => {
+		//Assemble
+		emptyArray = undefined;
+
+		//Act
+		let value = helper.shuffle(emptyArray);
+		//Assert
+		expect(value).toBe("");
+	});
+
+	test("ArrayIsString_ShouldReturnEmtyString", () => {
+		//Assemble
+
+		//Act
+		let value = helper.shuffle("string");
+
+		//Assert
+
+		expect(value).toBe("");
+	});
+
+	test("ArrayIsValid_ShouldReturnString", () => {
+		//Assemble
+		let shuffled = false;
+
+		//Act
+		let shuffledArray = helper.shuffle(validUnshuffledArray);
+
+		//Assert
+		for (let i = 0; i < validUnshuffledArray.length; i++) {
+			for (let j = 0; j < shuffledArray.length; j++) {
+				if (
+					validUnshuffledArray[i].suit != shuffledArray[j].suit &&
+					validUnshuffledArray[i].value != shuffledArray[j].value
+				) {
+					shuffled = true;
+					break;
+				}
+			}
+		}
+
+		expect(shuffled).toBe(true);
+	});
+});
+
+describe("startsWithCaseInsensitive", () => {
+	// beforeAll(async () => {
+	// 	emptyArray = undefined;
+	// });
+
+	test("ArrayIsEmpty_ShouldReturnEmptyString", () => {
+		//Assemble
+
+		//Act
+		let value = helper.shuffle(emptyArray);
+		//Assert
+		expect(value).toBe("");
 	});
 });
