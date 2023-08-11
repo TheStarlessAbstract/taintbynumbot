@@ -1,33 +1,6 @@
 class Helper {
 	constructor() {}
 
-	isTest() {
-		return process.env.JEST_WORKER_ID != undefined;
-	}
-
-	isValuePresentAndString(value) {
-		return value != undefined && typeof value === "string" && value != "";
-	}
-
-	isValuePresentAndNumber(value) {
-		return value != undefined && typeof value === "number";
-	}
-
-	isStreamer(userInfo) {
-		return userInfo.isBroadcaster;
-	}
-
-	isValidModeratorOrStreamer(userInfo) {
-		return userInfo.isBroadcaster || userInfo.isMod;
-	}
-
-	isVersionActive(array, index) {
-		if (array != undefined && array.length > 0) {
-			return array[index]?.active ?? false;
-		}
-		return false;
-	}
-
 	isCooldownPassed(currentTime, lastTimeSet, currentCooldown) {
 		if (
 			currentTime instanceof Date &&
@@ -39,6 +12,33 @@ class Helper {
 		}
 
 		return "";
+	}
+
+	isStreamer(userInfo) {
+		return userInfo.isBroadcaster;
+	}
+
+	isTest() {
+		return process.env.JEST_WORKER_ID != undefined;
+	}
+
+	isValidModeratorOrStreamer(userInfo) {
+		return userInfo.isBroadcaster || userInfo.isMod;
+	}
+
+	isValuePresentAndNumber(value) {
+		return value != undefined && typeof value === "number";
+	}
+
+	isValuePresentAndString(value) {
+		return value != undefined && typeof value === "string" && value != "";
+	}
+
+	isVersionActive(array, index) {
+		if (array != undefined && array.length > 0) {
+			return array[index]?.active ?? false;
+		}
+		return false;
 	}
 
 	getCommandArgumentKey(argument, index) {
@@ -60,15 +60,15 @@ class Helper {
 		return "";
 	}
 
-	getRandomisedAudioFileUrl(array) {
-		if (array != undefined && array.length > 0) {
-			let index = this.getRandomBetweenExclusiveMax(0, array.length);
-			let value = array[index]?.url ?? "";
-
-			if (!value.startsWith("http") && value != "") {
-				value = "";
-			}
-			return value;
+	getNextIndex(array) {
+		if (Array.isArray(array) && array.length > 0) {
+			let index = Math.max.apply(
+				Math,
+				array.map(function (o) {
+					return o.index;
+				})
+			);
+			return index + 1;
 		}
 		return "";
 	}
@@ -95,30 +95,36 @@ class Helper {
 		return "";
 	}
 
-	getNextIndex(array) {
-		let index = Math.max.apply(
-			Math,
-			array.map(function (o) {
-				return o.index;
-			})
-		);
-		return index + 1;
+	getRandomisedAudioFileUrl(array) {
+		if (array != undefined && array.length > 0) {
+			let index = this.getRandomBetweenExclusiveMax(0, array.length);
+			let value = array[index]?.url ?? "";
+
+			if (!value.startsWith("http") && value != "") {
+				value = "";
+			}
+			return value;
+		}
+		return "";
 	}
 
 	shuffle(array) {
-		let m = array.length,
-			t,
-			i;
+		if (Array.isArray(array) && array.length > 0) {
+			let m = array.length,
+				t,
+				i;
 
-		while (m) {
-			i = Math.floor(Math.random() * m--);
+			while (m) {
+				i = Math.floor(Math.random() * m--);
 
-			t = array[m];
-			array[m] = array[i];
-			array[i] = t;
+				t = array[m];
+				array[m] = array[i];
+				array[i] = t;
+			}
+
+			return array;
 		}
-
-		return array;
+		return "";
 	}
 
 	startsWithCaseInsensitive(string, subString) {
