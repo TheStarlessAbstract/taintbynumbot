@@ -19,10 +19,10 @@ let commandResponse = () => {
 				let existingMessage = await Message.findOne({ text: argumentText });
 
 				if (existingMessage == null) {
-					let messageList = await Message.find({});
+					let messageList = await Message.find({}).sort({ index: 0 });
 
 					let message = await Message.create({
-						index: helper.getNextIndex(messageList),
+						index: messageList[messageList.length - 1].index + 1,
 						text: argumentText,
 						addedBy: config.userInfo.displayName,
 					});
