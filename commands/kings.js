@@ -13,7 +13,7 @@ let cardsToDraw;
 let cooldown = 5000;
 let cost = 100;
 let kingsCount;
-let currentTime = new Date();
+let currentTime;
 
 let commandResponse = () => {
 	return {
@@ -114,6 +114,7 @@ let commandResponse = () => {
 						}
 					} else {
 						kingsCount = 0;
+						playAudio("chug");
 
 						result.push(
 							"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug."
