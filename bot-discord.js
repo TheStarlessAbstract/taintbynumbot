@@ -1,21 +1,33 @@
-const { Client, Events, Collection, GatewayIntentBits } = require("discord.js");
-const token = process.env.DISCORD_TOKEN;
+require("dotenv").config();
+
+const Client = require("discord.js").Client;
+const Events = require("discord.js").Events;
+const Collection = require("discord.js").Collection;
+const GatewayIntentBits = require("discord.js").GatewayIntentBits;
+const Helper = require("./classes/helper");
 
 const commands = require("./bot-commands");
-
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+const helper = new Helper();
+
 const discordChannelId = process.env.DISCORD_CHANNEL;
+init();
 
-client.commands = new Collection();
+function init() {
+	if (!helper.isTest()) {
+		const token = process.env.DISCORD_TOKEN;
 
-// When the client is ready, run this code (only once)
-// We use 'c' for the event parameter to keep it separate from the already defined 'client'
-client.once(Events.ClientReady, (c) => {
-	console.log(`Ready! Logged in as ${c.user.tag}`);
-});
+		client.commands = new Collection();
 
-client.login(token);
+		// When the client is ready, run this code (only once)
+		// We use 'c' for the event parameter to keep it separate from the already defined 'client'
+		client.once(Events.ClientReady, (c) => {
+			console.log(`Ready! Logged in as ${c.user.tag}`);
+		});
+		client.login(token);
+	}
+}
 
 async function setup() {
 	const channel = client.channels.cache.get(discordChannelId);
@@ -28,7 +40,6 @@ async function setup() {
 		await updateCommands();
 	} else {
 		twitchCommands = createCommands();
-
 		for (let i = 0; i < twitchCommands.length; i++) {
 			channel.send({ content: twitchCommands[i] });
 		}
@@ -86,66 +97,68 @@ function createCommands() {
 }
 
 async function updateCommands(action, updateCommand) {
-	const channel = client.channels.cache.get(discordChannelId);
-	let twitchCommands = [];
-	let contentLine = "";
+	if (!helper.isTest()) {
+		const channel = client.channels.cache.get(discordChannelId);
+		let twitchCommands = [];
+		let contentLine = "";
 
-	let messages = await channel.messages.fetch();
-	let newMessages = [];
-	twitchCommands = createCommands();
+		let messages = await channel.messages.fetch();
+		let newMessages = [];
+		twitchCommands = createCommands();
 
-	if (action == "add" || action == "edit" || action == "delete") {
-		contentLine = "**This command has been ";
+		if (action == "add" || action == "edit" || action == "delete") {
+			contentLine = "**This command has been ";
 
-		if (action == "add") {
-			contentLine += "created** \n";
-		} else if (action == "edit") {
-			contentLine += "edited** \n";
-		} else if (action == "delete") {
-			contentLine += "deleted** \n";
+			if (action == "add") {
+				contentLine += "created** \n";
+			} else if (action == "edit") {
+				contentLine += "edited** \n";
+			} else if (action == "delete") {
+				contentLine += "deleted** \n";
+			}
+
+			contentLine +=
+				"`!" +
+				updateCommand.name +
+				"`\n" +
+				"*Description:* " +
+				updateCommand.description +
+				"\n" +
+				"*Usage:* " +
+				updateCommand.usage +
+				"\n" +
+				"*Usable by:* " +
+				updateCommand.usableBy +
+				"\n";
+
+			twitchCommands.push(contentLine);
 		}
 
-		contentLine +=
-			"`!" +
-			updateCommand.name +
-			"`\n" +
-			"*Description:* " +
-			updateCommand.description +
-			"\n" +
-			"*Usage:* " +
-			updateCommand.usage +
-			"\n" +
-			"*Usable by:* " +
-			updateCommand.usableBy +
-			"\n";
-
-		twitchCommands.push(contentLine);
-	}
-
-	for (const [key, value] of messages) {
-		newMessages.push(value);
-	}
-
-	newMessages.reverse();
-
-	if (newMessages.length > twitchCommands.length) {
-		for (let i = twitchCommands.length; i < newMessages.length; i++) {
-			await newMessages[i].delete();
+		for (const [key, value] of messages) {
+			newMessages.push(value);
 		}
 
-		newMessages.splice(
-			twitchCommands.length,
-			newMessages.length - twitchCommands.length
-		);
-	} else if (newMessages.length < twitchCommands.length) {
-		for (let i = newMessages.length; i < twitchCommands.length; i++) {
-			await channel.send({ content: twitchCommands[i] });
-		}
-	}
+		newMessages.reverse();
 
-	for (let i = 0; i < newMessages.length; i++) {
-		if (newMessages[i].content !== twitchCommands[i]) {
-			await channel.messages.edit(newMessages[i], twitchCommands[i]);
+		if (newMessages.length > twitchCommands.length) {
+			for (let i = twitchCommands.length; i < newMessages.length; i++) {
+				await newMessages[i].delete();
+			}
+
+			newMessages.splice(
+				twitchCommands.length,
+				newMessages.length - twitchCommands.length
+			);
+		} else if (newMessages.length < twitchCommands.length) {
+			for (let i = newMessages.length; i < twitchCommands.length; i++) {
+				await channel.send({ content: twitchCommands[i] });
+			}
+		}
+
+		for (let i = 0; i < newMessages.length; i++) {
+			if (newMessages[i].content !== twitchCommands[i]) {
+				await channel.messages.edit(newMessages[i], twitchCommands[i]);
+			}
 		}
 	}
 }

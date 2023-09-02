@@ -1,40 +1,49 @@
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
+
 const kings = require("./kings");
 
-let COOLDOWN = 5000;
-let timer;
+const helper = new Helper();
 
-const getCommand = () => {
+let cooldown = 3000;
+
+let commandResponse = () => {
 	return {
 		response: async () => {
 			let result = [];
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN) {
-				timer = currentTime;
+			if (
+				helper.isCooldownPassed(
+					currentTime,
+					kingsRemain.getTimer(),
+					kingsRemain.getCooldown()
+				)
+			) {
+				kingsRemain.setTimer(currentTime);
 
 				let cardsToDraw = kings.getCardsToDraw();
 				let cardsRemain = cardsToDraw.filter((card) => {
 					return card.isDrawn == false;
 				});
 
-				result.push("Cards remaing in this game " + cardsRemain.length);
+				result.push("Cards remaining in this game " + cardsRemain.length);
 			}
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"Checks how many cards remaining in the deck for the current game of !kings",
-				usage: "!kingsremain",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+let versions = [
+	{
+		description:
+			"Checks how many cards remaining in the deck for the current game of !kings",
+		usage: "!kingsremain",
+		usableBy: "users",
+		active: true,
+	},
+];
 
-exports.getCommand = getCommand;
-exports.setTimer = setTimer;
+const kingsRemain = new TimerCommand(commandResponse, versions, cooldown);
+
+exports.command = kingsRemain;

@@ -1,6 +1,7 @@
 const ApiClient = require("@twurple/api").ApiClient;
 const ChatClient = require("@twurple/chat").ChatClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
+const Helper = require("./classes/helper");
 
 const Token = require("./models/token");
 
@@ -18,44 +19,52 @@ let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let userId = process.env.TWITCH_USER_ID;
 let username = process.env.TWITCH_USERNAME;
 
+const helper = new Helper();
+
 let apiClient;
 let isLive = false;
 let intervalMessages;
 let messageCount = 0;
 let timedMessagesInterval;
 let token;
+let issuesRaised;
 
 async function setup() {
 	token = await Token.findOne({ name: "chatClient" });
 
 	if (token) {
 		const tokenData = initializeTokenData(token);
-		const authProvider = createAuthProvider(tokenData);
+		const authProvider = await createAuthProvider(tokenData);
 		const chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 
-		await chatClient.connect(chatClient);
+		setApiClient(apiClient);
 
-		setupChatClientListeners(apiClient, chatClient);
+		if (!helper.isTest()) {
+			await chatClient.connect(chatClient);
+			await setupChatClientListeners(apiClient, chatClient);
+		}
 	}
-
-	await messages.setup();
 }
 
 async function connected() {
-	console.log(" * Connected to Twitch chat * ");
+	if (!helper.isTest()) {
+		console.log(" * Connected to Twitch chat * ");
+	}
 }
 
 async function setupChatClientListeners(apiClient, chatClient) {
-	chatClient.onRegister(async () => {
+	chatClient.onAuthenticationSuccess(async () => {
 		connected();
-		checkLive(apiClient, chatClient);
-		setApiClient(apiClient);
 
-		kings.resetKings();
-		redemptions.setChatClient(chatClient);
-		await commands.setup();
-		await deathCounter.setup(apiClient);
+		checkLive(apiClient, chatClient);
+
+		if (!helper.isTest()) {
+			kings.resetKings();
+			redemptions.setChatClient(chatClient);
+			await commands.setup();
+			await deathCounter.setup(apiClient);
+		}
 	});
 
 	await chatClient.onMessage(async (channel, user, message, msg) => {
@@ -63,30 +72,38 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		if (shouldIgnoreMessage(user, botUsername, message)) return;
 
-		const userInfo = msg.userInfo;
-		const { isBroadcaster, isMod, isVip, isSub } = userInfo;
-		const isModUp = isBroadcaster || isMod;
+		if (!userInfoCheck(msg.userInfo)) {
+			const userInfo = msg.userInfo;
+			let [command, argument] = message.slice(1).split(/\s(.+)/);
+			let commandLink = commands.list[command.toLowerCase()];
 
-		let [command, argument] = message.slice(1).split(/\s(.+)/);
+			if (commandLink == undefined) return;
 
-		const { response, details } =
-			(await commands.list[command.toLowerCase()]) || {};
+			const { response } = (await commandLink.getCommand()) || {};
+			let versions = commandLink.getVersions();
+			let hasActiveVersions =
+				versions.filter(function (version) {
+					return version.active;
+				}).length > 0;
+			if (hasActiveVersions) {
+				if (typeof response === "function") {
+					let result = await response({
+						channelId: msg.channelId,
+						userInfo,
+						argument,
+					});
 
-		if (typeof response === "function") {
-			let result = await response({
-				isBroadcaster,
-				isModUp,
-				userInfo,
-				argument,
-			});
-
-			if (result) {
-				for (let i = 0; i < result.length; i++) {
-					chatClient.say(channel, result[i]);
+					if (result) {
+						for (let i = 0; i < result.length; i++) {
+							chatClient.say(channel, result[i]);
+						}
+					}
+				} else if (typeof response === "string") {
+					chatClient.say(channel, response);
 				}
 			}
-		} else if (typeof response === "string") {
-			chatClient.say(channel, response);
+		} else {
+			console.log("userInfo types changed");
 		}
 	});
 }
@@ -103,6 +120,9 @@ async function checkLive(apiClient, chatClient) {
 
 		if (streamLiveFlag && !isLive) {
 			setTimedMessages(chatClient);
+			if (process.env.JEST_WORKER_ID == undefined) {
+				loyalty.start();
+			}
 			isLive = true;
 		} else if (!streamLiveFlag && isLive) {
 			clearInterval(timedMessagesInterval);
@@ -113,7 +133,7 @@ async function checkLive(apiClient, chatClient) {
 }
 
 async function setTimedMessages(chatClient) {
-	intervalMessages = messages.get();
+	intervalMessages = await messages.get();
 
 	timedMessagesInterval = setInterval(async () => {
 		if (messageCount >= 25) {
@@ -122,12 +142,12 @@ async function setTimedMessages(chatClient) {
 				1
 			);
 
-			chatClient.say("#" + username, message.text);
+			chatClient.say("#" + username, message.index + ". " + message.text);
 
 			messageCount = 0;
 
-			if (intervalMessages.length === 0) {
-				intervalMessages = messages.get();
+			if (intervalMessages.length == 0) {
+				intervalMessages = await messages.get();
 			}
 		}
 	}, 10 * 60 * 1000);
@@ -151,12 +171,12 @@ function initializeTokenData(token) {
 	};
 }
 
-function createAuthProvider(tokenData) {
-	return new RefreshingAuthProvider(
-		{
-			clientId,
-			clientSecret,
-			onRefresh: async (newTokenData) => {
+async function createAuthProvider(tokenData) {
+	let authProvider = new RefreshingAuthProvider({
+		clientId,
+		clientSecret,
+		onRefresh: async (userId, newTokenData) => {
+			if (process.env.JEST_WORKER_ID == undefined) {
 				token.accessToken = newTokenData.accessToken;
 				token.refreshToken = newTokenData.refreshToken;
 				token.scope = newTokenData.scope;
@@ -164,10 +184,13 @@ function createAuthProvider(tokenData) {
 				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
 				await token.save();
-			},
+			}
 		},
-		tokenData
-	);
+	});
+
+	await authProvider.addUserForToken(tokenData, ["chat"]);
+
+	return authProvider;
 }
 
 function createChatClient(authProvider) {
@@ -200,8 +223,75 @@ function setApiClient(newApiClient) {
 	apiClient = newApiClient;
 }
 
-function getApiClient() {
+async function getApiClient() {
+	if (!apiClient) {
+		await setup();
+	}
 	return apiClient;
+}
+
+function userInfoCheck(userInfo) {
+	const stringTypes = [
+		userInfo.color,
+		userInfo.displayName,
+		userInfo.userId,
+		userInfo.userName,
+		userInfo.userType,
+	];
+
+	const stringUndefinedTypes = [userInfo.color, userInfo.userType];
+
+	const boolTypes = [
+		userInfo.isArtist,
+		userInfo.isBroadcaster,
+		userInfo.isFounder,
+		userInfo.isMod,
+		userInfo.isSubscriber,
+		userInfo.isVip,
+	];
+	const mappedTypes = [userInfo.badgeInfo, userInfo.badges];
+
+	issuesRaised = false;
+
+	stringTypes.forEach(confirmStrings);
+
+	if (!issuesRaised) {
+		stringUndefinedTypes.forEach(confirmStringsOrUndefined);
+	}
+
+	if (!issuesRaised) {
+		boolTypes.forEach(confirmBools);
+	}
+
+	if (!issuesRaised) {
+		mappedTypes.forEach(confirmMaps);
+	}
+
+	return issuesRaised;
+}
+
+function confirmStrings(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "string";
+	}
+}
+
+function confirmStringsOrUndefined(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "string" || item == undefined;
+	}
+}
+
+function confirmBools(item) {
+	if (!issuesRaised) {
+		issuesRaised = typeof item != "boolean";
+	}
+}
+
+function confirmMaps(item) {
+	if (!issuesRaised) {
+		issuesRaised = !(item instanceof Map);
+	}
 }
 
 exports.setup = setup;

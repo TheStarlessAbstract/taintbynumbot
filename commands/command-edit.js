@@ -1,31 +1,48 @@
+const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
+
 const Command = require("../models/command");
 
 const commands = require("../bot-commands");
 const discord = require("../bot-discord");
 
-const getCommand = () => {
+const helper = new Helper();
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
+				helper.isValuePresentAndString(config.argument)
+			) {
 				if (config.argument.startsWith("!")) {
-					let commandName = config.argument
-						.split(/\s(.+)/)[0]
+					let commandName = helper
+						.getCommandArgumentKey(config.argument, 0)
 						.slice(1)
 						.toLowerCase();
-					let commandText = config.argument.split(/\s(.+)/)[1];
+					let commandText = helper.getCommandArgumentKey(config.argument, 1);
 
 					if (commandText) {
-						const { response } = (await commands.list[commandName]) || {};
+						const { response } = commands.list[commandName]?.getCommand() || {};
 
 						if (response) {
 							let command = await Command.findOne({ name: commandName });
 
-							if (command) {
-								commands.list[commandName] = {
-									response: commandText,
-								};
+							if (command && command.text != commandText) {
+								commands.list[commandName] = new BaseCommand(() => {
+									return {
+										response: command.text,
+									};
+								}, [
+									{
+										description: command.text,
+										usage: "!" + command.name,
+										usableBy: "users",
+										active: true,
+									},
+								]);
 
 								command.text = commandText;
 								await command.save();
@@ -37,45 +54,61 @@ const getCommand = () => {
 									usableBy: "users",
 								});
 
-								result.push(["!" + commandName + " has been edited!"]);
+								result.push("!" + commandName + " has been edited!");
+							} else if (command && command.text == commandText) {
+								result.push(
+									"!" + commandName + " already says: " + commandText
+								);
 							} else {
-								result.push([
+								result.push(
 									"!" +
 										commandName +
-										" is too spicy to be edited through chat, Starless is going to have to do some work for that, so ask nicely",
-								]);
+										" is too spicy to be edited through chat, Starless is going to have to do some work for that, so ask nicely"
+								);
 							}
 						} else {
-							result.push(["No command found by this name !" + commandName]);
+							result.push(
+								"!" +
+									commandName +
+									" doesn't look to be a command, are you sure you spelt it right, dummy?!"
+							);
 						}
+					} else if (!commandName) {
+						result.push(
+							"To edit a Command, you must include the command name - !editComm ![command name] [command text]"
+						);
 					} else {
-						result.push([
-							"To edit a Command, you must include the Command name, and follwed by the new Command output, Command must start with '!' '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
-						]);
+						result.push(
+							"To edit a Command, you must include the edited command text - !editComm ![command name] [edited command text]"
+						);
 					}
 				} else {
-					result.push([
-						"Command being edited must start with '!' !editcomm !editcommand this is what an edit command looks like",
-					]);
+					result.push(
+						"To edit a Command, command name must start with '!' - !editComm ![command name] [edited command text]"
+					);
 				}
-			} else if (!config.isModUp) {
-				result.push(["!editcomm command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To edit a Command, you must include the Command name, and follwed by the the Command output, edited Command must start with !: '!editcomm !Yen Rose would really appreciate it if Yen would step on her'",
-				]);
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
+				result.push("!editComm is for Mods only");
+			} else if (!helper.isValuePresentAndString(config.argument)) {
+				result.push(
+					"To edit a Command, use !editComm ![command name] [edited command text]"
+				);
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Edits an existing command",
-				usage: "!editcomm !newCommand This is an edited command",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
-exports.getCommand = getCommand;
+let versions = [
+	{
+		description: "Edits an existing command",
+		usage: "!editcomm ![command name] [updated text for command]",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
+const editCommand = new BaseCommand(commandResponse, versions);
+
+exports.command = editCommand;

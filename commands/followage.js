@@ -1,50 +1,63 @@
+const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
+
 const chatClient = require("../bot-chatclient");
 
-const getCommand = () => {
+const helper = new Helper();
+
+let twitchId = process.env.TWITCH_USER_ID;
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			const apiClient = chatClient.getApiClient();
-			const follow = await apiClient.users.getFollowFromUserToBroadcaster(
-				config.userInfo.userId,
-				twitchId
-			);
-
-			if (follow) {
-				const currentTimestamp = Date.now();
-				const followStartTimestamp = follow.followDate.getTime();
-
-				let followLength = getFollowLength(
-					currentTimestamp - followStartTimestamp
+			if (!helper.isStreamer(config.userInfo)) {
+				const apiClient = await chatClient.getApiClient();
+				const follow = await apiClient.users.getFollowFromUserToBroadcaster(
+					config.userInfo.userId,
+					twitchId
 				);
 
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" has been following TheStarlessAbstract for " +
-						followLength,
-				]);
-			} else {
-				result.push([
-					"@" +
-						config.userInfo.displayName +
-						" hit that follow button, otherwise this command is doing a whole lot of nothing for you",
-				]);
+				if (follow) {
+					const currentTimestamp = Date.now();
+					const followStartTimestamp = follow.followDate.getTime();
+
+					let followLength = getFollowLength(
+						currentTimestamp - followStartTimestamp
+					);
+
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" has been following TheStarlessAbstract for " +
+							followLength
+					);
+				} else {
+					result.push(
+						"@" +
+							config.userInfo.displayName +
+							" hit that follow button, otherwise this command is doing a whole lot of nothing for you"
+					);
+				}
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"How long has it been since you last unfollowed, and then refollowed",
-				usage: "!followage",
-				usableBy: "users",
-			},
-		],
 	};
 };
+
+let versions = [
+	{
+		description:
+			"How long has it been since you last unfollowed, and then refollowed",
+		usage: "!followage",
+		usableBy: "users",
+		active: true,
+	},
+];
+
+const followage = new BaseCommand(commandResponse, versions);
 
 function getFollowLength(followTime) {
 	let second = Math.floor(followTime / 1000);
@@ -77,8 +90,8 @@ function getFollowLength(followTime) {
 			followString +=
 				timeUnit.value +
 				" " +
-				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name);
-			(", ");
+				(timeUnit.value > 1 ? timeUnit.name + "s" : timeUnit.name) +
+				", ";
 		}
 	}
 
@@ -88,4 +101,4 @@ function getFollowLength(followTime) {
 	return followString;
 }
 
-exports.getCommand = getCommand;
+exports.command = followage;

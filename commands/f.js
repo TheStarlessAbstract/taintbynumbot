@@ -1,10 +1,15 @@
 const axios = require("axios");
 
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
+
 const AudioLink = require("../models/audiolink");
 const DeathCounter = require("../models/deathcounter");
 
 const audio = require("../bot-audio");
 const chatClient = require("../bot-chatclient");
+
+const helper = new Helper();
 
 let twitchId = process.env.TWITCH_USER_ID;
 let url = process.env.BOT_DOMAIN;
@@ -12,79 +17,69 @@ let url = process.env.BOT_DOMAIN;
 let allTimeStreamDeaths;
 let apiClient;
 let audioLinks;
-let COOLDOWN = 5000;
+let cooldown = 5000;
 let gamesPlayed;
 let gameStreamDeaths;
-let timer;
 let totalGameDeaths;
 let totalStreamDeaths;
 
-const getCommand = () => {
+let commandResponse = () => {
 	return {
-		response: async ({}) => {
+		response: async (config) => {
 			let result = [];
 
-			try {
-				let stream = await getStreamData();
+			let currentTime = new Date();
+			if (helper.isCooldownPassed(currentTime, f.getTimer(), f.getCooldown())) {
+				f.setTimer(currentTime);
 
-				if (stream == null) {
-					result.push(
-						"Starless doesn't seem to be streaming right now, come back later"
-					);
-				} else {
-					let currentTime = new Date();
-
-					if (currentTime - timer > COOLDOWN) {
-						timer = currentTime;
+				try {
+					let stream = await getStreamData(config);
+					if (stream == null) {
+						result.push(
+							"Starless doesn't seem to be streaming right now, come back later"
+						);
+					} else {
 						let gameName = stream.gameName;
 						let streamDate = stream.startDate;
 						let timeSinceStartAsMs = Math.floor(currentTime - streamDate);
-
 						streamDate = new Date(
 							streamDate.getFullYear(),
 							streamDate.getMonth(),
 							streamDate.getDate()
 						);
-
 						gameStreamDeaths = await getDeathCounter(
 							gameName,
 							streamDate,
 							gameStreamDeaths
 						);
-
 						allTimeStreamDeaths++;
 						totalGameDeaths++;
 						totalStreamDeaths++;
-
 						gameStreamDeaths.deaths++;
-						gameStreamDeaths.save();
-
+						await gameStreamDeaths.save();
 						let averageToDeathMs = timeSinceStartAsMs / gameStreamDeaths.deaths;
-
 						let averageToDeath = {
 							hours: Math.floor(averageToDeathMs / (1000 * 60 * 60)),
 							minutes: Math.floor((averageToDeathMs / (1000 * 60)) % 60),
 							seconds: Math.floor((averageToDeathMs / 1000) % 60),
 						};
-
 						let audioLink;
-
 						if (totalGameDeaths == 666) {
 							audioLink = await AudioLink.findOne({ name: "666" });
 							audioLink = audioLink?.url;
 						} else {
-							audioLink = getRandomisedAudioFileUrl(audioLinks);
+							audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
 						}
+						if (!helper.isTest()) {
+							audio.play(audioLink);
 
-						audio.play(audioLink);
-
-						resp = await axios.post(url + "/deathcounter", {
-							deaths: gameStreamDeaths.deaths,
-							gameDeaths: totalGameDeaths,
-							allDeaths: allTimeStreamDeaths,
-							average: averageToDeath,
-						});
-
+							resp = await axios.post(url + "/deathcounter", {
+								deaths: gameStreamDeaths.deaths,
+								gameDeaths: totalGameDeaths,
+								allDeaths: allTimeStreamDeaths,
+								average: averageToDeath,
+							});
+						}
 						let random = Math.floor(Math.random() * 100) + 1;
 						let pularlity;
 						if (random == 1) {
@@ -93,7 +88,6 @@ const getCommand = () => {
 								"death/fail",
 								"deaths/fails"
 							);
-
 							result.push(
 								"ThisIsFine ThisIsFine ThisIsFine it's only " +
 									gameStreamDeaths.deaths +
@@ -107,7 +101,6 @@ const getCommand = () => {
 								"time",
 								"times"
 							);
-
 							result.push(
 								"Starless has now died/failed " +
 									gameStreamDeaths.deaths +
@@ -117,10 +110,8 @@ const getCommand = () => {
 									gameStreamDeaths.gameTitle +
 									" this stream"
 							);
-
 							if (random >= 13 && random <= 23) {
 								pularlity = getPlurality(allTimeStreamDeaths, "time", "times");
-
 								result.push(
 									"Since records have started, Starless has died/failed a grand total of " +
 										allTimeStreamDeaths +
@@ -129,7 +120,6 @@ const getCommand = () => {
 								);
 							} else if (gamesPlayed > 1 && random >= 35 && random <= 45) {
 								pularlity = getPlurality(totalStreamDeaths, "time", "times");
-
 								result.push(
 									"Starless has played " +
 										gamesPlayed +
@@ -141,7 +131,6 @@ const getCommand = () => {
 							} else if (random >= 57 && random <= 67) {
 								if (totalGameDeaths != 0) {
 									pularlity = getPlurality(totalGameDeaths, "time", "times");
-
 									result.push(
 										"Starless has died/failed at least " +
 											totalGameDeaths +
@@ -154,7 +143,6 @@ const getCommand = () => {
 							} else if (random >= 79 && random <= 89) {
 								let averageString = "";
 								pularlity = getPlurality(totalGameDeaths, "time", "times");
-
 								if (averageToDeath.hours > 0) {
 									averageString = averageToDeath.hours + "h ";
 								}
@@ -164,7 +152,6 @@ const getCommand = () => {
 								if (averageToDeath.seconds > 0) {
 									averageString = averageString + averageToDeath.seconds + "s ";
 								}
-
 								result.push(
 									"Starless is dying/failing on average every " +
 										averageString +
@@ -173,31 +160,30 @@ const getCommand = () => {
 							}
 						}
 					}
+				} catch (err) {
+					console.log(err);
+					result.push(
+						"Twitch says no, and Starless should really sort this out some time after stream"
+					);
 				}
-			} catch (err) {
-				console.log(err);
-				result.push(
-					"Twitch says no, and Starless should really sort this out some time after stream"
-				);
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description:
-					"To keep track of my many, many, many, many, many deaths/failures",
-				usage: "!f",
-				usableBy: "users",
-			},
-		],
-		active: true,
 	};
 };
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+let versions = [
+	{
+		description:
+			"To keep track of my many, many, many, many, many deaths/failures",
+		usage: "!f",
+		usableBy: "users",
+		active: true,
+	},
+];
+
+const f = new TimerCommand(commandResponse, versions, cooldown);
 
 const getDeathCounter = async (gameName, streamDate, gameStreamDeaths) => {
 	let gameDeathCounter;
@@ -244,23 +230,19 @@ async function createDeathCounter(game, date) {
 	});
 }
 
-function getRandomisedAudioFileUrl(array) {
-	let index = getRandomBetweenExclusiveMax(0, array.length);
-	let audioUrl = array[index].url;
-
-	return audioUrl;
-}
-
 async function updateAudioLinks() {
 	audioLinks = await AudioLink.find({ command: "f" }).exec();
 }
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
+async function getStreamData(config) {
+	let streamData;
 
-async function getStreamData() {
-	return await apiClient.streams.getStreamByUserId(twitchId);
+	if (helper.isTest() && config?.testOptions) {
+		streamData = config.testOptions;
+	} else {
+		streamData = await apiClient.streams.getStreamByUserId(twitchId);
+	}
+	return streamData;
 }
 
 async function setAllTimeStreamDeaths() {
@@ -315,9 +297,8 @@ async function setup() {
 	await setTotalGameDeaths();
 }
 
-exports.getCommand = getCommand;
+exports.command = f;
 exports.setAllTimeStreamDeaths = setAllTimeStreamDeaths;
-exports.setTimer = setTimer;
 exports.setTotalGameDeaths = setTotalGameDeaths;
 exports.setTotalStreamDeaths = setTotalStreamDeaths;
 exports.setup = setup;

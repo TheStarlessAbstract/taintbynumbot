@@ -1,7 +1,7 @@
 const PubNub = require("pubnub");
 
-const pubKey = process.env.PUBNUB_PUBKEY;
-const subKey = process.env.PUBNUB_SUBKEY;
+const pubKey = process.env.PUBNUB_PUBLISH_KEY;
+const subKey = process.env.PUBNUB_SUBSCRIBE_KEY;
 
 const pubnub = new PubNub({
 	publishKey: pubKey,
@@ -10,6 +10,7 @@ const pubnub = new PubNub({
 });
 
 const publishMessage = async (channel, message) => {
+	console.log(message);
 	const publishPayload = {
 		channel: channel,
 		message: {

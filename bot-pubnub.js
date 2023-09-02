@@ -3,16 +3,14 @@ const PubNub = require("pubnub");
 
 const commands = require("./bot-commands");
 
-const pubKey = process.env.PUBNUB_PUBKEY;
-const subKey = process.env.PUBNUB_SUBKEY;
+const pubKey = process.env.PUBNUB_PUBLISH_KEY;
+const subKey = process.env.PUBNUB_SUBSCRIBE_KEY;
 
 const pubnub = new PubNub({
 	publishKey: pubKey,
 	subscribeKey: subKey,
 	userId: "456",
 });
-
-setup();
 
 function setup() {
 	const listener = createListener();
@@ -34,7 +32,8 @@ function createListener() {
 		message: (messageEvent) => {
 			switch (messageEvent.channel) {
 				case "command_toggle":
-					handleCommandToggle(messageEvent.message.description);
+					let message = JSON.parse(messageEvent.message.description);
+					handleCommandToggle(message.command, message.version);
 					break;
 				default:
 					console.log("This case has not been defined yet");
@@ -46,9 +45,8 @@ function createListener() {
 		},
 	};
 }
-
-const handleCommandToggle = (commandName) => {
-	commands.list[commandName].active = !commands.list[commandName].active;
+const handleCommandToggle = (commandName, number) => {
+	commands.list[commandName].setVersionActive(number);
 };
 
 exports.setup = setup;

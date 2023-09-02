@@ -1,76 +1,90 @@
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
+
 const Quote = require("../models/quote");
 
-let COOLDOWN = 30000;
-let timer;
+const helper = new Helper();
 
-const getCommand = () => {
+let cooldown = 30000;
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 			let currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN) {
+			if (
+				helper.isCooldownPassed(
+					currentTime,
+					quote.getTimer(),
+					quote.getCooldown()
+				) ||
+				helper.isStreamer(config.userInfo)
+			) {
 				let entries = [];
 				let index;
-				timer = currentTime;
+				quote.setTimer(currentTime);
 
-				if (!config.argument) {
-					entries = await Quote.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						let quote;
-						quote = await Quote.findOne({ index: config.argument });
+				if (
+					helper.isVersionActive(versions, 0) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					entries = await Quote.aggregate([{ $sample: { size: 1 } }]);
+					if (entries.length == 0) {
+						result.push("Starless has never said anything of note");
+					}
+				} else if (helper.isValuePresentAndString(config.argument)) {
+					if (helper.isVersionActive(versions, 1) && !isNaN(config.argument)) {
+						let quote = await Quote.findOne({ index: config.argument });
+
 						if (quote) {
 							entries.push(quote);
+						} else {
+							result.push("There is no Quote " + config.argument);
 						}
-					} else {
+					} else if (helper.isVersionActive(versions, 2)) {
 						entries = await Quote.find({
 							text: { $regex: config.argument, $options: "i" },
 						});
+
+						if (!entries) {
+							result.push("No Quote found mentioning: " + config.argument);
+						}
 					}
 				}
 
 				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
+					index = helper.getRandomBetweenExclusiveMax(0, entries.length);
 					result.push(entries[index].index + `. ` + entries[index].text);
-				} else if (isNaN(config.argument)) {
-					result.push("No Starless quote found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push("Starless has never said anything of note");
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no Starless quote number " + config.argument);
 				}
 			}
 			return result;
 		},
-		versions: [
-			{
-				description: "Gets a random quote",
-				usage: "!quote",
-				usableBy: "users",
-			},
-			{
-				description: "Gets quote number 69",
-				usage: "!quote 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random quote that includes the string 'sit on my face' uwu",
-				usage: "!quote sit on my face",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
+let versions = [
+	{
+		description: "Gets a random quote",
+		usage: "!quote",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Gets quote number 69",
+		usage: "!quote 69",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description:
+			"Gets a random quote that includes the string 'sit on my face' uwu",
+		usage: "!quote sit on my face",
+		usableBy: "users",
+		active: true,
+	},
+];
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+const quote = new TimerCommand(commandResponse, versions, cooldown);
 
-exports.getCommand = getCommand;
-exports.setTimer = setTimer;
+exports.command = quote;

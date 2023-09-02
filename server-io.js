@@ -6,10 +6,9 @@ const DeathSaveState = require("./models/deathsavestate");
 let clientId = process.env.TWITCH_CLIENT_ID;
 
 let io;
-let url;
+let botDomain = process.env.BOT_DOMAIN;
 let interval;
 let deathCounterInterval;
-let lastPlayFinished = true;
 let isLive = false;
 let deaths;
 let gameDeaths;
@@ -17,45 +16,23 @@ let allDeaths = 0;
 let average;
 let lastDeathType = "Stream Deaths";
 let deathCount;
-
-if (process.env.PORT) {
-	url = process.env.BOT_DOMAIN;
-} else {
-	url = "http://localhost:5000/";
-}
+let ssl = process.env.PORT ? https : http;
 
 async function setup(newIo) {
 	io = newIo;
 	io.on("connection", async (socket) => {
 		if (socket.handshake.headers.referer.includes("channelpointoverlay")) {
 			console.log("/channelpointoverlay connected");
-
 			isLive = true;
 
 			interval = setInterval(() => {
-				try {
-					if (process.env.PORT) {
-						https.get(url, (res) => {
-							// do nothing
-						});
-					} else {
-						http.get(url, (res) => {
-							// do nothing
-						});
-					}
-				} catch (err) {
-					console.log(err);
-				}
+				ssl.get(botDomain, (res) => {});
 			}, getRandomBetween(600000, 900000));
 
 			socket.on("disconnect", () => {
 				console.log("/channelpointoverlay disconnected");
 				isLive = false;
 				clearInterval(interval);
-			});
-
-			socket.on("ended", () => {
-				lastPlayFinished = true;
 			});
 		}
 
@@ -124,7 +101,16 @@ async function setup(newIo) {
 		if (socket.handshake.headers.referer.includes("auth")) {
 			console.log("/auth connected");
 
-			io.emit("setClientId", clientId);
+			let redirectUri = botDomain + "/test";
+
+			let scope =
+				"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
+				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
+			// let scope =
+			// 	"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
+			// 	"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
+
+			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
 	});
 }
@@ -134,10 +120,7 @@ function getRandomBetween(min, max) {
 }
 
 function playAudio(audioLink) {
-	if (lastPlayFinished) {
-		io.emit("playAudio", audioLink);
-		lastPlayFinished = false;
-	}
+	io.emit("playAudio", audioLink);
 }
 
 function setDeaths(newDeaths, newGameDeaths, newAllDeaths, newAverage) {

@@ -13,15 +13,21 @@
             var socket = io();
             var x = document.getElementById("myAudio"); 
             var source = document.getElementById("source");
+            var lastPlayedFinished = true;
 
             x.addEventListener("ended", () => {
-                socket.emit("ended", "response");
+                lastPlayedFinished = true;
             }, false);
 
             socket.on("playAudio", (url) => {
-                source.src = url;
-                x.load()
+                if(lastPlayedFinished){
+                    source.src = url;
+                x.load();
                 x.play();
+
+                lastPlayedFinished = false;
+                }
+                
             });
         </script>
     </body>

@@ -1,108 +1,94 @@
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
+
 const AudioLink = require("../models/audiolink");
 const LoyaltyPoint = require("../models/loyaltypoint");
 
 const audio = require("../bot-audio");
 
-let audioLinks;
-let COOLDOWN = 5000;
-let cost = 500;
-let timer;
+const helper = new Helper();
 
-const getCommand = () => {
+let audioLinks;
+let cooldown = 5000;
+let cost = 500;
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let audioLink;
 			let currentTime = new Date();
 
-			try {
-				if (currentTime - timer < COOLDOWN) {
-					throw new Error("Wait longer");
-				}
-
+			if (
+				helper.isCooldownPassed(currentTime, drinkBitch.timer, cooldown) ||
+				helper.isStreamer(config.userInfo)
+			) {
+				drinkBitch.setTimer(currentTime);
 				let user = await LoyaltyPoint.findOne({
 					userId: config.userInfo.userId,
 				});
 
-				if (!user) {
-					throw new Error("No user found");
-				}
+				if (user) {
+					let audioLink;
+					if (user.points > cost) {
+						audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
 
-				if (user.points < cost) {
-					throw new Error("Not enough points");
-				}
+						if (!helper.isTest()) {
+							audio.play(audioLink);
+						}
 
-				timer = currentTime;
+						user.points -= cost;
+						await user.save();
+						result.push("@TheStarlessAbstract drink, bitch!");
+					} else {
+						if (helper.getRandomBetweenInclusiveMax(1, 100) == 100) {
+							audioLink = helper.getRandomisedAudioFileUrl(audioLinks);
 
-				audioLink = getRandomisedAudioFileUrl(audioLinks);
-				audio.play(audioLink);
+							if (!helper.isTest()) {
+								audio.play(audioLink);
+							}
 
-				user.points -= cost;
-				user.save();
-				result.push("@TheStarlessAbstract drink, bitch!");
-			} catch (error) {
-				if (error == "No user found") {
+							result.push(
+								"@" +
+									config.userInfo.displayName +
+									" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
+							);
+						} else {
+							result.push(
+								"@" +
+									config.userInfo.displayName +
+									" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
+							);
+						}
+					}
+				} else {
 					result.push(
 						"@" +
 							config.userInfo.displayName +
 							" It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkbitch"
 					);
-				} else if (error == "Not enough points") {
-					if (getRandomBetweenInclusiveMax(1, 100) == 100) {
-						audioLink = getRandomisedAudioFileUrl(audioLinks);
-						audio.play(audioLink);
-
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!"
-						);
-					} else {
-						result.push(
-							"@" +
-								config.userInfo.displayName +
-								" You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch"
-						);
-					}
 				}
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Makes Starless drink booze",
-				usage: "!drinkbitch",
-				usableBy: "users",
-				cost: "500 Tainty Points",
-			},
-		],
 	};
 };
 
-function getRandomisedAudioFileUrl(array) {
-	let index = getRandomBetweenExclusiveMax(0, array.length);
-	let audioUrl = array[index].url;
+let versions = [
+	{
+		description: "Makes Starless drink booze",
+		usage: "!drinkbitch",
+		usableBy: "users",
+		cost: "500 Tainty Points",
+		active: true,
+	},
+];
 
-	return audioUrl;
-}
-
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function getRandomBetweenInclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const drinkBitch = new TimerCommand(commandResponse, versions, cooldown);
 
 async function updateAudioLinks() {
-	audioLinks = await AudioLink.find({ command: "drinkbitch" }).exec();
+	audioLinks = await AudioLink.find({ command: "drinkbitch" });
 }
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
-
-exports.getCommand = getCommand;
-exports.setTimer = setTimer;
+exports.command = drinkBitch;
 exports.updateAudioLinks = updateAudioLinks;

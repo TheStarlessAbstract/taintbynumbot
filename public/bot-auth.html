@@ -3,32 +3,48 @@
     <head>
         <title>Socket.IO chat</title>
         <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <style>
+            body {
+                background-color: #333;
+                color: #fff;
+            }
+            #login-with-twitch {
+                background-color: #8c1aff;
+                border: none;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
-        <button type="button"><a href="" id="twitchurl">Connect with Twitch</a></button>
+        <button id="login-with-twitch">Login with Twitch</button>
         <script src="/socket.io/socket.io.js"></script>
         <script>
             var socket = io();
-            var x = document.getElementById("twitchurl"); 
+            var x = document.getElementById("login-with-twitch"); 
 
-            var response = "response_type=code"
-            var client_id = ""
-            var redirect_uri = "&redirect_uri=http://localhost:5000"
-            var scope = "&scope=channel%3Amanage%3Apolls+channel%3Aread%3Apolls"
-            var url = "https://id.twitch.tv/oauth2/authorize?"
+            var twitchAuthUrl;
 
-            socket.on("setClientId", clientId => {
-                client_id = "&client_id="+clientId;
-                x.href=url+response+client_id+redirect_uri+scope
+            socket.on("setDetails", details => {
+                clientId = details.clientId;
+                redirectUri = details.redirectUri;
+                scope = details.scope;
+
+                twitchAuthUrl = "https://id.twitch.tv/oauth2/authorize" +
+                "?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
+                "&response_type=code" +
+                "&scope=" + scope;
             });
+
+            $(document).ready(function() {
+            $("#login-with-twitch").click(function() {
+                window.location = twitchAuthUrl;
+            });
+        });
         </script>
     </body>
 </html>
-
-
-<!-- https://id.twitch.tv/oauth2/authorize
-    ?response_type=code
-    &client_id=hof5gwx0su6owfnys0nyan9c87zr6t
-    &redirect_uri=http://localhost:3000
-    &scope=channel%3Amanage%3Apolls+channel%3Aread%3Apolls
-    &state=c3ab8aa609ea11e793ae92361f002671 -->

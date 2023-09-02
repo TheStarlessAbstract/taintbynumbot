@@ -1,54 +1,66 @@
+const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
+
 const Quote = require("../models/quote");
 
-const getCommand = () => {
+const helper = new Helper();
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
-				let entries = await Quote.find({});
-				const index = entries.length ? getNextIndex(entries) : 1;
+			if (
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
+				helper.isValuePresentAndString(config.argument)
+			) {
+				let quoteText = config.argument;
 
-				try {
-					let created = await Quote.create({
+				let existingQuote = await Quote.findOne({ text: quoteText });
+
+				if (existingQuote != null) {
+					result.push("This Quote has already been added");
+				} else {
+					let entry = await Quote.findOne()
+						.sort({ index: -1 })
+						.select("index")
+						.exec();
+
+					let index;
+					if (entry) {
+						index = entry.index + 1;
+					} else {
+						index = 1;
+					}
+
+					await Quote.create({
 						index: index,
-						text: config.argument,
+						text: quoteText,
 						addedBy: config.userInfo.displayName,
 					});
 
-					result.push(["Quote added"]);
-				} catch (err) {
-					if (err.code == 11000) {
-						result.push("This quote has already been added");
-					} else {
-						console.log(err);
-						result.push(
-							"There was some problem adding this quote, and Starless should really sort this shit out."
-						);
-					}
+					result.push("Quote added: " + quoteText);
 				}
-			} else if (!config.isModUp) {
-				result.push(["!addquote command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To add a quote, you must include the quote after the command: '!addquote the mods totally never bully Starless'",
-				]);
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
+				result.push("!addQuote is for Mods only");
+			} else if (!helper.isValuePresentAndString(config.argument)) {
+				result.push("To add a Quote use !addQuote [quote text]");
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Saves a new, and totally out of context quote",
-				usage: "!addquote Fuck fuck fuck fuck fuck",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
-function getNextIndex(array) {
-	return array[array.length - 1].index + 1;
-}
+let versions = [
+	{
+		description: "Saves a new, and totally out of context quote",
+		usage: "!addquote Fuck fuck fuck fuck fuck",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-exports.getCommand = getCommand;
+const addQuote = new BaseCommand(commandResponse, versions);
+
+exports.command = addQuote;

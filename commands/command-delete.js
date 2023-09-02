@@ -1,78 +1,99 @@
+const BaseCommand = require("../classes/base-command");
+const Helper = require("../classes/helper");
+
 const Command = require("../models/command");
 
 const commands = require("../bot-commands");
 const discord = require("../bot-discord");
 
-const getCommand = () => {
+const helper = new Helper();
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
 
-			if (config.isModUp && config.argument) {
+			if (
+				helper.isValidModeratorOrStreamer(config.userInfo) &&
+				helper.isValuePresentAndString(config.argument)
+			) {
 				if (config.argument.startsWith("!")) {
-					let commandName = config.argument.slice(1).toLowerCase();
-					const { response } = (await commands.list[commandName]) || {};
+					let commandName = helper
+						.getCommandArgumentKey(config.argument, 0)
+						.slice(1)
+						.toLowerCase();
 
-					if (response) {
-						let command = await Command.findOne({ name: commandName });
+					if (commandName) {
+						const { response } = commands.list[commandName]?.getCommand() || {};
 
-						if (command) {
-							let deletion = await Command.deleteOne({ name: commandName });
+						if (response) {
+							let command = await Command.findOne({ name: commandName });
 
-							if (deletion.deletedCount > 0) {
-								delete commands.list[commandName];
-								discord.updateCommands("delete", {
-									name: commandName,
-									description: command.text,
-									usage: "!" + commandName,
-									usableBy: "users",
-								});
+							if (command) {
+								let deletion = await Command.deleteOne({ name: commandName });
 
-								result.push("!" + commandName + " has been deleted");
+								if (deletion.deletedCount > 0) {
+									delete commands.list[commandName];
+
+									discord.updateCommands("delete", {
+										name: commandName,
+										description: command.text,
+										usage: "!" + commandName,
+										usableBy: "users",
+									});
+
+									result.push("!" + commandName + " has been deleted");
+								} else {
+									result.push(
+										"!" +
+											commandName +
+											" has not been deleted, database says no?!"
+									);
+								}
 							} else {
 								result.push(
 									"!" +
 										commandName +
-										" has not been deleted, database says no?!"
+										" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely"
 								);
 							}
 						} else {
-							result.push([
+							result.push(
 								"!" +
 									commandName +
-									" is too spicy to be deleted through chat, Starless is going to have to do some work for that, so ask nicely",
-							]);
+									" doesn't look to be a command, are you sure you spelt it right, dummy?!"
+							);
 						}
 					} else {
-						result.push([
-							"!" +
-								commandName +
-								" doesn't look to be a command, are you sure you spelt it right, dummy?!",
-						]);
+						result.push(
+							"To delete a Command, you must include the command name - !delComm ![command name]"
+						);
 					}
 				} else {
-					result.push([
-						"To specify the command to delete, include '!' at the start !delcomm !oldcommand",
-					]);
+					result.push(
+						"To delete a Command, command name must start with '!' - !delComm ![command name]"
+					);
 				}
-			} else if (!config.isModUp) {
-				result.push(["!delcomm command is for Mods only"]);
-			} else if (!config.argument) {
-				result.push([
-					"To delete a command, you must include the command name, command being deleted must start with '!' : '!delcomm !oldcommand",
-				]);
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
+				result.push("!delComm Command is for Mods only");
+			} else if (!helper.isValuePresentAndString(config.argument)) {
+				result.push("To delete a Command, use !delComm ![command name]");
 			}
 
 			return result;
 		},
-		versions: [
-			{
-				description: "Deletes a command",
-				usage: "!delcomm !oldcommand",
-				usableBy: "mods",
-			},
-		],
 	};
 };
 
-exports.getCommand = getCommand;
+let versions = [
+	{
+		description: "Deletes a command",
+		usage: "!delcomm !oldcommand",
+		usableBy: "mods",
+		active: true,
+	},
+];
+
+const delCommand = new BaseCommand(commandResponse, versions);
+
+exports.command = delCommand;

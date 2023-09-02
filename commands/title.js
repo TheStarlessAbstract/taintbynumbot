@@ -1,78 +1,94 @@
-const Title = require("../models/title");
+const TimerCommand = require("../classes/timer-command");
+const Helper = require("../classes/helper");
 
-let COOLDOWN = 30000;
-let timer;
+const pubSubClient = require("../bot-pubsubclient");
 
-const getCommand = () => {
+let twitchId = process.env.TWITCH_USER_ID;
+
+const helper = new Helper();
+
+let cooldown = 10000;
+let currentTime = new Date();
+
+let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
-			let currentTime = new Date();
+			currentTime = new Date();
 
-			if (currentTime - timer > COOLDOWN) {
-				let entries = [];
-				let index;
-				let quote;
-				timer = currentTime;
+			if (
+				helper.isCooldownPassed(
+					currentTime,
+					title.getTimer(),
+					title.getCooldown()
+				)
+			) {
+				title.setTimer(currentTime);
+				let apiClient;
+				let channel;
 
-				if (!config.argument) {
-					entries = await Title.find({});
-				} else {
-					if (!isNaN(config.argument)) {
-						quote = await Title.findOne({ index: config.argument });
-						if (quote) {
-							entries.push(quote);
-						}
-					} else {
-						entries = await Title.find({
-							text: { $regex: config.argument, $options: "i" },
-						});
+				if (
+					helper.isVersionActive(versions, 0) &&
+					!helper.isValuePresentAndString(config.argument)
+				) {
+					apiClient = await pubSubClient.getApiClient();
+					channel = await apiClient.channels.getChannelInfoById(twitchId);
+
+					if (channel == null) {
+						result.push(
+							"Twitch says no, and Starless should really sort this out some time after stream"
+						);
+						return result;
 					}
-				}
 
-				if (entries.length > 0) {
-					index = getRandomBetweenExclusiveMax(0, entries.length);
-					result.push(entries[index].index + `. ` + entries[index].text);
-				} else if (isNaN(config.argument)) {
-					result.push("No Title found mentioning: " + config.argument);
-				} else if (!config.argument) {
-					result.push(
-						"The mods don't seem to have been very abusive lately...with titles"
-					);
-				} else if (!isNaN(config.argument)) {
-					result.push("There is no title number " + config.argument);
+					result.push("The current title is: " + channel.title);
+				} else if (
+					helper.isVersionActive(versions, 1) &&
+					helper.isValuePresentAndString(config.argument) &&
+					helper.isValidModeratorOrStreamer(config.userInfo)
+				) {
+					apiClient = await pubSubClient.getApiClient();
+
+					try {
+						await apiClient.channels.updateChannelInfo(twitchId, {
+							title: config.argument,
+						});
+					} catch (e) {
+						if (e.body.includes("banned words")) {
+							result.push(
+								"Twitch says you have used a no-no word - Title not updated"
+							);
+						} else {
+							result.push(
+								"Twitch has not updated the title for reasons - Try again later"
+							);
+						}
+						return result;
+					}
+
+					result.push("Title has been set to " + config.argument);
 				}
 			}
 			return result;
 		},
-		versions: [
-			{
-				description: "Gets a random title",
-				usage: "!titleharassment",
-				usableBy: "users",
-			},
-			{
-				description: "Gets title number 69",
-				usage: "!titleharassment 69",
-				usableBy: "users",
-			},
-			{
-				description:
-					"Gets a random title that includes the string 'sit on my face' uwu",
-				usage: "!titleharassment sit on my face",
-				usableBy: "users",
-			},
-		],
 	};
 };
 
-function getRandomBetweenExclusiveMax(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
+let versions = [
+	{
+		description: "Gets current title of the stream",
+		usage: "!title",
+		usableBy: "users",
+		active: true,
+	},
+	{
+		description: "Updates the current title of the stream",
+		usage: "!title My mistakes bring all the bots to the yard",
+		usableBy: "mods",
+		active: true,
+	},
+];
 
-function setTimer(newTimer) {
-	timer = newTimer;
-}
+const title = new TimerCommand(commandResponse, versions, cooldown);
 
-exports.getCommand = getCommand;
-exports.setTimer = setTimer;
+exports.command = title;
