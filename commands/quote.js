@@ -5,7 +5,7 @@ const Quote = require("../models/quote");
 
 const helper = new Helper();
 
-let cooldown = 30000;
+let cooldown = 10000;
 
 let commandResponse = () => {
 	return {
