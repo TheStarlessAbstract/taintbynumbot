@@ -121,11 +121,11 @@ router.get("/oauth/spotify", async (req, res) => {
 			twitchId: twitchUserId,
 			joinDate: new Date(),
 			spotifyToken: {
-				access_token: response.data.access_token,
-				token_type: response.data.token_type,
+				accessToken: response.data.access_token,
+				tokenType: response.data.token_type,
 				scope: response.data.scope,
-				expires_in: expiresIn,
-				refresh_token: response.data.refresh_token,
+				expiresIn: expiresIn,
+				refreshToken: response.data.refresh_token,
 			},
 		});
 	}
