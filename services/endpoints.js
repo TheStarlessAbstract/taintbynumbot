@@ -4,6 +4,7 @@ const path = require("path");
 const querystring = require("querystring");
 
 const Token = require("../models/token");
+const User = require("../models/user");
 
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
@@ -74,9 +75,68 @@ router.get("/auth", (req, res) => {
 	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
 });
 
+router.get("/spotify", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "public", "bot-spotify-auth.html"));
+});
+
+router.get("/oauth/spotify", async (req, res) => {
+	const code = req.query.code;
+
+	let botDomain = process.env.BOT_DOMAIN;
+	const clientId = process.env.SPOTIFY_CLIENT_ID;
+	const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+	let redirectUri = botDomain + "/oauth/spotify";
+
+	const response = await axios.post(
+		"https://accounts.spotify.com/api/token",
+		querystring.stringify({
+			grant_type: "authorization_code",
+			code: code,
+			redirect_uri: redirectUri,
+		}),
+		{
+			headers: {
+				Authorization:
+					"Basic " +
+					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+			},
+		}
+	);
+
+	let expiresIn = Date.now() + response.data.expires_in * 1000;
+	expiresIn = new Date(expiresIn);
+
+	let twitchUserId = process.env.TWITCH_USER_ID;
+	let user = await User.findOne({ twitchId: twitchUserId });
+
+	if (user) {
+		user.spotifyToken = {
+			scope: response.data.scope,
+			accessToken: response.data.access_token,
+			refreshToken: response.data.refresh_token,
+			expiresIn: expiresIn,
+		};
+	} else {
+		user = new User({
+			twitchId: twitchUserId,
+			joinDate: new Date(),
+			spotifyToken: {
+				access_token: response.data.access_token,
+				token_type: response.data.token_type,
+				scope: response.data.scope,
+				expires_in: expiresIn,
+				refresh_token: response.data.refresh_token,
+			},
+		});
+	}
+
+	user.save();
+
+	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
+});
+
 router.get("/oauth/callback", (req, res) => {
 	const code = req.query.code;
-	const scope = req.query.scope;
 
 	// Use the code and scope to make a request for an access token
 });
