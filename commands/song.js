@@ -15,6 +15,7 @@ let commandResponse = () => {
 			currentTime = new Date();
 
 			if (
+				helper.isStreamer ||
 				helper.isCooldownPassed(
 					currentTime,
 					song.getTimer(),
@@ -26,11 +27,7 @@ let commandResponse = () => {
 				let channelId = config.channelId;
 				let songString = await spotify.getCurrentPlaying(channelId);
 
-				if (songString == "no token") {
-					result.push("Can't access Spotify account");
-				} else {
-					result.push(songString);
-				}
+				result.push(songString);
 			}
 			return result;
 		},
