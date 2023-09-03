@@ -27,19 +27,19 @@ let TwitchTokenSchema = new Schema({
 });
 
 let SpotifyTokenSchema = new Schema({
-	access_token: { type: String, require: true },
-	token_type: { type: String, require: true, enum: ["Bearer"] },
+	accessToken: { type: String, require: true },
+	tokenType: { type: String, require: true, enum: ["Bearer"] },
 	scope: [
 		{
 			type: String,
 			require: true,
 		},
 	],
-	expires_in: {
+	expiresIn: {
 		type: Date,
 		required: true,
 	},
-	refresh_token: { type: String, require: true },
+	refreshToken: { type: String, require: true },
 });
 
 let UserSchema = new Schema({
