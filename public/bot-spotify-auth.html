@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <style>
+            body {
+                background-color: #333;
+                color: #fff;
+            }
+            #login-with-spotify {
+                background-color: #8c1aff;
+                border: none;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="login-with-spotify">Login with Spotify</button>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            var x = document.getElementById("login-with-twitch"); 
+
+            var authUrl;
+            
+            socket.on("setSpotifyDetails", details => {
+                clientId = details.spotifyClientId;
+                redirectUri = details.redirectUri;
+                scope = details.scope;
+
+                authUrl = "https://accounts.spotify.com/authorize?" +
+                "client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
+                "&response_type=code" +
+                "&scope=" + scope;
+            });
+
+            $(document).ready(function() {
+                $("#login-with-spotify").click(function() {
+                    window.location = authUrl;
+                });
+            });
+        </script>
+    </body>
+</html>
