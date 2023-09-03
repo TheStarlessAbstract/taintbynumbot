@@ -7,7 +7,10 @@ const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
 async function getToken(channelId) {
-	let user = await User.findOne({ twitchId: channelId }, "spotifyToken").exec();
+	let user = await User.findOne(
+		{ twitchId: channelId, spotifyToken: { $exists: true } },
+		"spotifyToken"
+	).exec();
 
 	if (!user) {
 		return null;
@@ -24,7 +27,7 @@ async function getToken(channelId) {
 }
 
 async function refreshToken(user) {
-	let refreshToken = user.spotifyToken.refreshoken;
+	let refreshToken = user.spotifyToken.refreshToken;
 
 	const response = await axios.post(
 		"https://accounts.spotify.com/api/token",
