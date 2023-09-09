@@ -116,7 +116,7 @@ async function setup(newIo) {
 
 		if (socket.handshake.headers.referer.includes("spotify")) {
 			console.log("/spotify connected");
-			const scope = "user-read-currently-playing";
+			const scope = "user-read-currently-playing user-read-playback-state";
 			redirectUri = botDomain + "/oauth/spotify";
 
 			//https://developer.spotify.com/documentation/web-api/tutorials/getting-started
