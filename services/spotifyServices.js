@@ -1,13 +1,20 @@
 const axios = require("axios");
 
-const spotify = require("../repos/spotifyRepo");
+const spotifyRepo = require("../repos/spotifyRepo");
 
 async function getCurrentPlaying(channelId) {
-	const token = await spotify.getToken(channelId);
+	const token = await spotifyRepo.getToken(channelId);
 
 	if (token === null) {
 		return "no token";
 	}
+
+	// check if playing
+	axios.get("https://api.spotify.com/v1/me/player/", {
+		headers: {
+			Authorization: "Bearer " + token.accessToken,
+		},
+	});
 
 	const response = await axios.get(
 		"https://api.spotify.com/v1/me/player/currently-playing",
