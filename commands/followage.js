@@ -1,7 +1,7 @@
 const BaseCommand = require("../classes/base-command");
 const Helper = require("../classes/helper");
 
-const chatClient = require("../bot-chatclient");
+const pubSubClient = require("../bot-pubsubclient");
 
 const helper = new Helper();
 
@@ -13,24 +13,24 @@ let commandResponse = () => {
 			let result = [];
 
 			if (!helper.isStreamer(config.userInfo)) {
-				const apiClient = await chatClient.getApiClient();
-				const follow = await apiClient.users.getFollowFromUserToBroadcaster(
-					config.userInfo.userId,
-					twitchId
+				const apiClient = await pubSubClient.getApiClient();
+				const channelFollower = await apiClient.channels.getChannelFollowers(
+					twitchId,
+					twitchId,
+					config.userInfo.userId
 				);
 
-				if (follow) {
+				if (channelFollower.data[0]) {
+					let follower = channelFollower.data[0];
 					const currentTimestamp = Date.now();
-					const followStartTimestamp = follow.followDate.getTime();
-
+					const followStartTimestamp = follower.followDate.getTime();
 					let followLength = getFollowLength(
 						currentTimestamp - followStartTimestamp
 					);
-
 					result.push(
 						"@" +
 							config.userInfo.displayName +
-							" has been following TheStarlessAbstract for " +
+							" has been staring into the Abstract abyss for " +
 							followLength
 					);
 				} else {
