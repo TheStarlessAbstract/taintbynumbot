@@ -105,5 +105,39 @@ async function setToken(code) {
 	await user.save();
 }
 
+async function testToken(something) {
+	// something = {
+	// 	type: "code" || "refresh",
+	// 	user: user,
+	// 	code: code,
+	// };
+
+	let somethingElse;
+
+	if (something.type == "code") {
+		somethingElse = {
+			grant_type: "code",
+		};
+	} else if (something.type == "refresh") {
+		somethingElse = {
+			grant_type: "refresh_token",
+		};
+	}
+
+	const response = await axios.post(
+		"https://accounts.spotify.com/api/token",
+		querystring.stringify({
+			somethingElse,
+		}),
+		{
+			headers: {
+				Authorization:
+					"Basic " +
+					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+			},
+		}
+	);
+}
+
 exports.getToken = getToken;
 exports.setToken = setToken;
