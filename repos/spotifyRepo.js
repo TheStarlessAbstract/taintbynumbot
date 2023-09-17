@@ -78,6 +78,8 @@ async function setToken(code) {
 	let expiresIn = Date.now() + response.data.expires_in * 1000;
 	expiresIn = new Date(expiresIn);
 
+	//////////////////
+
 	let twitchUserId = process.env.TWITCH_USER_ID;
 	let user = await User.findOne({ twitchId: twitchUserId });
 
@@ -102,32 +104,24 @@ async function setToken(code) {
 		});
 	}
 
+	//////////////////
+
 	await user.save();
 }
 
-async function testToken(something) {
+async function testToken(tokenInput) {
 	// something = {
 	// 	type: "code" || "refresh",
 	// 	user: user,
 	// 	code: code,
 	// };
 
-	let somethingElse;
-
-	if (something.type == "code") {
-		somethingElse = {
-			grant_type: "code",
-		};
-	} else if (something.type == "refresh") {
-		somethingElse = {
-			grant_type: "refresh_token",
-		};
-	}
+	let queryStringInput = generateQueryStringInput(tokenInput);
 
 	const response = await axios.post(
 		"https://accounts.spotify.com/api/token",
 		querystring.stringify({
-			somethingElse,
+			queryStringInput,
 		}),
 		{
 			headers: {
@@ -137,6 +131,55 @@ async function testToken(something) {
 			},
 		}
 	);
+
+	//////////////////
+
+	let user = await tokenProcessing(tokenInput, response.data);
+
+	if (tokenInput.type == "code") {
+		return null;
+	} else if (tokenInput.type == "refresh") {
+		return user;
+	}
+}
+
+function generateQueryStringInput(tokenInput) {
+	let queryStringInput;
+
+	if (tokenInput.type == "code") {
+		queryStringInput = {
+			grant_type: "code",
+			code: tokenInput.code,
+			redirect_uri: redirectUri,
+		};
+	} else if (tokenInput.type == "refresh") {
+		let refreshToken = tokenInput.user.spotifyToken.refreshToken;
+		queryStringInput = {
+			grant_type: "refresh_token",
+			refresh_token: refreshToken,
+		};
+	}
+
+	return queryStringInput;
+}
+
+async function tokenProcessing(tokenInput, data) {
+	let user;
+	let expiresIn = Date.now() + data.expires_in * 1000;
+	expiresIn = new Date(expiresIn);
+
+	if (tokenInput.type == "code") {
+	} else if (tokenInput.type == "refresh") {
+		user = tokenInput.user;
+
+		user.spotifyToken.scope = data.scope;
+		user.spotifyToken.accessToken = data.access_token;
+		user.spotifyToken.expiresIn = expiresIn;
+	}
+
+	await user.save();
+
+	return user;
 }
 
 exports.getToken = getToken;
