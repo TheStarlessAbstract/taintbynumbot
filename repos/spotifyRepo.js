@@ -1,10 +1,7 @@
-const axios = require("axios");
-const querystring = require("querystring");
+const spotifyServices = require("../services/spotifyServices");
 
 const User = require("../models/user");
 
-const clientId = process.env.SPOTIFY_CLIENT_ID;
-const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 const botDomain = process.env.BOT_DOMAIN;
 const redirectUri = botDomain + "/oauth/spotify";
 
@@ -22,122 +19,21 @@ async function getToken(channelId) {
 	let expiresIn = user.spotifyToken.expiresIn;
 
 	if (expiresIn < currentTime) {
-		user = await refreshToken(user);
+		user = await setToken({ type: "refresh", user: user });
 	}
 
 	return user.spotifyToken;
 }
 
-async function refreshToken(user) {
-	let refreshToken = user.spotifyToken.refreshToken;
-
-	const response = await axios.post(
-		"https://accounts.spotify.com/api/token",
-		querystring.stringify({
-			grant_type: "refresh_token",
-			refresh_token: refreshToken,
-		}),
-		{
-			headers: {
-				Authorization:
-					"Basic " +
-					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-			},
-		}
-	);
-
-	let expiresIn = Date.now() + response.data.expires_in * 1000;
-	expiresIn = new Date(expiresIn);
-
-	user.spotifyToken.scope = response.data.scope;
-	user.spotifyToken.accessToken = response.data.access_token;
-	user.spotifyToken.expiresIn = expiresIn;
-
-	await user.save();
-
-	return user;
-}
-
-async function setToken(code) {
-	const response = await axios.post(
-		"https://accounts.spotify.com/api/token",
-		querystring.stringify({
-			grant_type: "authorization_code",
-			code: code,
-			redirect_uri: redirectUri,
-		}),
-		{
-			headers: {
-				Authorization:
-					"Basic " +
-					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-			},
-		}
-	);
-
-	let expiresIn = Date.now() + response.data.expires_in * 1000;
-	expiresIn = new Date(expiresIn);
-
-	//////////////////
-
-	let twitchUserId = process.env.TWITCH_USER_ID;
-	let user = await User.findOne({ twitchId: twitchUserId });
-
-	if (user) {
-		user.spotifyToken = {
-			scope: response.data.scope,
-			accessToken: response.data.access_token,
-			refreshToken: response.data.refresh_token,
-			expiresIn: expiresIn,
-		};
-	} else {
-		user = new User({
-			twitchId: twitchUserId,
-			joinDate: new Date(),
-			spotifyToken: {
-				accessToken: response.data.access_token,
-				tokenType: response.data.token_type,
-				scope: response.data.scope,
-				expiresIn: expiresIn,
-				refreshToken: response.data.refresh_token,
-			},
-		});
-	}
-
-	//////////////////
-
-	await user.save();
-}
-
-async function testToken(tokenInput) {
-	// something = {
-	// 	type: "code" || "refresh",
-	// 	user: user,
-	// 	code: code,
-	// };
-
+async function setToken(tokenInput) {
 	let queryStringInput = generateQueryStringInput(tokenInput);
 
-	const response = await axios.post(
-		"https://accounts.spotify.com/api/token",
-		querystring.stringify({
-			queryStringInput,
-		}),
-		{
-			headers: {
-				Authorization:
-					"Basic " +
-					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-			},
-		}
-	);
-
-	//////////////////
+	const response = await spotifyServices.requestToken(queryStringInput);
 
 	let user = await tokenProcessing(tokenInput, response.data);
 
 	if (tokenInput.type == "code") {
-		return null;
+		return "";
 	} else if (tokenInput.type == "refresh") {
 		return user;
 	}
@@ -148,7 +44,7 @@ function generateQueryStringInput(tokenInput) {
 
 	if (tokenInput.type == "code") {
 		queryStringInput = {
-			grant_type: "code",
+			grant_type: "authorization_code",
 			code: tokenInput.code,
 			redirect_uri: redirectUri,
 		};
@@ -169,6 +65,29 @@ async function tokenProcessing(tokenInput, data) {
 	expiresIn = new Date(expiresIn);
 
 	if (tokenInput.type == "code") {
+		let twitchUserId = process.env.TWITCH_USER_ID;
+		user = await User.findOne({ twitchId: twitchUserId });
+
+		if (user) {
+			user.spotifyToken = {
+				scope: data.scope,
+				accessToken: data.access_token,
+				refreshToken: data.refresh_token,
+				expiresIn: expiresIn,
+			};
+		} else {
+			user = new User({
+				twitchId: twitchUserId,
+				joinDate: new Date(),
+				spotifyToken: {
+					accessToken: data.access_token,
+					tokenType: data.token_type,
+					scope: data.scope,
+					expiresIn: expiresIn,
+					refreshToken: data.refresh_token,
+				},
+			});
+		}
 	} else if (tokenInput.type == "refresh") {
 		user = tokenInput.user;
 
