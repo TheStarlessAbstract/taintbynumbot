@@ -119,10 +119,6 @@ async function setup(newIo) {
 			const scope = "user-read-currently-playing user-read-playback-state";
 			redirectUri = botDomain + "/oauth/spotify";
 
-			//https://developer.spotify.com/documentation/web-api/tutorials/getting-started
-			//https://github.com/spotify/web-api-examples/blob/master/authentication/authorization_code/app.js
-			//https://developer.spotify.com/documentation/web-api/tutorials/code-flow
-
 			io.emit("setSpotifyDetails", {
 				spotifyClientId,
 				redirectUri,
