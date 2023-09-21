@@ -17,7 +17,7 @@ async function getGameState() {
 }
 
 async function initializeGameState() {
-	let gameState = { kingsCount: 0 };
+	let gameState = { kingsCount: 0, jagerPrizeCounter: 0 };
 	let gameDeck = await Deck.getDeck();
 	let cardsToDraw = [];
 	let jagerBonusCards = [];
@@ -54,14 +54,4 @@ function jagerBonus(cardsToDraw, bonusArray) {
 	return cardsToDraw;
 }
 
-async function saveKingsState(cardsToDraw, kingsCount) {
-	let saveState = new KingsSaveState({
-		cardsToDraw: cardsToDraw,
-		kingsCount: kingsCount,
-	});
-
-	await saveState.save();
-}
-
 exports.getGameState = getGameState;
-exports.saveKingsState = saveKingsState;
