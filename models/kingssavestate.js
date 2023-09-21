@@ -4,6 +4,7 @@ let mongoose = require("mongoose"),
 let KingsSaveStateSchema = new Schema({
 	cardsToDraw: Schema.Types.Mixed,
 	kingsCount: Number,
+	jagerPrizeCounter: Number,
 });
 
 module.exports = mongoose.model("KingsSaveState", KingsSaveStateSchema);
