@@ -4,6 +4,7 @@ const http = require("http");
 const DeathSaveState = require("./models/deathsavestate");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
+const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
 
 let io;
 let botDomain = process.env.BOT_DOMAIN;
@@ -103,14 +104,30 @@ async function setup(newIo) {
 
 			let redirectUri = botDomain + "/test";
 
-			let scope =
-				"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
-				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
 			// let scope =
-			// 	"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
+			// 	"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
 			// 	"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
+			let scope =
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
+				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
 
 			io.emit("setDetails", { clientId, redirectUri, scope });
+		}
+
+		if (socket.handshake.headers.referer.includes("spotify")) {
+			console.log("/spotify connected");
+			const scope = "user-read-currently-playing user-read-playback-state";
+			redirectUri = botDomain + "/oauth/spotify";
+
+			//https://developer.spotify.com/documentation/web-api/tutorials/getting-started
+			//https://github.com/spotify/web-api-examples/blob/master/authentication/authorization_code/app.js
+			//https://developer.spotify.com/documentation/web-api/tutorials/code-flow
+
+			io.emit("setSpotifyDetails", {
+				spotifyClientId,
+				redirectUri,
+				scope,
+			});
 		}
 	});
 }

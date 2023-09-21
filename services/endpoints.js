@@ -7,6 +7,7 @@ const Token = require("../models/token");
 
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
+const spotifyRepo = require("../repos/spotifyRepo");
 
 const router = express.Router();
 
@@ -74,9 +75,21 @@ router.get("/auth", (req, res) => {
 	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
 });
 
+router.get("/spotify", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "public", "bot-spotify-auth.html"));
+});
+
+router.get("/oauth/spotify", async (req, res) => {
+	const code = req.query.code;
+
+	// returns empty string
+	await spotifyRepo.setToken({ type: "code", code: code });
+
+	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
+});
+
 router.get("/oauth/callback", (req, res) => {
 	const code = req.query.code;
-	const scope = req.query.scope;
 
 	// Use the code and scope to make a request for an access token
 });

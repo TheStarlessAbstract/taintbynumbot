@@ -29,6 +29,7 @@ const quoteDelete = require("./commands/quote-delete");
 const quoteEdit = require("./commands/quote-edit");
 const quote = require("./commands/quote");
 const so = require("./commands/so");
+const song = require("./commands/song");
 const steam = require("./commands/steam");
 const tinderAdd = require("./commands/tinder-add");
 const tinderDelete = require("./commands/tinder-delete");
@@ -111,6 +112,7 @@ const commands = {
 	points: points.command,
 	quote: quote.command,
 	so: so.command,
+	song: song.command,
 	steam: steam.command,
 	tinderquote: tinder.command,
 	title: title.command,
