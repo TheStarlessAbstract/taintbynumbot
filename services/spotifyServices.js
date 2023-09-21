@@ -1,6 +1,10 @@
 const axios = require("axios");
+const querystring = require("querystring");
 
 const spotifyRepo = require("../repos/spotifyRepo");
+
+const clientId = process.env.SPOTIFY_CLIENT_ID;
+const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
 async function getCurrentPlaying(channelId) {
 	const token = await spotifyRepo.getToken(channelId);
@@ -44,4 +48,21 @@ async function getCurrentPlaying(channelId) {
 	return result;
 }
 
+async function requestToken(queryStringInput) {
+	const response = await axios.post(
+		"https://accounts.spotify.com/api/token",
+		querystring.stringify(queryStringInput),
+		{
+			headers: {
+				Authorization:
+					"Basic " +
+					Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+			},
+		}
+	);
+
+	return response;
+}
+
 exports.getCurrentPlaying = getCurrentPlaying;
+exports.requestToken = requestToken;
