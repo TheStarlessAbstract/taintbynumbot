@@ -7,6 +7,7 @@ const Token = require("./models/token");
 const redemptions = require("./bot-redemptions");
 const loyalty = require("./bot-loyalty");
 const twitch = require("./services/twitch");
+const twitchChannels = require("./services/twitch/channels");
 
 let clientId = process.env.TWITCH_CLIENT_ID;
 let clientSecret = process.env.TWITCH_CLIENT_SECRET;
@@ -27,6 +28,7 @@ async function setup() {
 		setApiClient(apiClient);
 		redemptions.setApiClient(apiClient);
 		twitch.setApiClient(apiClient);
+		twitchChannels.setApiClient(apiClient);
 		loyalty.setup(apiClient);
 
 		const listener = await redemptions.setup(pubSubClient, userId); // check io
