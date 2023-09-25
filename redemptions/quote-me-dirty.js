@@ -5,6 +5,7 @@ const Quote = require("../models/quote");
 const botChatClient = require("../bot-chatclient");
 
 const twitch = require("../services/twitch");
+const twitchChannels = require("../services/twitch/channels");
 
 const helper = new Helper();
 
@@ -30,13 +31,13 @@ async function index(channelId) {
 		return;
 	}
 
-	let channel = await twitch.getChannelInfoById(channelId);
+	let channel = await twitchChannels.getChannelInfoById(channelId);
 
 	chatClient.say(
-		"#" + channel.displayName,
+		`#${channel.displayName}`,
 		"Time for another round of Quote me Dirty. Have your say in the poll."
 	);
-	chatClient.say("#" + channel.displayName, randomQuote[0].text);
+	chatClient.say(`#${channel.displayName}`, randomQuote[0].text);
 
 	let data = {
 		channelPointsPerVote: 69,
