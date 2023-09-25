@@ -1,4 +1,5 @@
 const audio = require("./bot-audio");
+const quoteMeDirty = require("./redemptions/quote-me-dirty");
 
 const axios = require("axios");
 
@@ -92,6 +93,8 @@ async function setup(pubSubClient, userId) {
 							" there is already a prediction ongoing, try again later"
 					);
 				}
+			} else if (message.rewardTitle.includes("Quote me Dirty")) {
+				quoteMeDirty.index(message.channelId);
 			}
 		});
 	}
