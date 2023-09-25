@@ -108,8 +108,7 @@ async function setup(newIo) {
 			// 	"channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
 			// 	"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
 			let scope =
-				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+" +
-				"channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers";
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls";
 
 			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
