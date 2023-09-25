@@ -46,7 +46,7 @@ router.get("/test", async (req, res) => {
 
 	// const accessToken = response.data;
 
-	let token = await Token.findOne({ name: "pubSubClientTest" });
+	let token = await Token.findOne({ name: "nextAuthTest" });
 
 	if (token) {
 		token.scope = response.data.scope;
