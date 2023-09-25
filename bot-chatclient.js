@@ -22,6 +22,7 @@ let username = process.env.TWITCH_USERNAME;
 const helper = new Helper();
 
 let apiClient;
+let chatClient;
 let isLive = false;
 let intervalMessages;
 let messageCount = 0;
@@ -35,7 +36,7 @@ async function setup() {
 	if (token) {
 		const tokenData = initializeTokenData(token);
 		const authProvider = await createAuthProvider(tokenData);
-		const chatClient = createChatClient(authProvider);
+		chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 
 		setApiClient(apiClient);
@@ -294,6 +295,11 @@ function confirmMaps(item) {
 	}
 }
 
+function getChatClient() {
+	return chatClient;
+}
+
 exports.setup = setup;
 exports.messageUpdate = messageUpdate;
 exports.getApiClient = getApiClient;
+exports.getChatClient = getChatClient;
