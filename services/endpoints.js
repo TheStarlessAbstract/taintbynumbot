@@ -7,7 +7,7 @@ const Token = require("../models/token");
 
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
-const spotifyRepo = require("../repos/spotifyRepo");
+const spotifyRepo = require("../repos/spotify");
 
 const router = express.Router();
 
