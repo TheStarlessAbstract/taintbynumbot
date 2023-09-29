@@ -1,6 +1,8 @@
 class Helper {
 	constructor() {}
 
+	sleep = require("util").promisify(setTimeout);
+
 	isCooldownPassed(currentTime, lastTimeSet, currentCooldown) {
 		if (
 			currentTime instanceof Date &&
