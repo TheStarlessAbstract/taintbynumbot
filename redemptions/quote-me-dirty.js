@@ -13,6 +13,25 @@ let twitchId = process.env.TWITCH_USER_ID;
 
 async function index(channelId) {
 	let chatClient = botChatClient.getChatClient();
+
+	// check if active prediction
+	// if active refund, and comment
+	// else continue
+
+	let channel = await twitchChannels.getChannelInfoById(channelId);
+
+	let data1 = {
+		autoLockAfter: 69,
+		outcomes: ["Dirty", "Not Dirty"],
+		title: "Will this quote be dirty?",
+	};
+
+	let response = await twitch.createPrediction(channelId, data1);
+
+	if (!response) {
+		return;
+	}
+
 	let randomQuote = [];
 	try {
 		randomQuote = await Quote.aggregate([{ $sample: { size: 1 } }]);
@@ -31,22 +50,14 @@ async function index(channelId) {
 		return;
 	}
 
-	let channel = await twitchChannels.getChannelInfoById(channelId);
-
 	chatClient.say(
 		`#${channel.displayName}`,
-		"Time for another round of Quote me Dirty. Have your say in the poll."
+		"Time for another round of Quote me Dirty. Make your predictions now"
 	);
+
+	await helper.sleep(data1.autoLockAfter * 1000);
+
 	chatClient.say(`#${channel.displayName}`, randomQuote[0].text);
-
-	let data = {
-		channelPointsPerVote: 69,
-		choices: ["Yes", "No"],
-		duration: 69,
-		title: "Was the quote dirty?",
-	};
-
-	await twitch.createPoll(channelId, data);
 }
 
 exports.index = index;
