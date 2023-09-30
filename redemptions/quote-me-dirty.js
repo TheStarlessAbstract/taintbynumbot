@@ -11,10 +11,11 @@ const helper = new Helper();
 
 let twitchId = process.env.TWITCH_USER_ID;
 
-async function index(channelId, redemptionId, rewardId) {
+async function index(channelId, redemptionId, rewardId, displayName) {
 	let chatClient = botChatClient.getChatClient();
 
 	let predictions = await twitch.getPredictions(channelId);
+	let channel = await twitchChannels.getChannelInfoById(channelId);
 
 	if (
 		predictions == null ||
@@ -28,10 +29,13 @@ async function index(channelId, redemptionId, rewardId) {
 			"CANCELED"
 		);
 
+		chatClient.say(
+			`#${channel.displayName}`,
+			`@${displayName}, there is a prediction waiting to be resolved, your channel points have been refunded`
+		);
+
 		return;
 	}
-
-	let channel = await twitchChannels.getChannelInfoById(channelId);
 
 	let data = {
 		autoLockAfter: 69,
@@ -49,18 +53,17 @@ async function index(channelId, redemptionId, rewardId) {
 			"CANCELED"
 		);
 
+		chatClient.say(
+			`#${channel.displayName}`,
+			`@${displayName}, something went wrong setting up the prediction, your channel points have been refunded`
+		);
+
 		return;
 	}
 
 	let randomQuote = [];
 	try {
 		randomQuote = await Quote.aggregate([{ $sample: { size: 1 } }]);
-
-		if (randomQuote.length === 0) {
-			console.log("No quotes found.");
-		} else {
-			console.log("Random Document:", randomQuote[0].text);
-		}
 	} catch (err) {
 		randomQuote.push({ text: "" });
 		console.error(err);
@@ -74,6 +77,11 @@ async function index(channelId, redemptionId, rewardId) {
 			"CANCELED"
 		);
 		twitch.cancelPrediction(channelId, prediction.id);
+
+		chatClient.say(
+			`#${channel.displayName}`,
+			`@${displayName}, no quotes found, your channel points have been refunded`
+		);
 
 		return;
 	}
