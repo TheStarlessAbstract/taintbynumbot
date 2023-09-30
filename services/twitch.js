@@ -66,11 +66,7 @@ async function updateRedemptionStatusByIds(
 
 async function sendAnnouncement(broadcaster, announcement) {
 	try {
-		console.log(announcement);
-		await pubSubApiClient.chat.sendAnnouncement({
-			broadcaster,
-			announcement,
-		});
+		await pubSubApiClient.chat.sendAnnouncement(broadcaster, announcement);
 	} catch (err) {
 		console.error(err);
 	}
