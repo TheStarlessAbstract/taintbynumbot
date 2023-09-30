@@ -93,6 +93,11 @@ async function index(channelId, redemptionId, rewardId, displayName) {
 
 	await helper.sleep(data.autoLockAfter * 1000);
 
+	twitch.sendAnnouncement(channelId, {
+		color: "primary",
+		message: randomQuote[0].text,
+	});
+
 	chatClient.say(`#${channel.displayName}`, randomQuote[0].text);
 
 	twitch.updateRedemptionStatusByIds(
