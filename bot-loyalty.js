@@ -16,10 +16,7 @@ async function setup(apiClient) {
 function chatInterval() {
 	let followingUser;
 	loyaltyInterval = setInterval(async () => {
-		let chatPaginated = await apiClient.chat.getChattersPaginated(
-			twitchUserId,
-			twitchUserId
-		);
+		let chatPaginated = await apiClient.chat.getChattersPaginated(twitchUserId);
 
 		let currentPageUsers = await chatPaginated.getNext();
 		let currentUsersList = [];
