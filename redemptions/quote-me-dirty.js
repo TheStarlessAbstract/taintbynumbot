@@ -98,8 +98,6 @@ async function index(channelId, redemptionId, rewardId, displayName) {
 		message: randomQuote[0].text,
 	});
 
-	chatClient.say(`#${channel.displayName}`, randomQuote[0].text);
-
 	twitch.updateRedemptionStatusByIds(
 		channelId,
 		rewardId,
