@@ -34,7 +34,12 @@ async function setup(pubSubClient, userId) {
 			if (audioLink) {
 				audio.play(audioLink.url);
 			} else if (message.rewardTitle.includes("Quote me Dirty")) {
-				quoteMeDirty.index(message.channelId, message.id, message.rewardId);
+				quoteMeDirty.index(
+					message.channelId,
+					message.id,
+					message.rewardId,
+					message.userDisplayName
+				);
 			}
 		});
 	}
