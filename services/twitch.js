@@ -19,18 +19,49 @@ async function createPrediction(broadcaster, data) {
 	} catch (err) {
 		success = false;
 
-		const errorMessage = err.message;
-		const messageStart =
-			errorMessage.indexOf('message":"') + 'message":"'.length;
-		const messageEnd = errorMessage.indexOf('"}', messageStart);
-		const extractedMessage = errorMessage.substring(messageStart, messageEnd);
-
-		console.error(
-			`ERROR - status: ${err.statusCode}, url: ${err.url}, function: createPrediction(), message: ${extractedMessage}`
-		);
+		console.error(err);
 	}
 
 	return success;
+}
+
+async function getPredictions(broadcaster, pagination) {
+	let predictions;
+	try {
+		predictions = await pubSubApiClient.predictions.getPredictions(broadcaster);
+	} catch (err) {
+		console.error(err);
+
+		predictions = null;
+	}
+
+	return predictions;
+}
+
+async function cancelPrediction(broadcaster, id) {
+	try {
+		await pubSubApiClient.predictions.cancelPrediction(broadcaster, id);
+	} catch (err) {
+		console.error(err);
+	}
+}
+
+async function updateRedemptionStatusByIds(
+	broadcaster,
+	rewardId,
+	redemptionIds,
+	status
+) {
+	try {
+		await pubSubApiClient.channelPoints.updateRedemptionStatusByIds(
+			broadcaster,
+			rewardId,
+			redemptionIds,
+			status
+		);
+	} catch (err) {
+		console.error(err);
+	}
 }
 
 async function setApiClient(apiClient) {
@@ -41,3 +72,6 @@ exports.setApiClient = setApiClient;
 exports.getChannelInfoById = getChannelInfoById;
 exports.createPoll = createPoll;
 exports.createPrediction = createPrediction;
+exports.getPredictions = getPredictions;
+exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
+exports.cancelPrediction = cancelPrediction;
