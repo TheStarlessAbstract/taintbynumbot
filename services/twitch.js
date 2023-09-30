@@ -64,6 +64,18 @@ async function updateRedemptionStatusByIds(
 	}
 }
 
+async function sendAnnouncement(broadcaster, announcement) {
+	try {
+		console.log(announcement);
+		await pubSubApiClient.chat.sendAnnouncement({
+			broadcaster,
+			announcement,
+		});
+	} catch (err) {
+		console.error(err);
+	}
+}
+
 async function setApiClient(apiClient) {
 	pubSubApiClient = apiClient;
 }
@@ -75,3 +87,4 @@ exports.createPrediction = createPrediction;
 exports.getPredictions = getPredictions;
 exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
 exports.cancelPrediction = cancelPrediction;
+exports.sendAnnouncement = sendAnnouncement;
