@@ -11,24 +11,44 @@ const helper = new Helper();
 
 let twitchId = process.env.TWITCH_USER_ID;
 
-async function index(channelId) {
+async function index(channelId, redemptionId, rewardId) {
 	let chatClient = botChatClient.getChatClient();
 
-	// check if active prediction
-	// if active refund, and comment
-	// else continue
+	let predictions = await twitch.getPredictions(channelId);
+
+	if (
+		predictions == null ||
+		predictions.data[0].status == "ACTIVE" ||
+		predictions.data[0].status == "LOCKED"
+	) {
+		twitch.updateRedemptionStatusByIds(
+			channelId,
+			rewardId,
+			redemptionId,
+			"CANCELED"
+		);
+
+		return;
+	}
 
 	let channel = await twitchChannels.getChannelInfoById(channelId);
 
-	let data1 = {
+	let data = {
 		autoLockAfter: 69,
-		outcomes: ["Dirty", "Not Dirty"],
-		title: "Will this quote be dirty?",
+		outcomes: ["Tainted", "Not Tainted"],
+		title: "How filthy did my mods twist my words?",
 	};
 
-	let response = await twitch.createPrediction(channelId, data1);
+	let prediction = await twitch.createPrediction(channelId, data);
 
-	if (!response) {
+	if (!prediction) {
+		twitch.updateRedemptionStatusByIds(
+			channelId,
+			rewardId,
+			redemptionId,
+			"CANCELED"
+		);
+
 		return;
 	}
 
@@ -47,6 +67,14 @@ async function index(channelId) {
 	}
 
 	if (randomQuote[0].text === "") {
+		twitch.updateRedemptionStatusByIds(
+			channelId,
+			rewardId,
+			redemptionId,
+			"CANCELED"
+		);
+		twitch.cancelPrediction(channelId, prediction.id);
+
 		return;
 	}
 
@@ -55,9 +83,16 @@ async function index(channelId) {
 		"Time for another round of Quote me Dirty. Make your predictions now"
 	);
 
-	await helper.sleep(data1.autoLockAfter * 1000);
+	await helper.sleep(data.autoLockAfter * 1000);
 
 	chatClient.say(`#${channel.displayName}`, randomQuote[0].text);
+
+	twitch.updateRedemptionStatusByIds(
+		channelId,
+		rewardId,
+		redemptionId,
+		"FULFILLED"
+	);
 }
 
 exports.index = index;
