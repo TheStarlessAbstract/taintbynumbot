@@ -9,8 +9,6 @@ const twitchChannels = require("../services/twitch/channels");
 
 const helper = new Helper();
 
-let twitchId = process.env.TWITCH_USER_ID;
-
 async function index(channelId, redemptionId, rewardId, displayName) {
 	let chatClient = botChatClient.getChatClient();
 
