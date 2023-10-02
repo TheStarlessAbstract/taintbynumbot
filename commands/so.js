@@ -2,6 +2,7 @@ const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
 const chatClient = require("../bot-chatclient");
+const twitch = require("../services/twitch");
 
 const helper = new Helper();
 
@@ -49,6 +50,8 @@ let commandResponse = () => {
 								streamed +
 								". I hear they love the Taint"
 						);
+
+						twitch.shoutoutUser(config.channelId, user.id);
 					}
 				} else if (!helper.isValuePresentAndString(config.argument)) {
 					result.push(
