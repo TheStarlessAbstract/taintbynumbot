@@ -64,6 +64,10 @@ async function sendAnnouncement(broadcaster, announcement) {
 	}
 }
 
+async function shoutoutUser(from, to) {
+	pubSubApiClient.chat.shoutoutUser(from, to);
+}
+
 async function setApiClient(apiClient) {
 	pubSubApiClient = apiClient;
 }
@@ -75,3 +79,4 @@ exports.getPredictions = getPredictions;
 exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
 exports.cancelPrediction = cancelPrediction;
 exports.sendAnnouncement = sendAnnouncement;
+exports.shoutoutUser = shoutoutUser;
