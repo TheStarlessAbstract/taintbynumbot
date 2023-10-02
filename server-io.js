@@ -105,7 +105,7 @@ async function setup(newIo) {
 			let redirectUri = botDomain + "/test";
 
 			let scope =
-				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements";
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
 
 			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
