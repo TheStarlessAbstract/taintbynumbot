@@ -1,7 +1,6 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const chatClient = require("../bot-chatclient");
 const twitch = require("../services/twitch");
 
 const helper = new Helper();
@@ -12,9 +11,9 @@ let commandResponse = () => {
 	return {
 		response: async (config) => {
 			let result = [];
+			let response;
 			let currentTime = new Date();
-			let stream;
-			let streamed;
+			let channel;
 
 			if (
 				helper.isValidModeratorOrStreamer(config.userInfo) &&
@@ -28,38 +27,28 @@ let commandResponse = () => {
 						username = username.slice(1);
 					}
 
-					let apiClient = await chatClient.getApiClient();
-					let user = await apiClient.users.getUserByName(username);
+					let user = await twitch.getUserByName(username);
 
 					if (!user) {
-						result.push("Couldn't find a user by the name of " + username);
+						result.push(`Couldn't find a user by the name of ${username}`);
 					} else {
-						stream = await apiClient.channels.getChannelInfoById(user.id);
+						channel = await twitch.getChannelInfoById(user.id);
 
-						if (stream.gameName != "") {
-							streamed = ", they last streamed " + stream.gameName;
-						} else {
-							streamed = "";
+						if (channel.gameName != "") {
+							result.push(
+								`@${user.displayName} last streamed ${channel.gameName}. I hear they love the Taint!`
+							);
 						}
 
-						result.push(
-							"Go check out " +
-								username +
-								" at twitch.tv/" +
-								username +
-								streamed +
-								". I hear they love the Taint"
-						);
-
-						twitch.shoutoutUser(config.channelId, user.id);
+						response = await twitch.shoutoutUser(config.channelId, user.id);
 					}
 				} else if (!helper.isValuePresentAndString(config.argument)) {
 					result.push(
-						"You got to include a username to shoutout someone: !so @buhhsbot"
+						`You have to include a username to shoutout someone: !so @buhhsbot`
 					);
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
-				result.push("!so is for Mods only");
+				result.push(`!so is for Mods only`);
 			}
 
 			return result;
@@ -69,9 +58,9 @@ let commandResponse = () => {
 
 let versions = [
 	{
-		description: "Gives a shoutout to some wonderful user",
-		usage: "!so @buhhsbot",
-		usableBy: "mods",
+		description: `Gives a shoutout to some wonderful user`,
+		usage: `!so @buhhsbot`,
+		usableBy: `mods`,
 		active: true,
 	},
 ];
