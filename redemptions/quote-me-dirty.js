@@ -15,6 +15,10 @@ async function index(channelId, redemptionId, rewardId, displayName) {
 	let predictions = await twitch.getPredictions(channelId);
 	let channel = await twitchChannels.getChannelInfoById(channelId);
 
+	if (!channel) {
+		return;
+	}
+
 	if (
 		predictions == null ||
 		predictions.data[0].status == "ACTIVE" ||
