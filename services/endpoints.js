@@ -44,8 +44,6 @@ router.get("/test", async (req, res) => {
 		}
 	);
 
-	// const accessToken = response.data;
-
 	let token = await Token.findOne({ name: "nextAuthTest" });
 
 	if (token) {
@@ -56,7 +54,7 @@ router.get("/test", async (req, res) => {
 		token.obtainmentTimestamp = 0;
 	} else {
 		token = new Token({
-			name: "pubSubClientTest",
+			name: "nextAuthTest",
 			scope: response.data.scope,
 			accessToken: response.data.access_token,
 			refreshToken: response.data.refresh_token,
@@ -67,7 +65,6 @@ router.get("/test", async (req, res) => {
 
 	token.save();
 
-	// res.send("Hello code!");
 	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
 });
 
