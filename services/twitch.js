@@ -1,7 +1,14 @@
 let pubSubApiClient;
 
-async function getChannelInfoById(user) {
-	const channel = await pubSubApiClient.channels.getChannelInfoById(user);
+async function getChannelInfoById(id) {
+	let channel;
+
+	try {
+		channel = await pubSubApiClient.channels.getChannelInfoById(id);
+	} catch (err) {
+		console.error(err);
+		channel = "";
+	}
 
 	return channel;
 }
@@ -65,7 +72,29 @@ async function sendAnnouncement(broadcaster, announcement) {
 }
 
 async function shoutoutUser(from, to) {
-	pubSubApiClient.chat.shoutoutUser(from, to);
+	let success = true;
+
+	try {
+		await pubSubApiClient.chat.shoutoutUser(from, to);
+	} catch (err) {
+		console.error(err);
+		success = false;
+	}
+
+	return success;
+}
+
+async function getUserByName(username) {
+	let user;
+
+	try {
+		user = await pubSubApiClient.users.getUserByName(username);
+	} catch (err) {
+		console.error(err);
+		user = "";
+	}
+
+	return user;
 }
 
 async function setApiClient(apiClient) {
@@ -73,10 +102,11 @@ async function setApiClient(apiClient) {
 }
 
 exports.setApiClient = setApiClient;
-exports.getChannelInfoById = getChannelInfoById;
-exports.createPrediction = createPrediction;
-exports.getPredictions = getPredictions;
-exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
-exports.cancelPrediction = cancelPrediction;
-exports.sendAnnouncement = sendAnnouncement;
 exports.shoutoutUser = shoutoutUser;
+exports.getUserByName = getUserByName;
+exports.getPredictions = getPredictions;
+exports.cancelPrediction = cancelPrediction;
+exports.createPrediction = createPrediction;
+exports.sendAnnouncement = sendAnnouncement;
+exports.getChannelInfoById = getChannelInfoById;
+exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
