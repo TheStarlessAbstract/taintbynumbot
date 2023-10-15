@@ -26,8 +26,9 @@ async function setup() {
 		const apiClient = new ApiClient({ authProvider });
 
 		setApiClient(apiClient);
-		redemptions.setApiClient(apiClient);
+
 		twitch.setApiClient(apiClient);
+		redemptions.setApiClient(apiClient);
 		twitchChannels.setApiClient(apiClient);
 		loyalty.setup(apiClient);
 
