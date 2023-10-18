@@ -2,7 +2,8 @@ const ApiClient = require("@twurple/api").ApiClient;
 const PubSubClient = require("@twurple/pubsub").PubSubClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 
-const Token = require("./models/token");
+const Token = require("./../models/token");
+const User = require("./../models/user");
 
 const clientId = process.env.TWITCH_CLIENT_ID;
 const clientSecret = process.env.TWITCH_CLIENT_SECRET;
@@ -13,6 +14,10 @@ let apiClient;
 async function init() {
 	let state;
 	let token = await Token.findOne({ name: "nextAuthTest" });
+	let users = await User.find({}, "twitchToken").exec();
+
+	console.log(1);
+	console.log(users);
 
 	if (token) {
 		state = true;
@@ -45,6 +50,11 @@ async function createAuthProvider(tokenData) {
 		clientSecret,
 		onRefresh: async (userId, newTokenData) => {
 			if (process.env.JEST_WORKER_ID == undefined) {
+				// find user by user ID, get their twitch token
+				// update with newTokenData
+				// save
+
+				/////
 				token.accessToken = newTokenData.accessToken;
 				token.refreshToken = newTokenData.refreshToken;
 				token.scope = newTokenData.scope;
@@ -52,6 +62,7 @@ async function createAuthProvider(tokenData) {
 				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
 
 				await token.save();
+				/////
 			}
 		},
 	});
