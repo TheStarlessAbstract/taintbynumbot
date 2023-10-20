@@ -5,7 +5,7 @@ const twitch = require("./../repos/twitch");
 
 describe("twitch", () => {
 	beforeAll(async () => {
-		db.connectToMongoDB();
+		await db.connectToMongoDB();
 	});
 
 	afterAll(async () => {
