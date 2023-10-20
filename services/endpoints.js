@@ -4,6 +4,7 @@ const path = require("path");
 const querystring = require("querystring");
 
 const Token = require("../models/token");
+const User = require("../models/user");
 
 const serverIo = require("../server-io");
 const serverPubNub = require("../server-pubnub");
@@ -12,16 +13,11 @@ const spotifyRepo = require("../repos/spotify");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-	console.log("hello twitch");
-
 	res.send("Hello Twitch!");
 });
 
 router.get("/test", async (req, res) => {
-	console.log("hello twitch");
-
 	const code = req.query.code;
-	const scope = req.query.scope;
 
 	let botDomain = process.env.BOT_DOMAIN;
 	let clientId = process.env.TWITCH_CLIENT_ID;
@@ -44,26 +40,41 @@ router.get("/test", async (req, res) => {
 		}
 	);
 
-	let token = await Token.findOne({ name: "nextAuthTest" });
+	let users = await axios.get("https://api.twitch.tv/helix/users", {
+		headers: {
+			Authorization: `Bearer ${response.data.access_token}`,
+			"Client-ID": clientId,
+		},
+	});
 
-	if (token) {
-		token.scope = response.data.scope;
-		token.accessToken = response.data.access_token;
-		token.refreshToken = response.data.refresh_token;
-		token.expiresIn = 0;
-		token.obtainmentTimestamp = 0;
-	} else {
-		token = new Token({
-			name: "nextAuthTest",
+	let twitchId = users.data.data[0].id;
+	let user = await User.findOne({
+		twitchId: twitchId,
+	});
+
+	if (user) {
+		user.twitchToken = {
 			scope: response.data.scope,
 			accessToken: response.data.access_token,
 			refreshToken: response.data.refresh_token,
 			expiresIn: 0,
 			obtainmentTimestamp: 0,
+		};
+	} else {
+		user = new User({
+			twitchId: twitchId,
+			joinDate: new Date(),
+			twitchToken: {
+				scope: response.data.scope,
+				accessToken: response.data.access_token,
+				refreshToken: response.data.refresh_token,
+				expiresIn: 0,
+				obtainmentTimestamp: 0,
+			},
 		});
 	}
 
-	token.save();
+	user.save();
 
 	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
 });
