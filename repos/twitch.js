@@ -2,7 +2,6 @@ const ApiClient = require("@twurple/api").ApiClient;
 const PubSubClient = require("@twurple/pubsub").PubSubClient;
 const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 
-const Token = require("./../models/token");
 const User = require("./../models/user");
 
 const clientId = process.env.TWITCH_CLIENT_ID;
@@ -12,64 +11,86 @@ let pubSubClient;
 let apiClient;
 
 async function init() {
-	let state;
-	let token = await Token.findOne({ name: "nextAuthTest" });
-	let users = await User.find({}, "twitchToken").exec();
+	let users = await User.find({}, "twitchId twitchToken").exec();
 
-	console.log(1);
-	console.log(users);
-
-	if (token) {
-		state = true;
-		const tokenData = initializeTokenData(token);
-		const authProvider = await createAuthProvider(tokenData);
-		pubSubClient = new PubSubClient({ authProvider });
-		apiClient = new ApiClient({ authProvider });
-	} else {
-		state = false;
-		// something
+	if (users.length == 0) {
+		return false;
 	}
 
-	return state;
+	const authProvider = await createAuthProvider();
+
+	for (let i = 0; i < users.length; i++) {
+		authProvider.addUser(users[i].twitchId, users[i].twitchToken, [
+			`pubsub:${users[i].twitchId}`,
+		]);
+	}
+
+	pubSubClient = new PubSubClient({ authProvider });
+	apiClient = new ApiClient({ authProvider });
+
+	let followers;
+	let list;
+	for (let i = 0; i < users.length; i++) {
+		followers = await apiClient.channels.getChannelFollowersPaginated(
+			users[i].twitchId
+		);
+
+		list = await followers.getNext();
+
+		console.log(list);
+	}
+
+	return true;
 }
 
-function initializeTokenData(token) {
-	return {
-		twitchId: token.twitchId,
-		accessToken: token.accessToken,
-		refreshToken: token.refreshToken,
-		scope: token.scope,
-		expiresIn: 0,
-		obtainmentTimestamp: 0,
-	};
-}
-
-async function createAuthProvider(tokenData) {
+async function createAuthProvider() {
+	console.log(1);
 	let authProvider = new RefreshingAuthProvider({
 		clientId,
 		clientSecret,
-		onRefresh: async (userId, newTokenData) => {
-			if (process.env.JEST_WORKER_ID == undefined) {
-				// find user by user ID, get their twitch token
-				// update with newTokenData
-				// save
-
-				/////
-				token.accessToken = newTokenData.accessToken;
-				token.refreshToken = newTokenData.refreshToken;
-				token.scope = newTokenData.scope;
-				token.expiresIn = newTokenData.expiresIn;
-				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
-
-				await token.save();
-				/////
-			}
+		onRefresh: async (twitchId, token) => {
+			// if (process.env.JEST_WORKER_ID == undefined) {
+			console.log(2);
+			await updateUserTwitchToken(twitchId, token);
+			console.log(3);
+			// }
 		},
 	});
-
-	await authProvider.addUserForToken(tokenData, ["chat"]);
-
+	console.log(4);
 	return authProvider;
+}
+
+async function updateUserTwitchToken(twitchId, token) {
+	let user = await User.findOne(
+		{
+			twitchId: twitchId,
+		},
+		"twitchToken"
+	).exec();
+
+	if (user) {
+		user.twitchToken = {
+			scope: token.scope,
+			accessToken: token.access_token,
+			refreshToken: token.refresh_token,
+			expiresIn: 0,
+			obtainmentTimestamp: 0,
+		};
+	} else {
+		user = new User({
+			twitchId: twitchId,
+			joinDate: new Date(),
+			twitchToken: {
+				scope: token.scope,
+				accessToken: token.access_token,
+				refreshToken: token.refresh_token,
+				expiresIn: 0,
+				obtainmentTimestamp: 0,
+			},
+		});
+	}
+
+	user.save();
 }
 
 function getPubSubClient() {
