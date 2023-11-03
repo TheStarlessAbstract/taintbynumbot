@@ -21,7 +21,7 @@ async function init() {
 	let token;
 
 	for (let i = 0; i < users.length; i++) {
-		token = tokenFormat(twitchToken);
+		token = tokenFormat(users.twitchToken);
 
 		authProvider.addUser(users[i].twitchId, token, [
 			`pubsub:${users[i].twitchId}`,
