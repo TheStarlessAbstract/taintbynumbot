@@ -8,7 +8,6 @@ const Token = require("./models/token");
 const commands = require("./bot-commands");
 const deathCounter = require("./bot-deathcounter");
 const messages = require("./bot-messages");
-const redemptions = require("./bot-redemptions");
 const loyalty = require("./bot-loyalty");
 
 const kings = require("./commands/kings");
@@ -62,7 +61,6 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		if (!helper.isTest()) {
 			kings.resetKings();
-			redemptions.setChatClient(chatClient);
 			await commands.setup();
 			await deathCounter.setup(apiClient);
 		}
