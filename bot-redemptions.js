@@ -1,71 +1,45 @@
 const audio = require("./bot-audio");
 const quoteMeDirty = require("./redemptions/quote-me-dirty");
-
-const axios = require("axios");
+const twitchRepo = require("./repos/twitch");
 
 const AudioLink = require("./models/audiolink");
+const User = require("./models/user");
 
 let audioLinks;
 let lastAudioPlayed;
 let audioLink;
-let url = process.env.BOT_DOMAIN;
-let apiClient;
-let twitchId = process.env.TWITCH_USER_ID;
-let twitchUsername = process.env.TWITCH_USERNAME;
-let higherLower = getRandom();
-let predictionWinner;
-let chatClient;
 let audioTimeout = false;
 let audioTimeoutPeriod = 10000;
 let audioTimeoutActive = false;
 let redeemUser;
 
-async function setup(pubSubClient, userId) {
-	let listener;
+async function init() {
+	let pubSubClient = twitchRepo.getPubSubClient();
 	audioLinks = await AudioLink.find({});
 	lastAudioPlayed = new Date().getTime();
 
+	let users = await User.find({}, "twitchId").exec();
+
 	if (process.env.JEST_WORKER_ID == undefined) {
-		listener = await pubSubClient.onRedemption(userId, async (message) => {
-			redeemUser = message.userName;
-			audioLink = audioLinks.find(
-				(element) => element.channelPointRedeem == message.rewardTitle
-			);
-			if (audioLink) {
-				audio.play(audioLink.url);
-			} else if (message.rewardTitle.includes("Quote me Dirty")) {
-				quoteMeDirty.index(
-					message.channelId,
-					message.id,
-					message.rewardId,
-					message.userDisplayName
+		for (let i = 0; i < users.length; i++) {
+			await pubSubClient.onRedemption(users[i].twitchId, async (message) => {
+				redeemUser = message.userName;
+				audioLink = audioLinks.find(
+					(element) => element.channelPointRedeem == message.rewardTitle
 				);
-			}
-		});
+				if (audioLink) {
+					audio.play(audioLink.url);
+				} else if (message.rewardTitle.includes("Quote me Dirty")) {
+					quoteMeDirty.index(
+						message.channelId,
+						message.id,
+						message.rewardId,
+						message.userDisplayName
+					);
+				}
+			});
+		}
 	}
-
-	return listener;
-}
-
-async function setApiClient(newApiClient) {
-	apiClient = newApiClient;
-
-	// await apiClient.channelPoints.createCustomReward(twitchId, {
-	// 	cost: 1,
-	// 	title: "Higher or Lower than " + higherLower,
-	// 	autoFullfill: false,
-	// 	backgroundColor: "#392e5c",
-	// 	globalCooldown: null,
-	// 	isEnabled: true,
-	// 	maxRedemptionsPerStream: null,
-	// 	maxRedemptionsPerUserPerStream: null,
-	// 	prompt: "Come gamble your Taintified Essence",
-	// 	userInputRequired: false,
-	// });
-}
-
-function setChatClient(newChatClient) {
-	chatClient = newChatClient;
 }
 
 function getAudioTimeout() {
@@ -81,17 +55,7 @@ function setAudioTimeout(newAudioTimeoutPeriod) {
 	}
 }
 
-function getRandom() {
-	return Math.floor(Math.random() * 100) + 1;
-}
-
-function getRandomBetween(max, min) {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-exports.setup = setup;
-exports.setApiClient = setApiClient;
-exports.setChatClient = setChatClient;
+exports.init = init;
 exports.getAudioTimeout = getAudioTimeout;
 exports.setAudioTimeout = setAudioTimeout;
 
@@ -110,3 +74,16 @@ exports.setAudioTimeout = setAudioTimeout;
 //     userId: message.userId,
 //     userName: message.userName,
 // };
+
+// await apiClient.channelPoints.createCustomReward(twitchId, {
+// 	cost: 1,
+// 	title: "Higher or Lower than " + higherLower,
+// 	autoFullfill: false,
+// 	backgroundColor: "#392e5c",
+// 	globalCooldown: null,
+// 	isEnabled: true,
+// 	maxRedemptionsPerStream: null,
+// 	maxRedemptionsPerUserPerStream: null,
+// 	prompt: "Come gamble your Taintified Essence",
+// 	userInputRequired: false,
+// });
