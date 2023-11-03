@@ -1,23 +1,23 @@
+const twitchRepo = require("./repos/twitch");
+
 const LoyaltyPoint = require("./models/loyaltypoint");
 
 let twitchUserId = process.env.TWITCH_USER_ID;
 
 let apiClient;
-let isLive;
 let existingUsers = [];
 let newUsers;
 let subs;
 let loyaltyInterval;
 
-async function setup(apiClient) {
-	setApiClient(apiClient);
+async function init() {
+	apiClient = twitchRepo.getApiClient();
 }
 
 function chatInterval() {
 	let followingUser;
 	loyaltyInterval = setInterval(async () => {
 		let chatPaginated = await apiClient.chat.getChattersPaginated(twitchUserId);
-
 		let currentPageUsers = await chatPaginated.getNext();
 		let currentUsersList = [];
 
@@ -55,13 +55,16 @@ function chatInterval() {
 
 		let channelFollower;
 		for (let i = 0; i < existingUsers.length; i++) {
+			////
+			// not needed, existingUsers created using curreNtUsers IDs??
 			followingUser = currentUsersList.find(
 				(chatUser) => chatUser.userId == existingUsers[i].userId
 			);
+			////
 
+			let newFollowBonus = 0;
 			if (!existingUsers[i].follower) {
 				channelFollower = await apiClient.channels.getChannelFollowers(
-					twitchUserId,
 					twitchUserId,
 					followingUser.userId
 				);
@@ -69,12 +72,9 @@ function chatInterval() {
 				if (channelFollower.data.length == 1) {
 					newFollowBonus = 2000;
 					existingUsers[i].follower = true;
-				} else {
-					newFollowBonus = 0;
 				}
-			} else {
-				newFollowBonus = 0;
 			}
+
 			modifier = getModifier(existingUsers[i]);
 			existingUsers[i].points += 10 * modifier + newFollowBonus;
 
@@ -94,7 +94,6 @@ async function createUser(array) {
 	for (let i = 0; i < array.length; i++) {
 		channelFollower = await apiClient.channels.getChannelFollowers(
 			twitchUserId,
-			twitchUserId,
 			array[i].userId
 		);
 
@@ -105,6 +104,7 @@ async function createUser(array) {
 			following = false;
 			newFollowBonus = 0;
 		}
+
 		modifier = getModifier(array[i]);
 		newUser = new LoyaltyPoint({
 			username: array[i].userName,
@@ -135,19 +135,10 @@ function getModifier(user) {
 	return mod;
 }
 
-function setApiClient(newApiClient) {
-	apiClient = newApiClient;
-}
-
-function setIsLive(liveBool) {
-	isLive = liveBool;
-}
-
 function stopInterval() {
 	clearInterval(loyaltyInterval);
 }
 
-exports.setup = setup;
-exports.setIsLive = setIsLive;
+exports.init = init;
 exports.start = chatInterval;
 exports.stop = stopInterval;
