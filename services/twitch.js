@@ -1,4 +1,10 @@
+const twitchRepo = require("../repos/twitch.js");
+
 let pubSubApiClient;
+
+function init() {
+	pubSubApiClient = twitchRepo.getApiClient();
+}
 
 async function getChannelInfoById(id) {
 	let channel;
@@ -97,11 +103,7 @@ async function getUserByName(username) {
 	return user;
 }
 
-async function setApiClient(apiClient) {
-	pubSubApiClient = apiClient;
-}
-
-exports.setApiClient = setApiClient;
+exports.init = init;
 exports.shoutoutUser = shoutoutUser;
 exports.getUserByName = getUserByName;
 exports.getPredictions = getPredictions;
