@@ -1,7 +1,7 @@
 const BaseCommand = require("../classes/base-command");
 const Helper = require("../classes/helper");
 
-const pubSubClient = require("../bot-pubsubclient");
+const twitchRepo = require("./../repos/twitch");
 
 const helper = new Helper();
 
@@ -13,7 +13,7 @@ let commandResponse = () => {
 			let result = [];
 
 			if (!helper.isStreamer(config.userInfo)) {
-				const apiClient = await pubSubClient.getApiClient();
+				const apiClient = twitchRepo.getApiClient();
 				const channelFollower = await apiClient.channels.getChannelFollowers(
 					twitchId,
 					twitchId,
