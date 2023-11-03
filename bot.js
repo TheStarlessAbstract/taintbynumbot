@@ -17,7 +17,7 @@ async function init() {
 	pubnub.setup();
 	await db.connectToMongoDB();
 	await chatClient.setup();
-	await pubSubClient.setup();
+	await pubSubClient.init();
 	await discord.setup();
 }
 
