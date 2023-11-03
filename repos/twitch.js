@@ -18,45 +18,31 @@ async function init() {
 	}
 
 	const authProvider = await createAuthProvider();
+	let token;
 
 	for (let i = 0; i < users.length; i++) {
-		authProvider.addUser(users[i].twitchId, users[i].twitchToken, [
+		token = tokenFormat(twitchToken);
+
+		authProvider.addUser(users[i].twitchId, token, [
 			`pubsub:${users[i].twitchId}`,
 		]);
 	}
 
 	pubSubClient = new PubSubClient({ authProvider });
 	apiClient = new ApiClient({ authProvider });
-
-	let followers;
-	let list;
-	for (let i = 0; i < users.length; i++) {
-		followers = await apiClient.channels.getChannelFollowersPaginated(
-			users[i].twitchId
-		);
-
-		list = await followers.getNext();
-
-		console.log(list);
-	}
-
 	return true;
 }
 
 async function createAuthProvider() {
-	console.log(1);
 	let authProvider = new RefreshingAuthProvider({
 		clientId,
 		clientSecret,
-		onRefresh: async (twitchId, token) => {
-			// if (process.env.JEST_WORKER_ID == undefined) {
-			console.log(2);
-			await updateUserTwitchToken(twitchId, token);
-			console.log(3);
-			// }
-		},
 	});
-	console.log(4);
+
+	authProvider.onRefresh(async (twitchId, token) => {
+		await updateUserTwitchToken(twitchId, token);
+	});
+
 	return authProvider;
 }
 
@@ -68,29 +54,25 @@ async function updateUserTwitchToken(twitchId, token) {
 		"twitchToken"
 	).exec();
 
-	if (user) {
-		user.twitchToken = {
-			scope: token.scope,
-			accessToken: token.access_token,
-			refreshToken: token.refresh_token,
-			expiresIn: 0,
-			obtainmentTimestamp: 0,
-		};
-	} else {
+	if (!user) {
 		user = new User({
 			twitchId: twitchId,
 			joinDate: new Date(),
-			twitchToken: {
-				scope: token.scope,
-				accessToken: token.access_token,
-				refreshToken: token.refresh_token,
-				expiresIn: 0,
-				obtainmentTimestamp: 0,
-			},
 		});
 	}
 
+	user.twitchToken = tokenFormat(token);
 	user.save();
+}
+
+function tokenFormat(token) {
+	return {
+		accessToken: token.accessToken,
+		refreshToken: token.refreshToken,
+		scope: token.scope,
+		expiresIn: token.expiresIn,
+		obtainmentTimestamp: token.obtainmentTimestamp,
+	};
 }
 
 function getPubSubClient() {
