@@ -5,7 +5,6 @@ const Quote = require("../models/quote");
 const botChatClient = require("../bot-chatclient");
 
 const twitch = require("../services/twitch");
-const twitchChannels = require("../services/twitch/channels");
 
 const helper = new Helper();
 
@@ -13,7 +12,7 @@ async function index(channelId, redemptionId, rewardId, displayName) {
 	let chatClient = botChatClient.getChatClient();
 
 	let predictions = await twitch.getPredictions(channelId);
-	let channel = await twitchChannels.getChannelInfoById(channelId);
+	let channel = await twitch.getChannelInfoById(channelId);
 
 	if (!channel) {
 		return;
