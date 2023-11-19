@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const db = require("../../bot-mongoose.js");
+const twitchRepo = require("../../repos/twitch.js");
 
 const followage = require("../../commands/followage");
 
@@ -12,6 +13,7 @@ const { response } = commandLink.getCommand();
 describe("followage", () => {
 	beforeAll(async () => {
 		db.connectToMongoDB();
+		await twitchRepo.init();
 	});
 
 	afterAll(async () => {
@@ -54,7 +56,7 @@ describe("followage", () => {
 
 		//Assert
 		expect(result[0]).toMatch(
-			/@design_by_rose has been following TheStarlessAbstract for/
+			/@design_by_rose has been staring into the Abstract abyss for/
 		);
 	});
 
