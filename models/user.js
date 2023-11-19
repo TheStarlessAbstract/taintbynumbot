@@ -56,6 +56,7 @@ let UserSchema = new Schema({
 		type: SpotifyTokenSchema,
 		require: false,
 	},
+	role: { type: String, require: true, enum: ["admin", "bot", "user"] },
 });
 
 module.exports = mongoose.model("User", UserSchema);
