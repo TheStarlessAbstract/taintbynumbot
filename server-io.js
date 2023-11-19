@@ -110,6 +110,16 @@ async function setup(newIo) {
 			io.emit("setDetails", { clientId, redirectUri, scope });
 		}
 
+		if (socket.handshake.headers.referer.includes("botAuthorisation")) {
+			console.log("/botAuthorisation connected");
+
+			let redirectUri = botDomain + "/test";
+
+			let scope = "openid chat:edit+chat:read";
+
+			io.emit("botAuthorisation setDetails", { clientId, redirectUri, scope });
+		}
+
 		if (socket.handshake.headers.referer.includes("spotify")) {
 			console.log("/spotify connected");
 			const scope = "user-read-currently-playing user-read-playback-state";
