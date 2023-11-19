@@ -16,7 +16,6 @@ let commandResponse = () => {
 				const apiClient = twitchRepo.getApiClient();
 				const channelFollower = await apiClient.channels.getChannelFollowers(
 					twitchId,
-					twitchId,
 					config.userInfo.userId
 				);
 
