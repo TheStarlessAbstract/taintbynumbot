@@ -1,20 +1,14 @@
-const ApiClient = require("@twurple/api").ApiClient;
-const ChatClient = require("@twurple/chat").ChatClient;
-const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 const Helper = require("./classes/helper");
-
-const Token = require("./models/token");
 
 const commands = require("./bot-commands");
 const deathCounter = require("./bot-deathcounter");
 const messages = require("./bot-messages");
 const loyalty = require("./bot-loyalty");
-
+const twitchRepo = require("./repos/twitch");
+const twitchService = require("./services/twitch");
 const kings = require("./commands/kings");
 
 let botUsername = process.env.TWITCH_BOT_USERNAME;
-let clientId = process.env.TWITCH_CLIENT_ID;
-let clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let userId = process.env.TWITCH_USER_ID;
 let username = process.env.TWITCH_USERNAME;
 
@@ -26,38 +20,22 @@ let isLive = false;
 let intervalMessages;
 let messageCount = 0;
 let timedMessagesInterval;
-let token;
 let issuesRaised;
 
-async function setup() {
-	token = await Token.findOne({ name: "chatClient" });
+async function init() {
+	apiClient = twitchRepo.getApiClient();
+	chatClient = twitchRepo.getChatClient();
 
-	if (token) {
-		const tokenData = initializeTokenData(token);
-		const authProvider = await createAuthProvider(tokenData);
-		chatClient = createChatClient(authProvider);
-		const apiClient = new ApiClient({ authProvider });
-
-		setApiClient(apiClient);
-
-		if (!helper.isTest()) {
-			await chatClient.connect(chatClient);
-			await setupChatClientListeners(apiClient, chatClient);
-		}
-	}
-}
-
-async function connected() {
 	if (!helper.isTest()) {
-		console.log(" * Connected to Twitch chat * ");
+		chatClient.connect();
+		await setupChatClientListeners();
 	}
 }
 
-async function setupChatClientListeners(apiClient, chatClient) {
+async function setupChatClientListeners() {
 	chatClient.onAuthenticationSuccess(async () => {
 		connected();
-
-		checkLive(apiClient, chatClient);
+		checkLive();
 
 		if (!helper.isTest()) {
 			kings.resetKings();
@@ -107,18 +85,18 @@ async function setupChatClientListeners(apiClient, chatClient) {
 	});
 }
 
-function shouldIgnoreMessage(user, botUsername, message) {
-	return (
-		user === botUsername || user === "buhhsbot" || !message.startsWith("!")
-	);
+async function connected() {
+	if (!helper.isTest()) {
+		console.log(" * Connected to Twitch chat * ");
+	}
 }
 
-async function checkLive(apiClient, chatClient) {
+async function checkLive() {
 	setInterval(async () => {
-		let streamLiveFlag = await isStreamLive(apiClient);
+		let streamLiveFlag = await isStreamLive();
 
 		if (streamLiveFlag && !isLive) {
-			setTimedMessages(chatClient);
+			setTimedMessages();
 			if (process.env.JEST_WORKER_ID == undefined) {
 				loyalty.start();
 			}
@@ -131,80 +109,11 @@ async function checkLive(apiClient, chatClient) {
 	}, 5 * 60 * 1000);
 }
 
-async function setTimedMessages(chatClient) {
-	intervalMessages = await messages.get();
-
-	timedMessagesInterval = setInterval(async () => {
-		if (messageCount >= 25) {
-			const [message] = intervalMessages.splice(
-				getRandomBetween(0, intervalMessages.length),
-				1
-			);
-
-			chatClient.say("#" + username, message.index + ". " + message.text);
-
-			messageCount = 0;
-
-			if (intervalMessages.length == 0) {
-				intervalMessages = await messages.get();
-			}
-		}
-	}, 10 * 60 * 1000);
-}
-
-function getRandomBetween(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
-function messageUpdate(update) {
-	intervalMessages = update;
-}
-
-function initializeTokenData(token) {
-	return {
-		accessToken: token.accessToken,
-		refreshToken: token.refreshToken,
-		scope: token.scope,
-		expiresIn: 0,
-		obtainmentTimestamp: 0,
-	};
-}
-
-async function createAuthProvider(tokenData) {
-	let authProvider = new RefreshingAuthProvider({
-		clientId,
-		clientSecret,
-		onRefresh: async (userId, newTokenData) => {
-			if (process.env.JEST_WORKER_ID == undefined) {
-				token.accessToken = newTokenData.accessToken;
-				token.refreshToken = newTokenData.refreshToken;
-				token.scope = newTokenData.scope;
-				token.expiresIn = newTokenData.expiresIn;
-				token.obtainmentTimestamp = newTokenData.obtainmentTimestamp;
-
-				await token.save();
-			}
-		},
-	});
-
-	await authProvider.addUserForToken(tokenData, ["chat"]);
-
-	return authProvider;
-}
-
-function createChatClient(authProvider) {
-	return new ChatClient({
-		authProvider,
-		channels: [username],
-		requestMembershipEvents: true,
-	});
-}
-
-async function isStreamLive(apiClient) {
+async function isStreamLive() {
 	let streamStatus;
 
 	try {
-		let stream = await apiClient.streams.getStreamByUserId(userId);
+		let stream = await twitchService.getStreamByUserId(userId);
 
 		if (stream == null) {
 			streamStatus = false;
@@ -218,15 +127,34 @@ async function isStreamLive(apiClient) {
 	return streamStatus;
 }
 
-function setApiClient(newApiClient) {
-	apiClient = newApiClient;
+async function setTimedMessages() {
+	intervalMessages = await messages.get();
+
+	timedMessagesInterval = setInterval(async () => {
+		if (messageCount >= 25) {
+			const [message] = intervalMessages.splice(
+				helper.getRandomBetweenExclusiveMax(0, intervalMessages.length),
+				1
+			);
+
+			chatClient.say(`#${username}`, `${message.index}. ${message.text}`);
+			messageCount = 0;
+
+			if (intervalMessages.length == 0) {
+				intervalMessages = await messages.get();
+			}
+		}
+	}, 10 * 60 * 1000);
 }
 
-async function getApiClient() {
-	if (!apiClient) {
-		await setup();
-	}
-	return apiClient;
+function shouldIgnoreMessage(user, botUsername, message) {
+	return (
+		user === botUsername || user === "buhhsbot" || !message.startsWith("!")
+	);
+}
+
+function messageUpdate(update) {
+	intervalMessages = update;
 }
 
 function userInfoCheck(userInfo) {
@@ -293,11 +221,5 @@ function confirmMaps(item) {
 	}
 }
 
-function getChatClient() {
-	return chatClient;
-}
-
-exports.setup = setup;
+exports.init = init;
 exports.messageUpdate = messageUpdate;
-exports.getApiClient = getApiClient;
-exports.getChatClient = getChatClient;
