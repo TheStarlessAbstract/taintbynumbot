@@ -61,9 +61,16 @@ router.get("/test", async (req, res) => {
 			obtainmentTimestamp: 0,
 		};
 	} else {
+		let role = "user";
+		if (twitchId == process.env.TWITCH_USER_ID) {
+			role = "admin";
+		} else if (twitchId == process.env.TWITCH_BOT_ID) {
+			role = "bot";
+		}
 		user = new User({
 			twitchId: twitchId,
 			joinDate: new Date(),
+			role: role,
 			twitchToken: {
 				scope: response.data.scope,
 				accessToken: response.data.access_token,
@@ -81,6 +88,10 @@ router.get("/test", async (req, res) => {
 
 router.get("/auth", (req, res) => {
 	res.sendFile(path.join(__dirname, "..", "public", "bot-auth.html"));
+});
+
+router.get("/botAuthorisation", (req, res) => {
+	res.sendFile(path.join(__dirname, "..", "public", "bot-auth-bothlogin.html"));
 });
 
 router.get("/spotify", (req, res) => {
