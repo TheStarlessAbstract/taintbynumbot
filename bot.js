@@ -6,6 +6,8 @@ const pubSubClient = require("./bot-pubsubclient");
 const discord = require("./bot-discord");
 const kings = require("./commands/kings");
 const db = require("./bot-mongoose.js");
+const twitchRepo = require("./repos/twitch");
+const twitchService = require("./services/twitch");
 
 init();
 
@@ -16,7 +18,10 @@ async function init() {
 	// Connect to MongoDB and set up other components
 	pubnub.setup();
 	await db.connectToMongoDB();
-	await chatClient.setup();
+	await twitchRepo.init();
+	twitchService.init();
+
+	await chatClient.init();
 	await pubSubClient.init();
 	await discord.setup();
 }
