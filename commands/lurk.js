@@ -1,25 +1,36 @@
 const BaseCommand = require("../classes/base-command");
+const BotCommand = require("../classes/bot-command");
 const Helper = require("../classes/helper");
 
+const db = require("./../bot-mongoose.js");
+const CommandNew = require("../models/commandnew");
+const Quote = require("../models/quote");
+
 const helper = new Helper();
+let lurk = {};
+let users = {};
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
-			let result = [];
+			console.log("command");
+			let userCommand = await CommandNew.findOne({
+				streamerId: config.channelId,
+				name: "lurk",
+			});
+
+			users[config.channelId] = { output: userCommand.output };
 
 			if (
 				helper.isValuePresentAndString(config.userInfo.displayName) &&
 				!helper.isStreamer(config.userInfo)
 			) {
-				result.push(
-					"@" +
-						config.userInfo.displayName +
-						" finds a comfortable spot behind the bushes to perv on the stream"
+				let output = eval(
+					"`" + helper.getOutput(users, config.channelId, "isLurking") + "`"
 				);
-			}
 
-			return result;
+				return output;
+			}
 		},
 	};
 };
@@ -34,6 +45,18 @@ let versions = [
 	},
 ];
 
-const lurk = new BaseCommand(commandResponse, versions);
+init();
+async function init() {
+	console.log("init: " + 1);
+	console.log(db.getReadyState());
+	let userCommand = await Quote.find({});
+	for (let i = 0; i < userCommand.length; i++) {
+		console.log(userCommand[i]);
+	}
+	console.log(userCommand);
+	users = await helper.getCommandUsers("lurk");
+	console.log("init: " + 2);
+	lurk = new BotCommand(commandResponse, versions, users);
+}
 
 exports.command = lurk;
