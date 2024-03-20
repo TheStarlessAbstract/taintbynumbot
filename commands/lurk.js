@@ -2,18 +2,16 @@ const BaseCommand = require("../classes/base-command");
 const BotCommand = require("../classes/bot-command");
 const Helper = require("../classes/helper");
 
-const db = require("./../bot-mongoose.js");
 const CommandNew = require("../models/commandnew");
-const Quote = require("../models/quote");
 
 const helper = new Helper();
-let lurk = {};
-let users = {};
+const users = {};
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
-			console.log("command");
+			if (helper.isStreamer(config.userInfo)) return;
+
 			let userCommand = await CommandNew.findOne({
 				streamerId: config.channelId,
 				name: "lurk",
@@ -21,16 +19,10 @@ let commandResponse = () => {
 
 			users[config.channelId] = { output: userCommand.output };
 
-			if (
-				helper.isValuePresentAndString(config.userInfo.displayName) &&
-				!helper.isStreamer(config.userInfo)
-			) {
-				let output = eval(
-					"`" + helper.getOutput(users, config.channelId, "isLurking") + "`"
-				);
+			let output = helper.getOutput(users, config.channelId, "isLurking");
+			output = output.replace("[displayName]", config.userInfo.displayName);
 
-				return output;
-			}
+			return output;
 		},
 	};
 };
@@ -45,18 +37,6 @@ let versions = [
 	},
 ];
 
-init();
-async function init() {
-	console.log("init: " + 1);
-	console.log(db.getReadyState());
-	let userCommand = await Quote.find({});
-	for (let i = 0; i < userCommand.length; i++) {
-		console.log(userCommand[i]);
-	}
-	console.log(userCommand);
-	users = await helper.getCommandUsers("lurk");
-	console.log("init: " + 2);
-	lurk = new BotCommand(commandResponse, versions, users);
-}
+const lurk = new BotCommand(commandResponse, versions, users);
 
 exports.command = lurk;
