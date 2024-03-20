@@ -18,7 +18,7 @@ async function init() {
 	audioLinks = await AudioLink.find({});
 	lastAudioPlayed = new Date().getTime();
 
-	let users = await User.find({}, "twitchId").exec();
+	let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
 
 	if (process.env.JEST_WORKER_ID == undefined) {
 		for (let i = 0; i < users.length; i++) {
