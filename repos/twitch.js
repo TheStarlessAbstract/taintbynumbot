@@ -50,7 +50,6 @@ async function createAuthProvider() {
 	});
 
 	authProvider.onRefresh(async (twitchId, token) => {
-		console.log("refresh");
 		await updateUserTwitchToken(twitchId, token);
 	});
 
@@ -99,7 +98,7 @@ async function createChatClient(authProvider) {
 }
 
 function createPubSubClient(authProvider) {
-	new PubSubClient({ authProvider });
+	return new PubSubClient({ authProvider });
 }
 
 async function getUsernames() {
