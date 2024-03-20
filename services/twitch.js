@@ -118,7 +118,81 @@ async function getStreamByUserId(userId) {
 	return stream;
 }
 
+async function getStreamsByUserIds(users) {
+	let streams;
+
+	try {
+		streams = await apiClient.streams.getStreamsByUserIds(users);
+	} catch (err) {
+		console.log("oof");
+		console.error(err);
+		streams = "";
+	}
+
+	return streams;
+}
+
+async function getChattersPaginated(broadcaster) {
+	let chatters;
+
+	try {
+		chatters = await apiClient.chat.getChattersPaginated(broadcaster);
+	} catch (err) {
+		console.error(err);
+		chatters = "";
+	}
+
+	return chatters;
+}
+
+async function getSubscriptionsForUsers(broadcaster, users) {
+	let subscriptions;
+
+	try {
+		subscriptions = await apiClient.subscriptions.getSubscriptionsForUsers(
+			broadcaster,
+			users
+		);
+	} catch (err) {
+		console.error(err);
+		chatters = "";
+	}
+
+	return subscriptions;
+}
+
+async function getChannelFollowers(broadcaster, user, pagination) {
+	let followers;
+
+	try {
+		followers = await apiClient.channels.getChannelFollowers(
+			broadcaster,
+			user,
+			pagination
+		);
+	} catch (err) {
+		console.error(err);
+		chatters = "";
+	}
+
+	return followers;
+}
+
+async function getUserById(userId) {
+	let user;
+
+	try {
+		user = await apiClient.users.getUserById(userId);
+	} catch (err) {
+		console.error(err);
+		user = "";
+	}
+
+	return user;
+}
+
 exports.init = init;
+exports.getUserById = getUserById;
 exports.shoutoutUser = shoutoutUser;
 exports.getUserByName = getUserByName;
 exports.getPredictions = getPredictions;
@@ -127,4 +201,8 @@ exports.createPrediction = createPrediction;
 exports.sendAnnouncement = sendAnnouncement;
 exports.getStreamByUserId = getStreamByUserId;
 exports.getChannelInfoById = getChannelInfoById;
+exports.getChannelFollowers = getChannelFollowers;
+exports.getStreamsByUserIds = getStreamsByUserIds;
+exports.getChattersPaginated = getChattersPaginated;
+exports.getSubscriptionsForUsers = getSubscriptionsForUsers;
 exports.updateRedemptionStatusByIds = updateRedemptionStatusByIds;
