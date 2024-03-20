@@ -1,3 +1,5 @@
+const CommandNew = require("../models/commandnew");
+
 class Helper {
 	constructor() {}
 
@@ -134,6 +136,29 @@ class Helper {
 		let subStringLowercase = subString.toLowerCase();
 
 		return stringLowercase.startsWith(subStringLowercase);
+	}
+
+	getOutput(users, channelId, prop) {
+		let output = "";
+
+		output = users[channelId].output.get(prop).message;
+
+		return output;
+	}
+
+	async getCommandUsers(name) {
+		console.log("getCommandUsers: " + 1);
+		let users = {};
+
+		let commandUsers = await CommandNew.find({ name: name });
+		console.log(commandUsers);
+		console.log("getCommandUsers: " + 2);
+
+		for (let i = 0; i < commandUsers.length; i++) {
+			users[commandUsers[i].streamerId] = { output: commandUsers[i].output };
+		}
+
+		return users;
 	}
 }
 
