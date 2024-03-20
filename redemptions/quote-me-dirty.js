@@ -2,14 +2,14 @@ const Helper = require("../classes/helper");
 
 const Quote = require("../models/quote");
 
-const botChatClient = require("../bot-chatclient");
+const twitchRepo = require("../repos/twitch");
 
 const twitch = require("../services/twitch");
 
 const helper = new Helper();
 
 async function index(channelId, redemptionId, rewardId, displayName) {
-	let chatClient = botChatClient.getChatClient();
+	let chatClient = twitchRepo.getChatClient();
 
 	let predictions = await twitch.getPredictions(channelId);
 	let channel = await twitch.getChannelInfoById(channelId);
