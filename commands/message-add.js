@@ -1,46 +1,49 @@
 const BaseCommand = require("../classes/base-command");
 const Helper = require("../classes/helper");
 
+const chatClient = require("../bot-chatclient");
+
 const Message = require("../models/message");
-const messages = require("../bot-messages");
 
 const helper = new Helper();
 
 let commandResponse = () => {
 	return {
 		response: async (config) => {
-			let result = [];
-
 			if (
 				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
 				let argumentText = config.argument;
-				let existingMessage = await Message.findOne({ text: argumentText });
+				let existingMessage = await Message.findOne({
+					twitchId: config.channelId,
+					text: argumentText,
+				});
 
-				if (existingMessage == null) {
-					let messageList = await Message.find({}).sort({ index: 0 });
-
-					let message = await Message.create({
-						index: messageList[messageList.length - 1].index + 1,
-						text: argumentText,
-						addedBy: config.userInfo.displayName,
-					});
-
-					messageList.push(message);
-					messages.update(messageList);
-
-					result.push("Message added - " + message.index + ": " + message.text);
-				} else {
-					result.push("This Message has already been added");
+				if (!existingMessage) {
+					return "This Message has already been added";
 				}
-			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
-				result.push("!addMessage command is for Mods only");
-			} else if (!helper.isValuePresentAndString(config.argument)) {
-				result.push("To add a Message use !addMessage [message output]");
-			}
 
-			return result;
+				let messageList = await Message.find({
+					twitchId: config.channelId,
+				}).sort({ index: 0 });
+
+				let message = await Message.create({
+					twitchId: config.channelId,
+					index: messageList[messageList.length - 1].index + 1,
+					text: argumentText,
+					addedBy: config.userInfo.displayName,
+				});
+
+				messageList.push(message);
+				chatClient.updateMessages(config.channelId, messageList);
+
+				return `Message added - ${message.index}: ${message.text}`;
+			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
+				return "!addMessage command is for Mods only";
+			} else if (!helper.isValuePresentAndString(config.argument)) {
+				return "To add a Message use !addMessage [message output]";
+			}
 		},
 	};
 };
