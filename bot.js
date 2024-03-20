@@ -1,13 +1,13 @@
 require("dotenv").config();
 
-const chatClient = require("./bot-chatclient");
-const pubnub = require("./bot-pubnub");
-const pubSubClient = require("./bot-pubsubclient");
-const discord = require("./bot-discord");
-const kings = require("./commands/kings");
 const db = require("./bot-mongoose.js");
 const twitchRepo = require("./repos/twitch");
 const twitchService = require("./services/twitch");
+const chatClient = require("./bot-chatclient");
+const pubSubClient = require("./bot-pubsubclient");
+const discord = require("./bot-discord");
+const kings = require("./commands/kings");
+const pubnub = require("./bot-pubnub");
 
 init();
 
@@ -16,14 +16,13 @@ async function init() {
 	setupSignalHandlers();
 
 	// Connect to MongoDB and set up other components
-	pubnub.setup();
+	// pubnub.setup();
 	await db.connectToMongoDB();
 	await twitchRepo.init();
 	twitchService.init();
-
 	await chatClient.init();
-	await pubSubClient.init();
-	await discord.setup();
+	// await pubSubClient.init();
+	// await discord.setup();
 }
 
 function setupSignalHandlers() {
@@ -34,10 +33,10 @@ function setupSignalHandlers() {
 
 async function handleSignal(signal) {
 	if (signal === "SIGTERM") {
-		await kings.saveKingsState();
+		// await kings.saveKingsState();
 		process.exit(0);
 	} else if (signal === "SIGINT") {
-		await kings.saveKingsState();
+		// await kings.saveKingsState();
 		process.exit(0);
 	}
 }
