@@ -8,6 +8,7 @@ const DeathCounter = require("../models/deathcounter");
 
 const audio = require("../bot-audio");
 const chatClient = require("../bot-chatclient");
+const twitchService = require("../services/twitch");
 
 const helper = new Helper();
 
@@ -240,7 +241,7 @@ async function getStreamData(config) {
 	if (helper.isTest() && config?.testOptions) {
 		streamData = config.testOptions;
 	} else {
-		streamData = await apiClient.streams.getStreamByUserId(twitchId);
+		streamData = await twitchService.getStreamByUserId(twitchId);
 	}
 	return streamData;
 }
@@ -289,8 +290,6 @@ async function setTotalGameDeaths() {
 }
 
 async function setup() {
-	apiClient = await chatClient.getApiClient();
-
 	await updateAudioLinks();
 	await setAllTimeStreamDeaths();
 	await setTotalStreamDeaths();
