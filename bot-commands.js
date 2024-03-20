@@ -1,6 +1,12 @@
 const BaseCommand = require("./classes/base-command");
 
 const Command = require("./models/command");
+const CommandNew = require("./models/commandnew");
+const User = require("./models/user");
+
+const reqCommands = {
+	lurk: require("./commands/lurk"),
+};
 
 const audioTimeout = require("./commands/audiotimeout");
 const buhhs = require("./commands/buhhs");
@@ -19,10 +25,6 @@ const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/message-add");
 const messagesDelete = require("./commands/message-delete");
 const messagesEdit = require("./commands/message-edit");
-const modAbuseAdd = require("./commands/modabuse-add");
-const modAbuseDelete = require("./commands/modabuse-delete");
-const modAbuseEdit = require("./commands/modabuse-edit");
-const modAbuse = require("./commands/modabuse");
 const points = require("./commands/points");
 const quoteAdd = require("./commands/quote-add");
 const quoteDelete = require("./commands/quote-delete");
@@ -39,10 +41,20 @@ const title = require("./commands/title");
 
 let chugLastUseTime = "";
 
+const userCommands = {
+	// 123: {
+	// 	addcomm: commandAdd.command,
+	// 	addmessage: messagesAdd.command,
+	// },
+	// 124: {
+	// 	suck: commandAdd.command,
+	// 	blow: messagesAdd.command,
+	// },
+};
+
 const commands = {
 	addcomm: commandAdd.command,
 	addmessage: messagesAdd.command,
-	addmodabuse: modAbuseAdd.command,
 	addtinder: tinderAdd.command,
 	addquote: quoteAdd.command,
 	audiotimeout: audioTimeout.command,
@@ -92,13 +104,11 @@ const commands = {
 	deaths: deaths.command,
 	delcomm: commandDelete.command,
 	delmessage: messagesDelete.command,
-	delmodabuse: modAbuseDelete.command,
 	delquote: quoteDelete.command,
 	deltinder: tinderDelete.command,
 	drinkbitch: drinkBitch.command,
 	editcomm: commandEdit.command,
 	editmessage: messagesEdit.command,
-	editmodabuse: modAbuseEdit.command,
 	editquote: quoteEdit.command,
 	edittinder: tinderEdit.command,
 	f: f.command,
@@ -108,7 +118,6 @@ const commands = {
 	kingsreset: kingsReset.command,
 	kings: kings.command,
 	lurk: lurk.command,
-	modabuse: modAbuse.command,
 	points: points.command,
 	quote: quote.command,
 	so: so.command,
@@ -119,31 +128,49 @@ const commands = {
 };
 
 async function setup() {
-	let chatCommands = await Command.find({});
+	let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
+	let userIds = getUserIds(users);
 
-	for (const command of chatCommands) {
-		commands[command.name] = new BaseCommand(() => {
-			return {
-				response: command.text,
-			};
-		}, [
-			{
-				description: command.text,
-				usage: "!" + command.name,
-				usableBy: "users",
-				active: true,
-			},
-		]);
+	// find all commands for user that are active
+	// loop through IDs
+	for (let i = 0; i < userIds.length; i++) {
+		let activeCommands = await CommandNew.find({
+			streamerId: userIds[i],
+			active: true,
+		});
+		userCommands[userIds[i]] = {};
 
-		getCommands();
+		// loop through commands add to userCommands
+		for (let j = 0; j < activeCommands.length; j++) {
+			if (activeCommands[j].name) {
+				console.log("name");
+
+				userCommands[userIds[i]][activeCommands[j].chatName] =
+					reqCommands[activeCommands[j].name].command;
+			} else {
+				userCommands[userIds[i]][activeCommands[j].chatName] =
+					new BaseCommand(() => {
+						return {
+							response: activeCommands[j].text,
+						};
+					}, [
+						{
+							description: activeCommands[j].text,
+							usage: "!" + activeCommands[j].chatName,
+							usableBy: "users",
+							active: true,
+						},
+					]);
+			}
+		}
 	}
+	// setCommandTimers();
 
-	setCommandTimers();
-
-	drinkBitch.updateAudioLinks();
-	await f.setup();
+	// drinkBitch.updateAudioLinks();
+	// await f.setup();
 }
 
+// for discord command display change to local query to database
 function getCommands() {
 	const commandList = Object.entries(commands).map(([key, value]) => {
 		return { name: key, versions: value.getVersions() };
@@ -157,10 +184,8 @@ function setCommandTimers() {
 	const currentDateTime = new Date();
 
 	commands.drinkbitch.setTimer(currentDateTime);
-	commands.points.setTimer(currentDateTime);
 	commands.quote.setTimer(currentDateTime);
 	commands.tinderquote.setTimer(currentDateTime);
-	commands.modabuse.setTimer(currentDateTime);
 	commands.f.setTimer(currentDateTime);
 	// chugLastUseTime = currentDateTime;
 	commands.kingsremain.setTimer(currentDateTime);
@@ -168,6 +193,16 @@ function setCommandTimers() {
 	commands.so.setTimer(currentDateTime);
 }
 
+function getUserIds(users) {
+	let userIds = [];
+
+	for (let user of users) {
+		userIds.push(user.twitchId);
+	}
+
+	return userIds;
+}
+
 exports.getCommands = getCommands;
-exports.list = commands;
+exports.list = userCommands;
 exports.setup = setup;
