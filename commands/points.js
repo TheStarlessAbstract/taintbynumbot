@@ -1,7 +1,7 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const chatClient = require("../bot-chatclient");
+const twitchService = require("../services/twitch");
 
 const LoyaltyPoint = require("../models/loyaltypoint");
 
@@ -12,12 +12,11 @@ let cooldown = 5000;
 let commandResponse = () => {
 	return {
 		response: async (config) => {
-			let result = [];
 			let currentTime = new Date();
 			let user;
 
 			if (
-				helper.isVersionActive(versions, 0) &&
+				points.getVersionActivity(0) &&
 				!helper.isValuePresentAndString(config.argument) &&
 				helper.isCooldownPassed(
 					currentTime,
@@ -29,26 +28,16 @@ let commandResponse = () => {
 				points.setTimer(currentTime);
 
 				user = await LoyaltyPoint.findOne({
+					twitchId: config.channelId,
 					userId: config.userInfo.userId,
 				});
 
-				if (user) {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" has " +
-							user.points +
-							" Tainty Points"
-					);
-				} else {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points."
-					);
+				if (!user) {
+					return `@${config.userInfo.displayName} I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points.`;
 				}
+				return `@${config.userInfo.displayName} has ${user.points} Tainty Points`;
 			} else if (
-				helper.isVersionActive(versions, 1) &&
+				points.getVersionActivity(1) &&
 				helper.isStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
@@ -56,61 +45,43 @@ let commandResponse = () => {
 				let newPoints = helper.getCommandArgumentKey(config.argument, 1);
 
 				if (
-					helper.isValuePresentAndString(username) &&
-					helper.isValuePresentAndNumber(newPoints)
+					!helper.isValuePresentAndString(username) ||
+					!helper.isValuePresentAndNumber(newPoints)
 				) {
-					if (username.startsWith("@")) {
-						username = username.substring(1);
-					}
-
-					const apiClient = await chatClient.getApiClient();
-					user = await apiClient.users.getUserByName(username.toLowerCase());
-
-					if (user) {
-						user = await LoyaltyPoint.findOne({
-							userId: user.id,
-						});
-
-						if (user) {
-							user.points += Number(newPoints);
-							await user.save();
-
-							result.push(
-								"Our glorious leader Starless, has given @" +
-									username +
-									" " +
-									newPoints +
-									" Tainty Points"
-							);
-						} else {
-							result.push(
-								"@TheStarlessAbstract doesn't look like @" +
-									username +
-									" can be given points just yet"
-							);
-						}
-					} else {
-						result.push(
-							"@TheStarlessAbstract no user found called " + username
-						);
-					}
-				} else {
-					result.push(
-						"@TheStarlessAbstract it's not that hard, just !points [username] [number]"
-					);
+					return `@TheStarlessAbstract it's not that hard, just !points [username] [number]`;
 				}
+
+				if (username.startsWith("@")) {
+					username = username.substring(1);
+				}
+
+				let twitchUser = await twitchService.getUserByName(
+					username.toLowerCase()
+				);
+
+				if (!twitchUser) {
+					return `TheStarlessAbstract no user found called ${username}`;
+				}
+
+				user = await LoyaltyPoint.findOne({
+					twitchId: config.channelId,
+					userId: twitchUser.id,
+				});
+
+				if (!user) {
+					return `@TheStarlessAbstract doesn't look like @${username} can be given points just yet`;
+				}
+
+				user.points += Number(newPoints);
+				await user.save();
+
+				return `Our glorious leader Starless, has given @${username} ${newPoints} Tainty Points`;
 			} else if (
 				!helper.isStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
 			) {
-				result.push(
-					"@" +
-						config.userInfo.displayName +
-						" you aren't allowed to use this command like that"
-				);
+				return `@${config.userInfo.displayName} you aren't allowed to use this command like that`;
 			}
-
-			return result;
 		},
 	};
 };
