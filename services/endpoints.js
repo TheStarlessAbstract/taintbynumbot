@@ -57,7 +57,7 @@ router.get("/test", async (req, res) => {
 			scope: response.data.scope,
 			accessToken: response.data.access_token,
 			refreshToken: response.data.refresh_token,
-			expiresIn: 0,
+			expiresIn: response.data.expires_in,
 			obtainmentTimestamp: 0,
 		};
 	} else {
@@ -67,6 +67,7 @@ router.get("/test", async (req, res) => {
 		} else if (twitchId == process.env.TWITCH_BOT_ID) {
 			role = "bot";
 		}
+
 		user = new User({
 			twitchId: twitchId,
 			joinDate: new Date(),
@@ -75,7 +76,7 @@ router.get("/test", async (req, res) => {
 				scope: response.data.scope,
 				accessToken: response.data.access_token,
 				refreshToken: response.data.refresh_token,
-				expiresIn: 0,
+				expiresIn: response.data.expires_in,
 				obtainmentTimestamp: 0,
 			},
 		});
