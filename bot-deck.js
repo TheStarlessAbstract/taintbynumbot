@@ -1,4 +1,69 @@
-const Deck = require("./models/deck");
+const CardGame = require("./models/cardgame");
+
+let twitchId = "100612361";
+
+async function init() {
+	let game = await CardGame.findOne({ twitchId: twitchId, name: "kings" });
+	if (game) {
+		return game;
+	}
+
+	game = new CardGame({ twitchId: twitchId, name: "kings" });
+
+	let suits = getSuits();
+	let values = getValues();
+
+	suits.forEach((suit) => {
+		values.forEach((value) => {
+			game.deck.push({
+				suit: suit,
+				value: value.value,
+				rule: value.rule,
+				explanation: value.explanation,
+				isDrawn: false,
+				hasAudioAlert: false,
+			});
+		});
+	});
+
+	game.bonus.push(
+		{
+			name: "jager",
+			active: true,
+			amount: 2,
+			appliesTo: "This card doesn't really have a rule",
+			message:
+				"A wild Jagerbomb appears, Starless uses self-control. Was it effective?",
+			hasAudioAlert: true,
+			prize: {
+				active: true,
+				// method doesn't really need to be spelled out exactly, but for now it helps
+				// can use some shorthand, or something when coding it up
+				method:
+					"((Total cards drawn minus last lastDrawn) multiplied by card cost)multiplied by rate",
+				rate: 0.66,
+				lastDrawn: 0,
+			},
+		},
+		{
+			name: "chug",
+			active: true,
+			amount: 1,
+			appliesTo: "4th King drawn",
+			message:
+				"King number 4, time for Starless to chug, but not chug, because he can't chug. Pfft, can't chug.",
+			hasAudioAlert: true,
+			prize: {
+				active: true,
+				method: "",
+			},
+		}
+	);
+
+	await game.save();
+
+	return game;
+}
 
 async function getDeck() {
 	let deck;
@@ -106,4 +171,5 @@ function getValues() {
 	];
 }
 
+exports.init = init;
 exports.getDeck = getDeck;
