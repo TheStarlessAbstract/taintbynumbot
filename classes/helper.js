@@ -147,12 +147,9 @@ class Helper {
 	}
 
 	async getCommandUsers(name) {
-		console.log("getCommandUsers: " + 1);
 		let users = {};
 
 		let commandUsers = await CommandNew.find({ name: name });
-		console.log(commandUsers);
-		console.log("getCommandUsers: " + 2);
 
 		for (let i = 0; i < commandUsers.length; i++) {
 			users[commandUsers[i].streamerId] = { output: commandUsers[i].output };
