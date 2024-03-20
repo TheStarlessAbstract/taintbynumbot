@@ -1,12 +1,25 @@
 require("dotenv").config();
 
-const lurk = require("../../commands/lurk");
+const db = require("../../bot-mongoose.js");
 
+let lurk;
 let userInfo;
-let commandLink = lurk.command;
-const { response } = commandLink.getCommand();
+let commandLink;
 
 describe("lurk", () => {
+	beforeAll(async () => {
+		await db.connectToMongoDB();
+		console.log("beforeAll: " + 1);
+		lurk = require("../../commands/lurk");
+		console.log("beforeAll: " + 2);
+		commandLink = lurk.command;
+		console.log("beforeAll: " + 3);
+	});
+
+	afterAll(async () => {
+		await db.disconnectFromMongoDB();
+	});
+
 	test("IsBroadcasterIsFalse_ShouldReturnUndefined", async () => {
 		//Assemble
 		userInfo = { isBroadcaster: false, displayName: "design_by_rose" };
@@ -22,9 +35,8 @@ describe("lurk", () => {
 
 	test("IsBroadcasterIsTrue_ShouldReturnString", async () => {
 		//Assemble
-		isBroadcaster = true;
 		userInfo = { isBroadcaster: true, displayName: "TheStarlessAbstract" };
-
+		const { response } = commandLink.getCommand();
 		//Act
 		let result = await response({
 			userInfo,
@@ -32,5 +44,5 @@ describe("lurk", () => {
 
 		//Assert
 		expect(result[0]).toBeUndefined();
-	});
+	}, 30000);
 });
