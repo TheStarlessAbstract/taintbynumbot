@@ -1,6 +1,8 @@
 const BaseCommand = require("../classes/base-command");
 const Helper = require("../classes/helper");
 
+const chatClient = require("../bot-chatclient");
+
 const Message = require("../models/message");
 
 const helper = new Helper();
@@ -8,8 +10,6 @@ const helper = new Helper();
 let commandResponse = () => {
 	return {
 		response: async (config) => {
-			let result = [];
-
 			if (
 				helper.isValidModeratorOrStreamer(config.userInfo) &&
 				helper.isValuePresentAndString(config.argument)
@@ -17,25 +17,27 @@ let commandResponse = () => {
 				if (!isNaN(config.argument)) {
 					let index = config.argument;
 
-					let message = await Message.findOne({ index: index });
-					if (message) {
-						result.push("Message deleted - " + index + " was: " + message.text);
-						await message.deleteOne();
-					} else {
-						result.push("No Message " + config.argument + " found");
+					let message = await Message.findOne({
+						twitchId: config.channelId,
+						index: index,
+					});
+
+					if (!message) {
+						return `No Message ${config.argument} found`;
 					}
+
+					await message.deleteOne();
+					let messages = await Message.find({ twitchId: config.channelId });
+					chatClient.updateMessages(config.channelId, messages);
+					return `Message deleted - ${index} was: ${message.text}`;
 				} else {
-					result.push(
-						"!delMessage [index] - index is a number - !delMessage 69"
-					);
+					return `!delMessage [index] - index is a number - !delMessage 69`;
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
-				result.push("!delMessage is for Mods only");
+				return `!delMessage is for Mods only`;
 			} else if (!helper.isValuePresentAndString(config.argument)) {
-				result.push("To delete a Message use !delMessage [index]");
+				return `To delete a Message use !delMessage [index]`;
 			}
-
-			return result;
 		},
 	};
 };
