@@ -128,16 +128,19 @@ const commands = {
 };
 
 async function setup() {
+	// find all users whose role is not "bot"
 	let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
 	let userIds = getUserIds(users);
 
-	// find all commands for user that are active
-	// loop through IDs
+	// loop though IDs to get all active commands for all users
 	for (let i = 0; i < userIds.length; i++) {
 		let activeCommands = await CommandNew.find({
 			streamerId: userIds[i],
 			active: true,
 		});
+
+		if (!activeCommands) continue;
+
 		userCommands[userIds[i]] = {};
 
 		// loop through commands add to userCommands
