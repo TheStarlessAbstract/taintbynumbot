@@ -1,29 +1,23 @@
 const Helper = require("./classes/helper");
 
-const commands = require("./bot-commands");
-const deathCounter = require("./bot-deathcounter");
-const messages = require("./bot-messages");
-const loyalty = require("./bot-loyalty");
 const twitchRepo = require("./repos/twitch");
 const twitchService = require("./services/twitch");
+const commands = require("./bot-commands");
+const loyalty = require("./bot-loyalty");
+const messages = require("./bot-messages");
 const kings = require("./commands/kings");
 
+const User = require("./models/user");
+
 let botUsername = process.env.TWITCH_BOT_USERNAME;
-let userId = process.env.TWITCH_USER_ID;
-let username = process.env.TWITCH_USERNAME;
 
 const helper = new Helper();
 
-let apiClient;
 let chatClient;
-let isLive = false;
-let intervalMessages;
-let messageCount = 0;
-let timedMessagesInterval;
 let issuesRaised;
+const users = new Map();
 
 async function init() {
-	apiClient = twitchRepo.getApiClient();
 	chatClient = twitchRepo.getChatClient();
 
 	if (!helper.isTest()) {
@@ -38,21 +32,20 @@ async function setupChatClientListeners() {
 		checkLive();
 
 		if (!helper.isTest()) {
-			kings.resetKings();
+			// kings.resetKings();
 			await commands.setup();
-			await deathCounter.setup(apiClient);
 		}
 	});
 
-	await chatClient.onMessage(async (channel, user, message, msg) => {
-		messageCount++;
+	chatClient.onMessage(async (channel, user, message, msg) => {
+		users.get(msg.channelId).messageCount++;
 
 		if (shouldIgnoreMessage(user, botUsername, message)) return;
 
 		if (!userInfoCheck(msg.userInfo)) {
 			const userInfo = msg.userInfo;
 			let [command, argument] = message.slice(1).split(/\s(.+)/);
-			let commandLink = commands.list[command.toLowerCase()];
+			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
 
 			if (commandLink == undefined) return;
 
@@ -71,8 +64,12 @@ async function setupChatClientListeners() {
 					});
 
 					if (result) {
-						for (let i = 0; i < result.length; i++) {
-							chatClient.say(channel, result[i]);
+						if (Array.isArray(result)) {
+							for (let i = 0; i < result.length; i++) {
+								chatClient.say(channel, result[i]);
+							}
+						} else {
+							chatClient.say(channel, result);
 						}
 					}
 				} else if (typeof response === "string") {
@@ -92,56 +89,99 @@ async function connected() {
 }
 
 async function checkLive() {
+	await updateUsers();
 	setInterval(async () => {
-		let streamLiveFlag = await isStreamLive();
+		await updateUsers();
+		await checkStreamsLive();
 
-		if (streamLiveFlag && !isLive) {
-			setTimedMessages();
-			if (process.env.JEST_WORKER_ID == undefined) {
-				loyalty.start();
+		users.forEach((value, key) => {
+			if (value.isLive && !value.lastIsLiveUpdate) {
+				value.lastIsLiveUpdate = true;
+				setTimedMessages(value);
+				if (!helper.isTest()) {
+					loyalty.start(value.id);
+				}
+			} else if (!value.isLive && value.lastIsLiveUpdate) {
+				value.lastIsLiveUpdate = false;
+
+				clearInterval(value.timedMessagesInterval);
+				loyalty.stop(value.id);
 			}
-			isLive = true;
-		} else if (!streamLiveFlag && isLive) {
-			clearInterval(timedMessagesInterval);
-			loyalty.stop();
-			isLive = false;
-		}
+		});
 	}, 5 * 60 * 1000);
 }
 
-async function isStreamLive() {
-	let streamStatus;
+async function updateUsers() {
+	let usersFromDb = await User.find(
+		{ role: { $ne: "bot" } },
+		"twitchId"
+	).exec();
 
-	try {
-		let stream = await twitchService.getStreamByUserId(userId);
-
-		if (stream == null) {
-			streamStatus = false;
-		} else {
-			streamStatus = true;
+	for (let userFromDb of usersFromDb) {
+		if (!users.has(userFromDb.twitchId)) {
+			users.set(userFromDb.twitchId, {
+				id: userFromDb.twitchId,
+				isLive: false,
+				lastIsLiveUpdate: false,
+				messageCount: 0,
+			});
 		}
-	} catch {
-		streamStatus = false;
 	}
 
-	return streamStatus;
+	// let usersToRemove = [];
+	// for (let i = 0; i < users.length; i++) {
+	// 	// looking user in users whose id does not match any userFromDb
+	// 	if (!usersFromDb.some((userFromDb) => userFromDb.twitchId == users[i].id)) {
+	// 		usersToRemove.push(i);
+	// 		clearInterval(users[i].timedMessagesInterval);
+	// 		loyalty.stop(users[i].id);
+	// 	}
+	// }
+
+	// usersToRemove.sort((a, b) => {
+	// 	return b - a;
+	// });
+
+	// for (let index of usersToRemove) {
+	// 	users.splice(index, 1);
+	// }
 }
 
-async function setTimedMessages() {
-	intervalMessages = await messages.get();
+async function checkStreamsLive() {
+	let streams = await twitchService.getStreamsByUserIds(getUserIds());
 
-	timedMessagesInterval = setInterval(async () => {
-		if (messageCount >= 25) {
-			const [message] = intervalMessages.splice(
-				helper.getRandomBetweenExclusiveMax(0, intervalMessages.length),
+	users.forEach((value, key) => {
+		value.isLive = streams.some((stream) => {
+			if (stream.userId !== value.id) {
+				return false;
+			}
+
+			return true;
+		});
+	});
+}
+
+async function setTimedMessages(value) {
+	value.messages = await messages.get(value.id);
+	let user = await twitchService.getUserById(value.id);
+
+	value.channelName = user.name;
+
+	value.timedMessagesInterval = setInterval(async () => {
+		if (value.messageCount >= 25) {
+			const [message] = value.messages.splice(
+				helper.getRandomBetweenExclusiveMax(0, value.messages.length),
 				1
 			);
 
-			chatClient.say(`#${username}`, `${message.index}. ${message.text}`);
-			messageCount = 0;
+			chatClient.say(
+				`${value.channelName}`,
+				`${message.index}. ${message.text}`
+			);
+			value.messageCount = 0;
 
-			if (intervalMessages.length == 0) {
-				intervalMessages = await messages.get();
+			if (value.messages.length == 0) {
+				value.messages = await messages.get(value.id);
 			}
 		}
 	}, 10 * 60 * 1000);
@@ -151,10 +191,6 @@ function shouldIgnoreMessage(user, botUsername, message) {
 	return (
 		user === botUsername || user === "buhhsbot" || !message.startsWith("!")
 	);
-}
-
-function messageUpdate(update) {
-	intervalMessages = update;
 }
 
 function userInfoCheck(userInfo) {
@@ -221,5 +257,16 @@ function confirmMaps(item) {
 	}
 }
 
+function getUserIds() {
+	let userIds = [...users.keys()];
+
+	return userIds;
+}
+
+function updateMessages(twitchId, messages) {
+	let index = users.indexOf((user) => user.id === twitchId);
+	users[index].messages = messages;
+}
+
 exports.init = init;
-exports.messageUpdate = messageUpdate;
+exports.updateMessages = updateMessages;
