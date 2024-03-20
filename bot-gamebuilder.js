@@ -1,7 +1,24 @@
-const Deck = require("./bot-deck");
 const Helper = require("./classes/helper");
+const deck = require("./bot-deck");
+
 const KingsSaveState = require("./models/kingssavestate");
+
 const helper = new Helper();
+
+// function called by a game command like !kings
+async function getGame(twitchId, name) {
+	let game = await CardGame.findOne({ twitchId: twitchId, name: name });
+
+	if (!game) {
+		return "No game found";
+	}
+
+	///
+
+	// return
+}
+
+////////
 
 async function getGameState() {
 	let gameState;
