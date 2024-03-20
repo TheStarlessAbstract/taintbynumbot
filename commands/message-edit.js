@@ -1,9 +1,9 @@
 const BaseCommand = require("../classes/base-command");
 const Helper = require("../classes/helper");
 
-const Message = require("../models/message");
+const chatClient = require("../bot-chatclient");
 
-const messages = require("../bot-messages");
+const Message = require("../models/message");
 
 const helper = new Helper();
 
@@ -23,43 +23,35 @@ let commandResponse = () => {
 					helper.isValuePresentAndNumber(index) &&
 					helper.isValuePresentAndString(text)
 				) {
-					let message = await Message.findOne({ index: index });
+					let message = await Message.findOne({
+						twitchId: config.channelId,
+						index: index,
+					});
 
-					if (message) {
-						if (message.text == text) {
-							result.push(
-								"Message " + index + " already says: " + message.text
-							);
-						} else if (message.text != text) {
-							result.push("Message " + index + " was: " + message.text);
-							message.text = text;
-							await message.save();
-
-							let entries = await Message.findOne({});
-							messages.update(entries);
-
-							result.push(
-								"Message " + index + " has been updated to: " + message.text
-							);
-						}
-					} else {
-						result.push("No Message number " + index + " found");
+					if (!message) {
+						return `No Message number ${index} found`;
 					}
+					if (message.text == text) {
+						return `Message ${index} already says: ${message.text}`;
+					}
+
+					result.push(`Message ${index} was: ${message.text}`);
+					message.text = text;
+					await message.save();
+
+					let messages = await Message.find({ twitchId: config.channelId });
+					chatClient.updateMessages(config.channelId, messages);
+
+					result.push(`Message ${index} has been updated to: ${message.text}`);
 				} else if (!helper.isValuePresentAndNumber(index)) {
-					result.push(
-						"To edit a Message, you must include the index - !editMessage [index] [updated text]"
-					);
+					return "To edit a Message, you must include the index - !editMessage [index] [updated text]";
 				} else if (!helper.isValuePresentAndString(text)) {
-					result.push(
-						"To edit a Message, you must include the updated text - !editMessage [index] [updated text]"
-					);
+					return "To edit a Message, you must include the updated text - !editMessage [index] [updated text]";
 				}
 			} else if (!helper.isValidModeratorOrStreamer(config.userInfo)) {
-				result.push("!editMessage is for Mods only");
+				return "!editMessage is for Mods only";
 			} else if (!helper.isValuePresentAndString(config.argument)) {
-				result.push(
-					"To edit a Message use !editMessage [index] [updated text]"
-				);
+				return "To edit a Message use !editMessage [index] [updated text]";
 			}
 
 			return result;
