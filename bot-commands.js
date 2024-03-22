@@ -146,8 +146,6 @@ async function setup() {
 		// loop through commands add to userCommands
 		for (let j = 0; j < activeCommands.length; j++) {
 			if (activeCommands[j].name) {
-				console.log("name");
-
 				userCommands[userIds[i]][activeCommands[j].chatName] =
 					reqCommands[activeCommands[j].name].command;
 			} else {
