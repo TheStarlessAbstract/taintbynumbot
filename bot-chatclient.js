@@ -43,11 +43,14 @@ async function setupChatClientListeners() {
 		if (shouldIgnoreMessage(user, botUsername, message)) return;
 
 		if (!userInfoCheck(msg.userInfo)) {
-			const userInfo = msg.userInfo;
+			const config = msg.userInfo;
 			let [command, argument] = message.slice(1).split(/\s(.+)/);
 			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
 
 			if (commandLink == undefined) return;
+
+			config.channelId = msg.channelId;
+			config.argument = argument;
 
 			const { response } = (await commandLink.getCommand()) || {};
 			let versions = commandLink.getVersions();
@@ -57,11 +60,14 @@ async function setupChatClientListeners() {
 				}).length > 0;
 			if (hasActiveVersions) {
 				if (typeof response === "function") {
-					let result = await response({
-						channelId: msg.channelId,
-						userInfo,
-						argument,
-					});
+					let result = await response(
+						config
+						// 	{
+						// 	channelId: msg.channelId,
+						// 	userInfo,
+						// 	argument,
+						// }
+					);
 
 					if (result) {
 						if (Array.isArray(result)) {
