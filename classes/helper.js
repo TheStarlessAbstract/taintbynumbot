@@ -18,8 +18,8 @@ class Helper {
 		return "";
 	}
 
-	isStreamer(userInfo) {
-		return userInfo.isBroadcaster;
+	isStreamer(config) {
+		return config.isBroadcaster;
 	}
 
 	isTest() {
@@ -138,10 +138,10 @@ class Helper {
 		return stringLowercase.startsWith(subStringLowercase);
 	}
 
-	getOutput(users, channelId, prop) {
+	getOutput(user, prop) {
 		let output = "";
 
-		output = users[channelId].output.get(prop).message;
+		output = user.output.get(prop).message;
 
 		return output;
 	}
