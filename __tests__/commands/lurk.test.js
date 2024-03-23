@@ -51,7 +51,9 @@ describe("lurk", () => {
 		let result = await response(config);
 
 		//Assert
-		expect(result).toMatch(/@design_by_rose finds a comfortable spot/);
+		expect(result).toBe(
+			"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+		);
 	});
 
 	test("If chatter is Broadcaster, should be undefined", async () => {
