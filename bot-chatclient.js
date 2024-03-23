@@ -52,35 +52,29 @@ async function setupChatClientListeners() {
 			config.channelId = msg.channelId;
 			config.argument = argument;
 
-			const { response } = (await commandLink.getCommand()) || {};
 			let versions = commandLink.getVersions();
 			let hasActiveVersions =
 				versions.filter(function (version) {
 					return version.active;
 				}).length > 0;
-			if (hasActiveVersions) {
-				if (typeof response === "function") {
-					let result = await response(
-						config
-						// 	{
-						// 	channelId: msg.channelId,
-						// 	userInfo,
-						// 	argument,
-						// }
-					);
 
-					if (result) {
-						if (Array.isArray(result)) {
-							for (let i = 0; i < result.length; i++) {
-								chatClient.say(channel, result[i]);
-							}
-						} else {
-							chatClient.say(channel, result);
-						}
+			if (!hasActiveVersions) return;
+
+			let response = await commandLink.getCommand();
+			if (typeof response === "function") {
+				let result = await response(config);
+
+				if (!result) return;
+
+				if (Array.isArray(result)) {
+					for (let i = 0; i < result.length; i++) {
+						chatClient.say(channel, result[i]);
 					}
-				} else if (typeof response === "string") {
-					chatClient.say(channel, response);
+				} else {
+					chatClient.say(channel, result);
 				}
+			} else if (typeof response === "string") {
+				chatClient.say(channel, response);
 			}
 		} else {
 			console.log("userInfo types changed");
