@@ -1,44 +1,29 @@
 const BotCommand = require("../classes/bot-command");
 const Helper = require("../classes/helper");
-
 const CommandNew = require("../models/commandnew");
-
 const helper = new Helper();
-const users = {};
 
-let commandResponse = () => {
-	return {
-		response: async (config) => {
-			if (helper.isStreamer(config)) return;
+let commandResponse = async (config) => {
+	if (helper.isStreamer(config)) return;
 
-			/////
-			let userCommand = await CommandNew.findOne({
-				streamerId: config.channelId,
-				name: "lurk",
-			});
+	if (!command.getUser[config.channelId]) {
+		let userCommand = await CommandNew.findOne({
+			streamerId: config.channelId,
+			name: "lurk",
+		});
+		if (!userCommand) return;
+		command.addUser(config.channelId, { output: userCommand.output });
+	}
 
-			users[config.channelId] = { output: userCommand.output };
-			//////
+	let isLurkingString = helper.getOutput(
+		command.getUser(config.channelId),
+		"isLurking"
+	);
 
-			let output = helper.getOutput(users[config.channelId], "isLurking");
+	const configMap = getConfigMap(config);
+	isLurkingString = processOutputString(isLurkingString, configMap);
 
-			// check if matches regex here, if true continue, if false return output
-
-			map = getMap(config);
-			console.log(map);
-			// {
-			// 	displayName: config.displayName,
-			// 	channelId: config.channelId,
-			// 	channelName: config.channelName,
-			// }
-
-			// output = helper.processOutput(output, map);
-
-			output = output.replace("{displayName}", config.displayName);
-
-			return output;
-		},
-	};
+	return isLurkingString;
 };
 
 let versions = [
@@ -51,20 +36,33 @@ let versions = [
 	},
 ];
 
-const lurk = new BotCommand(commandResponse, versions, users);
+const command = new BotCommand(commandResponse, versions);
 
-function processOutput(output, map) {
+function processOutputString(outputString, map) {
 	const regex = /\{[^}]*\}/g;
-	const matches = output.match(regex);
-	if (!matches) return output;
+	const keysInOutputString = outputString.match(regex);
+	if (!keysInOutputString) return outputString;
 
-	const uniqueMatches = [...new Set(matches)];
-	// loop through unique matches and get replacement from map to update string
+	const uniqueKeysInOutputString = [...new Set(keysInOutputString)];
+	const cleanedArrayOfKeys = removeCurlyBracesFromStringArray(
+		uniqueKeysInOutputString
+	);
 
-	return output;
+	for (let i = 0; i < cleanedArrayOfKeys.length; i++) {
+		outputString = outputString.replaceAll(
+			`{${cleanedArrayOfKeys[i]}}`,
+			map.get(cleanedArrayOfKeys[i])
+		);
+	}
+
+	return outputString;
 }
 
-function getMap(config) {
+function removeCurlyBracesFromStringArray(stringArray) {
+	return stringArray.map((string) => string.substring(1, string.length - 1));
+}
+
+function getConfigMap(config) {
 	const map = new Map([
 		["displayName", ""],
 		["channelId", ""],
@@ -78,8 +76,4 @@ function getMap(config) {
 	return map;
 }
 
-// 				displayName: config.displayName,
-// 				channelId: config.channelId,
-// 				channelName: config.channelName,
-
-exports.command = lurk;
+module.exports = command;
