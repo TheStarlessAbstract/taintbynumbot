@@ -4,7 +4,7 @@ const Command = require("./models/command");
 const CommandNew = require("./models/commandnew");
 const User = require("./models/user");
 
-const reqCommands = {
+const defaultCommands = {
 	lurk: require("./commands/lurk"),
 };
 
@@ -21,7 +21,7 @@ const game = require("./commands/game");
 const kingsRemain = require("./commands/kings-remain");
 const kingsReset = require("./commands/kings-reset");
 const kings = require("./commands/kings");
-const lurk = require("./commands/lurk");
+// const lurk = require("./commands/lurk");
 const messagesAdd = require("./commands/message-add");
 const messagesDelete = require("./commands/message-delete");
 const messagesEdit = require("./commands/message-edit");
@@ -43,7 +43,7 @@ let chugLastUseTime = "";
 
 const userCommands = {
 	// 123: {
-	// 	addcomm: commandAdd.command,
+	// 	addcomm: commandAdd,
 	// 	addmessage: messagesAdd.command,
 	// },
 	// 124: {
@@ -117,7 +117,7 @@ const commands = {
 	kingsremain: kingsRemain.command,
 	kingsreset: kingsReset.command,
 	kings: kings.command,
-	lurk: lurk.command,
+	// lurk: lurk.command,
 	points: points.command,
 	quote: quote.command,
 	so: so.command,
@@ -147,21 +147,19 @@ async function setup() {
 		for (let j = 0; j < activeCommands.length; j++) {
 			if (activeCommands[j].name) {
 				userCommands[userIds[i]][activeCommands[j].chatName] =
-					reqCommands[activeCommands[j].name].command;
+					defaultCommands[activeCommands[j].name];
 			} else {
-				userCommands[userIds[i]][activeCommands[j].chatName] =
-					new BaseCommand(() => {
-						return {
-							response: activeCommands[j].text,
-						};
-					}, [
+				userCommands[userIds[i]][activeCommands[j].chatName] = new BaseCommand(
+					activeCommands[j].text,
+					[
 						{
 							description: activeCommands[j].text,
 							usage: "!" + activeCommands[j].chatName,
 							usableBy: "users",
 							active: true,
 						},
-					]);
+					]
+				);
 			}
 		}
 	}
