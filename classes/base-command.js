@@ -1,7 +1,11 @@
 class BaseCommand {
-	constructor(getCommand, versions) {
-		this.getCommand = getCommand;
+	constructor(command, versions) {
+		this.command = command;
 		this.versions = versions;
+	}
+
+	getCommand() {
+		return this.command;
 	}
 
 	getVersions() {
