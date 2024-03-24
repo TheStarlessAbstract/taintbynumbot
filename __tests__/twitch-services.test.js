@@ -40,57 +40,32 @@ describe("twitch", () => {
 		let result = true;
 
 		//Act
-		// let comm = new CommandNew({
-		// 	streamerId: twitchId,
-		// 	chatName: "lurk",
-		// 	active: true,
-		// 	name: "lurk",
-		// 	output: {
-		// 		isLurking: {
-		// 			message:
-		// 				"@${config.userInfo.displayName} finds a comfortable spot behind the bushes to perv on the stream",
-		// 			active: true,
-		// 		},
-		// 	},
-		// });
+		let comm = lurkTemplate();
 
-		// await comm.save();
+		await comm.save();
 
-		let userCommand = await CommandNew.findOne({
-			streamerId: twitchId,
-			chatName: "lurk",
-		});
+		let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
+		let userIds = getUserIds(users);
+		for (let i = 0; i < userIds.length; i++) {
+			let activeCommands = await Command.find({
+				streamerId: userIds[i],
+				active: true,
+			});
 
-		users[twitchId] = { output: userCommand.output };
+			let list = [];
+			for (let j = 0; j < activeCommands.length; j++) {
+				list.push({
+					streamerId: activeCommands[j].streamerId,
+					chatName: activeCommands[j].name,
+					active: true,
+					text: activeCommands[j].text,
+					createdBy: activeCommands[j].createdBy,
+					createdOn: activeCommands[j].createdOn,
+				});
+			}
 
-		let config = { userInfo: { displayName: "DazedSucks" } };
-
-		console.log(
-			eval("`" + users[twitchId].output.get("isLurking").message + "`")
-		);
-
-		// let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
-		// let userIds = getUserIds(users);
-		// for (let i = 0; i < userIds.length; i++) {
-		// 	let activeCommands = await Command.find({
-		// 		streamerId: userIds[i],
-		// 		active: true,
-		// 	});
-
-		// 	// let list = [];
-		// 	// for (let j = 0; j < activeCommands.length; j++) {
-		// 	// 	list.push({
-		// 	// 		streamerId: activeCommands[j].streamerId,
-		// 	// 		chatName: activeCommands[j].name,
-		// 	// 		active: true,
-		// 	// 		text: activeCommands[j].text,
-		// 	// 		createdBy: activeCommands[j].createdBy,
-		// 	// 		createdOn: activeCommands[j].createdOn,
-		// 	// 	});
-		// 	// }
-
-		// 	// await CommandNew.insertMany(list);
-		// }
+			await CommandNew.insertMany(list);
+		}
 
 		//Assert
 		expect(result).toBe(true);
@@ -105,4 +80,35 @@ function getUserIds(users) {
 	}
 
 	return userIds;
+}
+
+function lurkTemplate() {
+	return new CommandNew({
+		streamerId: twitchId,
+		chatName: "lurk",
+		defaultName: "lurk",
+		createdBy: twitchId,
+		createdOn: new Date(),
+		output: new Map([
+			[
+				"isLurking",
+				{
+					message:
+						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+					active: true,
+				},
+			],
+		]),
+		versions: new Map([
+			[
+				"noArguement",
+				{
+					description:
+						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+					active: true,
+					minimumPermissionLevel: "users",
+				},
+			],
+		]),
+	});
 }
