@@ -141,6 +141,8 @@ class Helper {
 	getOutput(user, prop) {
 		let output = "";
 
+		if (!user.output.get(prop).active) return null;
+
 		output = user.output.get(prop).message;
 
 		return output;
@@ -156,6 +158,56 @@ class Helper {
 		}
 
 		return users;
+	}
+
+	getUserIds(users) {
+		let userIds = [];
+
+		for (let user of users) {
+			userIds.push(user.twitchId);
+		}
+
+		return userIds;
+	}
+
+	processOutputString(outputString, map) {
+		const regex = /\{[^}]*\}/g;
+		const keysInOutputString = outputString.match(regex);
+		if (!keysInOutputString) return outputString;
+
+		const uniqueKeysInOutputString = [...new Set(keysInOutputString)];
+		const cleanedArrayOfKeys = removeFirstAndLastCharacterStringArray(
+			uniqueKeysInOutputString
+		);
+
+		for (let i = 0; i < cleanedArrayOfKeys.length; i++) {
+			outputString = outputString.replaceAll(
+				`{${cleanedArrayOfKeys[i]}}`,
+				map.get(cleanedArrayOfKeys[i])
+			);
+		}
+
+		return outputString;
+	}
+
+	removeFirstAndLastCharacterStringArray(arrayOfStrings) {
+		return arrayOfStrings.map((string) =>
+			string.substring(1, string.length - 1)
+		);
+	}
+
+	getCommandConfigMap(config) {
+		const map = new Map([
+			["displayName", ""],
+			["channelId", ""],
+			["isBroadcaster", ""],
+		]);
+
+		for (const key of map.keys()) {
+			map.set(key, config[key]);
+		}
+
+		return map;
 	}
 }
 
