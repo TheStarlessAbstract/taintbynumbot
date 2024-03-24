@@ -8,6 +8,7 @@ const messages = require("./bot-messages");
 const kings = require("./commands/kings");
 
 const User = require("./models/user");
+const CommandNew = require("./models/commandnew");
 
 let botUsername = process.env.TWITCH_BOT_USERNAME;
 
@@ -48,10 +49,30 @@ async function setupChatClientListeners() {
 			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
 
 			if (commandLink == undefined) return;
+			////
+			// Can start DB query on active versions here
+			const dad = await CommandNew.aggregate([
+				{ $match: { streamerId, chatName } },
+				{
+					$project: {
+						numberOfActiveVersions: {
+							$size: {
+								$filter: {
+									input: "$versions",
+									as: "version",
+									cond: { $eq: ["$$version.active", true] },
+								},
+							},
+						},
+					},
+				},
+			]);
+			// CommandNew ( for this chatName, and this channelId, check if any version active = true)
+			////
 
 			config.channelId = msg.channelId;
 			config.argument = argument;
-
+			//////////
 			let versions = commandLink.getVersions();
 			let hasActiveVersions =
 				versions.filter(function (version) {
@@ -59,7 +80,7 @@ async function setupChatClientListeners() {
 				}).length > 0;
 
 			if (!hasActiveVersions) return;
-
+			//////////
 			let response = await commandLink.getCommand();
 			if (typeof response === "function") {
 				let result = await response(config);
