@@ -1,0 +1,14 @@
+const db = require("../../bot-mongoose.js");
+const textCommands = require("./textCommands.js");
+const lurk = require("./lurk.js");
+
+runUpdates();
+
+async function runUpdates() {
+	await db.connectToMongoDB();
+
+	await textCommands();
+	await lurk();
+
+	await db.disconnectFromMongoDB();
+}
