@@ -1,8 +1,8 @@
 const BaseCommand = require("../classes/base-command");
 
 class TimerCommand extends BaseCommand {
-	constructor(getCommand, versions, cooldown) {
-		super(getCommand, versions);
+	constructor(getCommand, cooldown) {
+		super(getCommand);
 		this.cooldown = cooldown;
 		this.timer = new Date(0);
 	}
