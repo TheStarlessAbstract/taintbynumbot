@@ -1,25 +1,80 @@
+const CommandNew = require("../models/commandnew.js");
+
 class BaseCommand {
-	constructor(command, versions) {
+	constructor(command) {
 		this.command = command;
-		this.versions = versions;
+		this.channels = {};
 	}
 
 	getCommand() {
 		return this.command;
 	}
 
-	getVersions() {
-		return this.versions;
+	getChannels() {
+		return this.channels;
 	}
 
-	setVersionActive(element) {
-		if (typeof element == "number" && this.versions[element]) {
-			this.versions[element].active = !this.versions[element].active;
+	getChannel(channelId) {
+		return this.channels[channelId];
+	}
+
+	setChannels(channels) {
+		this.channels = channels;
+	}
+
+	addChannel(channelId, channel) {
+		this.channels[channelId] = channel;
+	}
+
+	async checkChannelForActiveVersion(channelId, command) {
+		let isActive = this.#channelActiveVersion(channelId);
+		if (isActive != -1) return isActive;
+
+		isActive = await this.#dbActiveVersion(channelId, command);
+
+		return isActive;
+	}
+
+	#channelActiveVersion(channelId) {
+		let isActive = false;
+		let channel = this.getChannel(channelId);
+
+		if (!channel) return -1;
+
+		const iterator = channel.versions.values();
+
+		for (let i = 0; i < channel.versions.size; i++) {
+			isActive = iterator.next().value.active;
+			if (isActive) break;
 		}
+
+		return isActive;
 	}
 
-	getVersionActivity(element) {
-		return this.versions[element].active;
+	async #dbActiveVersion(channelId, command) {
+		const aggregateResult = await CommandNew.aggregate([
+			{ $match: { streamerId: channelId, chatName: command } },
+			{
+				$project: {
+					isActive: {
+						$gt: [
+							{
+								$size: {
+									$filter: {
+										input: { $objectToArray: "$versions" },
+										as: "version",
+										cond: { $eq: ["$$version.v.active", true] },
+									},
+								},
+							},
+							0,
+						],
+					},
+				},
+			},
+		]);
+
+		return aggregateResult[0].isActive;
 	}
 }
 
