@@ -1,30 +1,13 @@
-const BaseCommand = require("../classes/base-command");
+const BaseCommand = require("../classes/base-command.js");
 
 class BotCommand extends BaseCommand {
-	constructor(getCommand, versions) {
-		super(getCommand, versions);
-		this.users = {};
-	}
-
-	getUsers() {
-		return this.users;
-	}
-
-	getUser(channelId) {
-		return this.users[channelId];
+	constructor(getCommand) {
+		super(getCommand);
 	}
 
 	// getTimer() {
 	// 	return this.timer;
 	// }
-
-	setUsers(users) {
-		this.users = users;
-	}
-
-	addUser(channelId, user) {
-		this.users[channelId] = user;
-	}
 
 	// setTimer(timer) {
 	// 	if (timer instanceof Date) {
