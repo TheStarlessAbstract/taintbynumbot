@@ -5,7 +5,8 @@ const CommandNew = require("./models/commandnew");
 const User = require("./models/user");
 
 const defaultCommands = {
-	lurk: require("./commands/lurk"),
+	lurk: require("./src/commands/lurk"),
+	drinkBitch: require("./commands/drinkbitch"),
 };
 
 const audioTimeout = require("./commands/audiotimeout");
@@ -14,7 +15,6 @@ const commandAdd = require("./commands/command-add");
 const commandDelete = require("./commands/command-delete");
 const commandEdit = require("./commands/command-edit");
 const deaths = require("./commands/deaths");
-const drinkBitch = require("./commands/drinkbitch");
 const f = require("./commands/f");
 const followage = require("./commands/followage");
 const game = require("./commands/game");
@@ -106,7 +106,6 @@ const commands = {
 	delmessage: messagesDelete.command,
 	delquote: quoteDelete.command,
 	deltinder: tinderDelete.command,
-	drinkbitch: drinkBitch.command,
 	editcomm: commandEdit.command,
 	editmessage: messagesEdit.command,
 	editquote: quoteEdit.command,
@@ -136,7 +135,7 @@ async function setup() {
 	for (let i = 0; i < userIds.length; i++) {
 		let activeCommands = await CommandNew.find({
 			streamerId: userIds[i],
-			active: true,
+			// active: true,
 		});
 
 		if (!activeCommands) continue;
@@ -145,25 +144,16 @@ async function setup() {
 
 		// loop through commands add to userCommands
 		for (let j = 0; j < activeCommands.length; j++) {
-			if (activeCommands[j].name) {
+			if (activeCommands[j].defaultName) {
 				userCommands[userIds[i]][activeCommands[j].chatName] =
-					defaultCommands[activeCommands[j].name];
+					defaultCommands[activeCommands[j].defaultName];
 			} else {
 				userCommands[userIds[i]][activeCommands[j].chatName] = new BaseCommand(
-					activeCommands[j].text,
-					[
-						{
-							description: activeCommands[j].text,
-							usage: "!" + activeCommands[j].chatName,
-							usableBy: "users",
-							active: true,
-						},
-					]
+					activeCommands[j].text
 				);
 			}
 		}
 	}
-	// setCommandTimers();
 
 	// drinkBitch.updateAudioLinks();
 	// await f.setup();
@@ -177,19 +167,6 @@ function getCommands() {
 
 	commandList.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
 	return commandList;
-}
-
-function setCommandTimers() {
-	const currentDateTime = new Date();
-
-	commands.drinkbitch.setTimer(currentDateTime);
-	commands.quote.setTimer(currentDateTime);
-	commands.tinderquote.setTimer(currentDateTime);
-	commands.f.setTimer(currentDateTime);
-	// chugLastUseTime = currentDateTime;
-	commands.kingsremain.setTimer(currentDateTime);
-	commands.deaths.setTimer(currentDateTime);
-	commands.so.setTimer(currentDateTime);
 }
 
 function getUserIds(users) {
