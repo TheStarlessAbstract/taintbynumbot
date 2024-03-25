@@ -1,6 +1,7 @@
 const db = require("../../bot-mongoose.js");
 const textCommands = require("./textCommands.js");
 const lurk = require("./lurk.js");
+const drinkBitch = require("./drinkbitch.js");
 
 runUpdates();
 
@@ -9,6 +10,7 @@ async function runUpdates() {
 
 	await textCommands();
 	await lurk();
+	await drinkBitch();
 
 	await db.disconnectFromMongoDB();
 }
