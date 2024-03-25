@@ -1,21 +1,25 @@
 require("dotenv").config();
-const commandLink = require("../../../commands/lurk");
-const CommandNew = require("../../../models/commandnew");
-const Helper = require("../../../classes/helper");
+const commandLink = require("../../commands/lurk.js");
+const CommandNew = require("../../../models/commandnew.js");
+const Helper = require("../../../classes/helper.js");
 
 const response = commandLink.getCommand();
 const channelId = process.env.TWITCH_USER_ID;
 let config;
 
-jest.mock("../../models/commandnew", () => ({
+jest.mock("../../../models/commandnew.js", () => ({
 	findOne: jest.fn(),
 }));
-jest.mock("../../classes/helper", () => {
+jest.mock("../../../classes/helper.js", () => {
 	const mockIsStreamer = jest.fn();
 	const getOutput = jest.fn();
+	const configMap = jest.fn();
+	const process = jest.fn();
 	return jest.fn(() => ({
 		isStreamer: mockIsStreamer,
 		getOutput: getOutput,
+		getCommandConfigMap: configMap,
+		processOutputString: process,
 	}));
 });
 const helper = new Helper();
@@ -41,6 +45,16 @@ describe("lurk", () => {
 		helper.isStreamer.mockReturnValue(false);
 		helper.getOutput.mockReturnValue(
 			"@{displayName} finds a comfortable spot behind the bushes to perv on the stream"
+		);
+		helper.getCommandConfigMap.mockReturnValue(
+			new Map([
+				["displayName", "design_by_rose"],
+				["channelId", channelId],
+				["isBroadcaster", false],
+			])
+		);
+		helper.processOutputString.mockReturnValue(
+			"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
 		);
 		CommandNew.findOne.mockResolvedValue(_doc);
 
