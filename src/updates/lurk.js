@@ -4,11 +4,11 @@ const CommandNew = require("../../models/commandnew.js");
 let twitchId = 100612361;
 
 async function copyAndUpdate() {
-	let comm = lurkTemplate();
+	let comm = template();
 	await comm.save();
 }
 
-function lurkTemplate() {
+function template() {
 	return new CommandNew({
 		streamerId: twitchId,
 		chatName: "lurk",
