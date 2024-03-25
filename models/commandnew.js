@@ -11,7 +11,7 @@ let VersionSchema = new Schema({
 	minimumPermissionLevel: {
 		type: String,
 		required: true,
-		enum: ["users", "vips", "mods", "streamer"], // maybe not needed, as would prevent custom
+		enum: ["users", "artist", "vips", "mods", "streamer"], // maybe not needed, as would prevent custom
 		default: "streamer",
 	}, // minimum user level to use the command
 });
@@ -21,6 +21,7 @@ let CommandNewSchema = new Schema({
 	chatName: { type: String, required: true }, // custom command name
 	defaultName: String, // default command name, change to defaultName
 	text: String, // only used for chat created commands || could be moved into output [default: text]
+	cost: Number,
 	createdBy: String,
 	createdOn: Date,
 	lastEditedBy: String,
@@ -30,6 +31,6 @@ let CommandNewSchema = new Schema({
 });
 
 CommandNewSchema.index({ streamerId: 1, chatName: 1 }, { unique: true });
-CommandNewSchema.index({ chatName: 1, name: 1 }, { unique: true });
+CommandNewSchema.index({ chatName: 1, defaultName: 1 }, { unique: true });
 
 module.exports = mongoose.model("CommandNew", CommandNewSchema);
