@@ -49,42 +49,20 @@ async function setupChatClientListeners() {
 			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
 
 			if (commandLink == undefined) return;
-			////
-			// Can start DB query on active versions here
-			const dad = await CommandNew.aggregate([
-				{ $match: { streamerId, chatName } },
-				{
-					$project: {
-						numberOfActiveVersions: {
-							$size: {
-								$filter: {
-									input: "$versions",
-									as: "version",
-									cond: { $eq: ["$$version.active", true] },
-								},
-							},
-						},
-					},
-				},
-			]);
-			// CommandNew ( for this chatName, and this channelId, check if any version active = true)
-			////
 
 			config.channelId = msg.channelId;
 			config.argument = argument;
-			//////////
-			let versions = commandLink.getVersions();
-			let hasActiveVersions =
-				versions.filter(function (version) {
-					return version.active;
-				}).length > 0;
 
-			if (!hasActiveVersions) return;
-			//////////
+			let isActive = await commandLink.checkChannelForActiveVersion(
+				config.channelId,
+				command
+			);
+
+			if (!isActive) return;
+
 			let response = await commandLink.getCommand();
 			if (typeof response === "function") {
 				let result = await response(config);
-
 				if (!result) return;
 
 				if (Array.isArray(result)) {
