@@ -1,87 +1,370 @@
 require("dotenv").config();
-const commandLink = require("../../commands/lurk.js");
+const lurk = require("../../commands/lurk.js");
 const CommandNew = require("../../../models/commandnew.js");
 const Helper = require("../../../classes/helper.js");
+const { getChatCommandConfigMap, isBroadcaster } = require("../../utils");
 
-const response = commandLink.getCommand();
-const channelId = process.env.TWITCH_USER_ID;
-let config;
+const command = lurk.getCommand();
+
+jest.mock("../../utils", () => ({
+	getChatCommandConfigMap: jest.fn(),
+	isBroadcaster: jest.fn(),
+}));
 
 jest.mock("../../../models/commandnew.js", () => ({
 	findOne: jest.fn(),
 }));
 jest.mock("../../../classes/helper.js", () => {
-	const mockIsStreamer = jest.fn();
 	const getOutput = jest.fn();
-	const configMap = jest.fn();
 	const process = jest.fn();
 	return jest.fn(() => ({
-		isStreamer: mockIsStreamer,
 		getOutput: getOutput,
-		getCommandConfigMap: configMap,
-		processOutputString: process,
+		getProcessedOutputString: process,
 	}));
 });
 const helper = new Helper();
 
-describe("lurk", () => {
-	test("If chatter is not Broadcaster, should return string", async () => {
-		//Assemble
-		const _doc = {
-			channelId: channelId,
-			name: "lurk",
-			output: new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]),
-		};
-
-		helper.isStreamer.mockReturnValue(false);
-		helper.getOutput.mockReturnValue(
-			"@{displayName} finds a comfortable spot behind the bushes to perv on the stream"
-		);
-		helper.getCommandConfigMap.mockReturnValue(
-			new Map([
-				["displayName", "design_by_rose"],
-				["channelId", channelId],
-				["isBroadcaster", false],
-			])
-		);
-		helper.processOutputString.mockReturnValue(
-			"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
-		);
-		CommandNew.findOne.mockResolvedValue(_doc);
-
-		config = { isBroadcaster: false, displayName: "design_by_rose", channelId };
-
-		//Act
-		let result = await response(config);
-
-		//Assert
-		expect(result).toBe(
-			"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
-		);
+describe("lurk command", () => {
+	let config;
+	const channelId = "1";
+	afterEach(() => {
+		jest.clearAllMocks();
 	});
 
-	test("If chatter is Broadcaster, should be undefined", async () => {
-		//Assemble
-		helper.isStreamer.mockReturnValue(true);
-		config = {
-			isBroadcaster: true,
-			displayName: "TheStarlessAbstract",
-			channelId,
-		};
+	describe("When isBroadcaster() returns true", () => {
+		test("Result should be undefined", async () => {
+			//Assemble
+			isBroadcaster.mockReturnValue(true);
+			getChatCommandConfigMap.mockReturnValue(
+				new Map([
+					["displayName", "design_by_rose"],
+					["channelId", channelId],
+					["isBroadcaster", false],
+				])
+			);
+			jest.spyOn(lurk, "getChannel").mockReturnValue({
+				output: new Map([
+					[
+						"isLurking",
+						{
+							message:
+								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+							active: true,
+						},
+					],
+				]),
+				versions: new Map([
+					[
+						"noArguement",
+						{
+							description:
+								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+							active: true,
+						},
+					],
+				]),
+			});
 
-		//Act
-		let result = await response(config);
+			helper.getProcessedOutputString.mockReturnValue(
+				"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+			);
 
-		//Assert
-		expect(result).toBeUndefined();
+			config = {
+				isBroadcaster: true,
+				displayName: "TheStarlessAbstract",
+				channelId,
+			};
+
+			//Act
+			let result = await command(config);
+
+			//Assert
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe("When isBroadcaster() returns false", () => {
+		describe("And getChatCommandConfigMap() does not return a configMap", () => {
+			test("Result should be undefined", async () => {
+				//Assemble
+				isBroadcaster.mockReturnValue(false);
+				getChatCommandConfigMap.mockReturnValue(undefined);
+				jest.spyOn(lurk, "getChannel").mockReturnValue({
+					output: new Map([
+						[
+							"isLurking",
+							{
+								message:
+									"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+								active: true,
+							},
+						],
+					]),
+					versions: new Map([
+						[
+							"noArguement",
+							{
+								description:
+									"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+								active: true,
+							},
+						],
+					]),
+				});
+
+				helper.getProcessedOutputString.mockReturnValue(
+					"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+				);
+
+				config = {
+					isBroadcaster: false,
+					displayName: "design_by_rose",
+					channelId,
+				};
+
+				//Act
+				let result = await command(config);
+
+				//Assert
+				expect(result).toBeUndefined();
+			});
+		});
+
+		describe("And getChatCommandConfigMap() returns a configMap", () => {
+			describe("And command.getChannel() returns a channel object", () => {
+				describe("And helper.getProcessedOutputString() returns a string", () => {
+					test("Result should be expected string", async () => {
+						//Assemble
+						isBroadcaster.mockReturnValue(false);
+						getChatCommandConfigMap.mockReturnValue(
+							new Map([
+								["displayName", "design_by_rose"],
+								["channelId", channelId],
+								["isBroadcaster", false],
+							])
+						);
+						jest.spyOn(lurk, "getChannel").mockReturnValue({
+							output: new Map([
+								[
+									"isLurking",
+									{
+										message:
+											"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+										active: true,
+									},
+								],
+							]),
+							versions: new Map([
+								[
+									"noArguement",
+									{
+										description:
+											"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+										active: true,
+									},
+								],
+							]),
+						});
+
+						helper.getProcessedOutputString.mockReturnValue(
+							"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+						);
+
+						config = {
+							isBroadcaster: false,
+							displayName: "design_by_rose",
+							channelId,
+						};
+
+						//Act
+						let result = await command(config);
+
+						//Assert
+						expect(result).toBe(
+							"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+						);
+					});
+				});
+				describe("And helper.getProcessedOutputString() does not return a string", () => {
+					test("Result should be undefined", async () => {
+						//Assemble
+						isBroadcaster.mockReturnValue(false);
+						getChatCommandConfigMap.mockReturnValue(
+							new Map([
+								["displayName", "design_by_rose"],
+								["channelId", channelId],
+								["isBroadcaster", false],
+							])
+						);
+						jest.spyOn(lurk, "getChannel").mockReturnValue({
+							output: new Map([
+								[
+									"isLurking",
+									{
+										message:
+											"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+										active: true,
+									},
+								],
+							]),
+							versions: new Map([
+								[
+									"noArguement",
+									{
+										description:
+											"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+										active: true,
+									},
+								],
+							]),
+						});
+
+						helper.getProcessedOutputString.mockReturnValue(undefined);
+
+						config = {
+							isBroadcaster: false,
+							displayName: "design_by_rose",
+							channelId,
+						};
+
+						//Act
+						let result = await command(config);
+
+						//Assert
+						expect(result).toBeUndefined();
+					});
+				});
+			});
+			describe("And command.getChannel() does not return a channel object", () => {
+				describe("And Command.findOne() does not return a Command", () => {
+					test("Result should be undefined", async () => {
+						//Assemble
+						isBroadcaster.mockReturnValue(false);
+						getChatCommandConfigMap.mockReturnValue(
+							new Map([
+								["displayName", "design_by_rose"],
+								["channelId", channelId],
+								["isBroadcaster", false],
+							])
+						);
+						jest.spyOn(lurk, "getChannel").mockReturnValue(undefined);
+						CommandNew.findOne.mockResolvedValue(undefined);
+						jest.spyOn(lurk, "addChannel").mockImplementation(() => jest.fn());
+						helper.getProcessedOutputString.mockReturnValue(
+							"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+						);
+
+						config = {
+							isBroadcaster: false,
+							displayName: "design_by_rose",
+							channelId,
+						};
+
+						//Act
+						let result = await command(config);
+
+						//Assert
+						expect(result).toBeUndefined();
+					});
+				});
+
+				describe("And Command.findOne() returns a Command", () => {
+					describe("And helper.getProcessedOutputString() returns a string", () => {
+						test("Result should be expected string", async () => {
+							//Assemble
+							isBroadcaster.mockReturnValue(false);
+							getChatCommandConfigMap.mockReturnValue(
+								new Map([
+									["displayName", "design_by_rose"],
+									["channelId", channelId],
+									["isBroadcaster", false],
+								])
+							);
+							jest.spyOn(lurk, "getChannel").mockReturnValue(undefined);
+							const _doc = {
+								channelId: channelId,
+								name: "lurk",
+								output: new Map([
+									[
+										"isLurking",
+										{
+											message:
+												"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+											active: true,
+										},
+									],
+								]),
+							};
+							CommandNew.findOne.mockResolvedValue(_doc);
+							jest
+								.spyOn(lurk, "addChannel")
+								.mockImplementation(() => jest.fn());
+							helper.getProcessedOutputString.mockReturnValue(
+								"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+							);
+
+							config = {
+								isBroadcaster: false,
+								displayName: "design_by_rose",
+								channelId,
+							};
+
+							//Act
+							let result = await command(config);
+
+							//Assert
+							expect(result).toBe(
+								"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
+							);
+						});
+					});
+					describe("And helper.getProcessedOutputString() does not return string", () => {
+						test("Result should be undefined", async () => {
+							//Assemble
+							isBroadcaster.mockReturnValue(false);
+							getChatCommandConfigMap.mockReturnValue(
+								new Map([
+									["displayName", "design_by_rose"],
+									["channelId", channelId],
+									["isBroadcaster", false],
+								])
+							);
+							jest.spyOn(lurk, "getChannel").mockReturnValue(undefined);
+							const _doc = {
+								channelId: channelId,
+								name: "lurk",
+								output: new Map([
+									[
+										"isLurking",
+										{
+											message:
+												"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+											active: true,
+										},
+									],
+								]),
+							};
+							CommandNew.findOne.mockResolvedValue(_doc);
+							jest
+								.spyOn(lurk, "addChannel")
+								.mockImplementation(() => jest.fn());
+							helper.getProcessedOutputString.mockReturnValue(undefined);
+
+							config = {
+								isBroadcaster: false,
+								displayName: "design_by_rose",
+								channelId,
+							};
+
+							//Act
+							let result = await command(config);
+
+							//Assert
+							expect(result).toBeUndefined();
+						});
+					});
+				});
+			});
+		});
 	});
 });
