@@ -1,33 +1,55 @@
-const BotCommand = require("../../classes/bot-command");
-const Helper = require("../../classes/helper");
+const BotCommand = require("../classes/bot-command");
 const CommandNew = require("../../models/commandnew");
-const helper = new Helper();
+const {
+	getChatCommandConfigMap,
+	getProcessedOutputString,
+	isBroadcaster,
+	isCooldownPassed,
+} = require("../utils");
+
+const cooldown = 0;
 
 const commandResponse = async (config) => {
-	if (helper.isStreamer(config)) return;
+	let currentTime = new Date();
 
-	if (!command.getChannel[config.channelId]) {
+	//// possible to move to nmove to function???
+	let channel = command.getChannel([config.channelId]);
+	if (!channel) {
 		const userCommand = await CommandNew.findOne({
 			streamerId: config.channelId,
 			defaultName: "lurk",
 		});
 		if (!userCommand) return;
 
-		command.addChannel(config.channelId, {
+		channel = {
 			output: userCommand.output,
 			versions: userCommand.versions,
-		});
+			// clearance/UserTypePermission/userTypeException: {broadcaster, mod, vip, artist}
+			// cooldown: { length, lastUsed }
+		};
+		command.addChannel(config.channelId, channel);
 	}
+	////
 
-	const commandConfigMap = helper.getCommandConfigMap(config);
+	/// isUserTypeCleared()
 
-	return helper.getProcessedOutputString(
-		command.getChannel(config.channelId),
+	if (isBroadcaster(config)) return; // isCooldownPassed(currentTime, command.timer, cooldown);
+	command.setTimer(currentTime); // setTimer for command.user[userId]
+
+	const chatCommandConfigMap = getChatCommandConfigMap(config);
+	if (!(chatCommandConfigMap instanceof Map)) return;
+
+	const output = getProcessedOutputString(
+		channel,
 		"isLurking",
-		commandConfigMap
+		chatCommandConfigMap
 	);
+
+	if (typeof output !== "string") return;
+
+	return output;
 };
 
-const command = new BotCommand(commandResponse);
+const command = new BotCommand(commandResponse, cooldown);
 
 module.exports = command;
