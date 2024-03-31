@@ -18,18 +18,24 @@ async function copyAndUpdate() {
 		let list = [];
 		for (let j = 0; j < activeCommands.length; j++) {
 			list.push({
-				streamerId: activeCommands[j].streamerId,
+				channelId: activeCommands[j].streamerId,
 				chatName: activeCommands[j].name,
 				text: activeCommands[j].text,
 				createdBy: activeCommands[j].createdBy, // convert to twitchId
 				createdOn: activeCommands[j].createdOn,
 				versions: new Map([
 					[
-						"noArguement",
+						"noArgument",
 						{
 							description: activeCommands[j].text,
 							active: true,
-							minimumPermissionLevel: "users",
+							usableBy: {
+								broadcaster: false,
+								mods: true,
+								vips: true,
+								artists: true,
+								users: true,
+							},
 						},
 					],
 				]),
