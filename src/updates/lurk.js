@@ -10,9 +10,9 @@ async function copyAndUpdate() {
 
 function template() {
 	return new CommandNew({
-		streamerId: twitchId,
+		channelId: twitchId,
 		chatName: "lurk",
-		defaultName: "lurk",
+		type: "lurk",
 		createdBy: twitchId,
 		createdOn: new Date(),
 		output: new Map([
@@ -27,12 +27,18 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArguement",
+				"noArgument",
 				{
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					minimumPermissionLevel: "users",
+					usableBy: {
+						broadcaster: false,
+						mods: true,
+						vips: true,
+						artists: true,
+						users: true,
+					},
 				},
 			],
 		]),
