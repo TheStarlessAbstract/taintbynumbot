@@ -12,29 +12,34 @@ const cooldown = 0;
 const commandResponse = async (config) => {
 	let currentTime = new Date();
 
-	//// possible to move to nmove to function???
+	// flow
+	// check command.users to see if command details available,
 	let channel = command.getChannel([config.channelId]);
+
+	// otherwise go to db, retrieve, add to command.users, continue
+	// if nothing in db, then return out
 	if (!channel) {
 		const userCommand = await CommandNew.findOne({
-			streamerId: config.channelId,
-			defaultName: "lurk",
+			channelId: config.channelId,
+			type: "lurk",
 		});
 		if (!userCommand) return;
 
 		channel = {
 			output: userCommand.output,
 			versions: userCommand.versions,
-			// clearance/UserTypePermission/userTypeException: {broadcaster, mod, vip, artist}
-			// cooldown: { length, lastUsed }
 		};
 		command.addChannel(config.channelId, channel);
 	}
-	////
 
-	/// isUserTypeCleared()
+	// decide version of command being called, if active, continue
+	isVersionActive();
+	// check if cooldown passed, update cooldown lastUsed if needed isCooldownpassed()
+	isCooldownPassed(currentTime, command.timer, cooldown);
+	// check if usable by user  isUserTypeCleared()
+	if (isBroadcaster(config)) return;
 
-	if (isBroadcaster(config)) return; // isCooldownPassed(currentTime, command.timer, cooldown);
-	command.setTimer(currentTime); // setTimer for command.user[userId]
+	// continue into chatConfigMap
 
 	const chatCommandConfigMap = getChatCommandConfigMap(config);
 	if (!(chatCommandConfigMap instanceof Map)) return;
