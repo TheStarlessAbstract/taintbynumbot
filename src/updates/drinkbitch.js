@@ -10,7 +10,7 @@ async function copyAndUpdate() {
 
 function template() {
 	return new CommandNew({
-		streamerId: twitchId,
+		channelId: twitchId,
 		chatName: "drinkBitch",
 		defaultName: "hydrate",
 		createdBy: twitchId,
@@ -55,7 +55,17 @@ function template() {
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					minimumPermissionLevel: "users",
+					usableBy: {
+						broadcaster: false,
+						mods: true,
+						vips: true,
+						artists: true,
+						users: true,
+					},
+					cooldown: {
+						length: 5000,
+					},
+					cost: 500,
 				},
 			],
 		]),
