@@ -10,7 +10,6 @@ const {
 const cooldown = 0;
 
 const commandResponse = async (config) => {
-	// /////
 	let channel = await checkChannel(config, "lurk");
 	if (!channel) return;
 
@@ -22,7 +21,6 @@ const commandResponse = async (config) => {
 		channel.versions.get(versionKey)
 	);
 	if (commandRestriction) return;
-	/////
 
 	const chatCommandConfigMap = getChatCommandConfigMap(config);
 	if (!(chatCommandConfigMap instanceof Map)) return;
