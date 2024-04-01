@@ -32,6 +32,16 @@ describe("lurk command", () => {
 	});
 
 	describe("When isBroadcaster() returns true", () => {
+		describe("test", () => {
+			test("test", async () => {
+				let config = { isBroadcaster: true, isMod: false, isSub: true };
+				let configStrings = ["isUser"];
+				let usableBy = ["isArtist", "isFounder", "isMod", "isSub", "isVip"];
+
+				const found = configStrings.some((r) => usableBy.includes(r));
+				console.log(found);
+			});
+		});
 		test("Result should be undefined", async () => {
 			//Assemble
 			isBroadcaster.mockReturnValue(true);
