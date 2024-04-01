@@ -27,18 +27,15 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"noArgument", // string, number
 				{
+					isArgumentOptional: true,
+					hasArgument: false,
+					isArgumentNumber: false,
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					usableBy: {
-						broadcaster: false,
-						mods: true,
-						vips: true,
-						artists: true,
-						users: true,
-					},
+					usableBy: ["artists", "founders", "mods", "subs", "vips", "users"],
 				},
 			],
 		]),
