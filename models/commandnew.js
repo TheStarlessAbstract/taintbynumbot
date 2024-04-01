@@ -1,17 +1,10 @@
 let mongoose = require("mongoose"),
 	Schema = mongoose.Schema;
 
-let UsableBySchema = new Schema({
-	broadcaster: Boolean,
-	mods: Boolean,
-	vips: Boolean,
-	artists: Boolean,
-	users: { type: Boolean, default: true },
-});
-
 let CooldownSchema = new Schema({
 	length: { type: Number, required: true },
 	lastUsed: Number,
+	bypassRoles: [String],
 });
 
 let OutputSchema = new Schema({
@@ -19,9 +12,12 @@ let OutputSchema = new Schema({
 	active: { type: Boolean, required: true },
 });
 let VersionSchema = new Schema({
+	isArgumentOptional: { type: Boolean, required: true },
+	hasArgument: Boolean,
+	isArgumentNumber: Boolean,
 	description: { type: String, required: true }, // what is the purpose of this version of the command
 	active: { type: Boolean, required: true }, // can this command be used in chat
-	usableBy: { type: UsableBySchema },
+	usableBy: [String],
 	cooldown: { type: CooldownSchema },
 	cost: Number,
 });
