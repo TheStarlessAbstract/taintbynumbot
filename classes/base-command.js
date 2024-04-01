@@ -3,7 +3,7 @@ const CommandNew = require("../models/commandnew.js");
 class BaseCommand {
 	constructor(command) {
 		this.command = command;
-		this.channels = {}; // currently channelId: { versions, output }  look into adding clearance: { cooldown, exceptions:{broadcaster, mod, vip, artist, user}}
+		this.channels = {}; // currently channelId: { versions, output }
 	}
 
 	getCommand() {
@@ -23,8 +23,6 @@ class BaseCommand {
 	}
 
 	addChannel(channelId, channel) {
-		// const returnedTarget = Object.assign(target, source);
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 		this.channels[channelId] = channel;
 	}
 
