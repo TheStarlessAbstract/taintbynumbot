@@ -33,7 +33,7 @@ let CommandNewSchema = new Schema({
 	lastEditedBy: String,
 	lastEditedOn: String,
 	output: { type: Map, of: OutputSchema },
-	versions: { type: Map, of: VersionSchema }, // "no argument", "number argument", "string argument"
+	versions: { type: Map, of: VersionSchema }, // "no argument", "numberArgument", "stringArgument"
 });
 
 CommandNewSchema.index({ streamerId: 1, chatName: 1 }, { unique: true });
