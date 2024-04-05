@@ -6,8 +6,17 @@ class BaseCommand {
 		this.channels = {}; // currently channelId: { versions, output }
 	}
 
-	getCommand() {
-		return this.command;
+	addChannel(channelId, channel) {
+		if (
+			typeof channelId !== "string" ||
+			!channel?.versions ||
+			!channel?.output ||
+			this.channels?.[channelId]
+		)
+			return false;
+
+		this.channels[channelId] = channel;
+		return true;
 	}
 
 	getChannels() {
@@ -15,15 +24,37 @@ class BaseCommand {
 	}
 
 	getChannel(channelId) {
+		if (!this.channels[channelId]) return false;
 		return this.channels[channelId];
+	}
+
+	getCommand() {
+		return this.command;
 	}
 
 	setChannels(channels) {
 		this.channels = channels;
 	}
 
-	addChannel(channelId, channel) {
-		this.channels[channelId] = channel;
+	async checkChannel(config, type) {
+		let channel = this.getChannel([config.channelId]);
+
+		if (!channel) {
+			const userCommand = await CommandNew.findOne({
+				channelId: config.channelId,
+				type: type,
+			});
+			if (!userCommand) return;
+
+			channel = {
+				output: userCommand.output,
+				versions: userCommand.versions,
+			};
+			const response = this.addChannel(config.channelId, channel);
+			if (!response) return false;
+		}
+
+		return channel;
 	}
 
 	async checkChannelForActiveVersion(channelId, command) {
@@ -33,6 +64,18 @@ class BaseCommand {
 		isActive = await this.#dbActiveVersion(channelId, command);
 
 		return isActive;
+	}
+
+	async checkCommandStatus(config, channel) {
+		const versionKey = this.#getCommandVersionKey(config, channel);
+		if (!versionKey) return;
+
+		const commandRestriction = this.#isCommandRestricted(
+			config,
+			channel.versions.get(versionKey)
+		);
+
+		return commandRestriction;
 	}
 
 	#channelActiveVersion(channelId) {
@@ -75,6 +118,52 @@ class BaseCommand {
 		]);
 
 		return aggregateResult[0].isActive;
+	}
+
+	#isCommandRestricted(config, version) {
+		const userAllowed = this.#hasPermittedRoles(config, version.usableBy);
+		if (!userAllowed) return true;
+
+		const bypass = this.#hasPermittedRoles(
+			config,
+			version.cooldown.bypassRoles
+		);
+		if (bypass) return false;
+
+		return isCooldownPassed(
+			currentTime,
+			version.cooldown.lastUsed,
+			version.cooldown.length
+		);
+	}
+
+	#hasPermittedRoles(config, permittedRoles) {
+		const roleStrings = configRoleStrings(config);
+		const found = roleStrings.some((r) => permittedRoles.includes(r));
+
+		return found;
+	}
+
+	// checking to see what version of the command to use, if there are multiple versions
+	#getCommandVersionKey(config, channel) {
+		let hasArgument = false;
+		let isNumber = false;
+		let argument = config.argument;
+		if (argument) {
+			hasArgument = true;
+			isNumber = isArgumentNumber(argument);
+		}
+
+		for (let [key, value] of channel.versions) {
+			if (
+				!value.active ||
+				(!value.isArgumentOptional && hasArgument != value.hasArgument) ||
+				isNumber != value.isArgumentNumber
+			)
+				continue;
+			return key;
+		}
+		return;
 	}
 }
 
