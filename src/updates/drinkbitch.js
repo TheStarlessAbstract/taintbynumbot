@@ -50,7 +50,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArguement",
+				"noArgument",
 				{
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
