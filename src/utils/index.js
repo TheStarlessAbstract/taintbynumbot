@@ -3,6 +3,8 @@ const isBroadcaster = require("./isBroadcaster.js");
 const isCooldownPassed = require("./isCooldownPassed.js");
 const getChatCommandConfigMap = require("./getCommandConfigMap.js");
 const configRoleStrings = require("./configRoleStrings.js");
+// const confirmChannelProperties = require("./confirmChannelProperties.js");
+const isValueNumber = require("./isValueNumber.js");
 
 module.exports = {
 	getChatCommandConfigMap,
@@ -10,4 +12,6 @@ module.exports = {
 	isBroadcaster,
 	isCooldownPassed,
 	configRoleStrings,
+	// confirmChannelProperties,
+	isValueNumber,
 };
