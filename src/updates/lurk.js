@@ -29,13 +29,21 @@ function template() {
 			[
 				"noArgument", // string, number
 				{
-					isArgumentOptional: true,
+					isArgumentOptional: false,
 					hasArgument: false,
 					isArgumentNumber: false,
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					usableBy: ["artists", "founders", "mods", "subs", "vips", "users"],
+					usableBy: [
+						"broadcaster",
+						"artists",
+						"founders",
+						"mods",
+						"subs",
+						"vips",
+						"users",
+					],
 				},
 			],
 		]),
