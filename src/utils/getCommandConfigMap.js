@@ -5,7 +5,7 @@ const getChatCommandConfigMap = (config) => {
 	if (!(map instanceof Map)) return;
 
 	for (const key of map.keys()) {
-		if (!config[key]) return;
+		if (!config[key]) continue;
 		map.set(key, config[key]);
 	}
 
