@@ -6,7 +6,7 @@ const User = require("./models/user");
 
 const defaultCommands = {
 	lurk: require("./src/commands/lurk"),
-	drinkBitch: require("./commands/drinkbitch"),
+	// drinkBitch: require("./src/commands/drinkbitch"),
 };
 
 const audioTimeout = require("./commands/audiotimeout");
@@ -134,7 +134,7 @@ async function setup() {
 	// loop though IDs to get all active commands for all users
 	for (let i = 0; i < userIds.length; i++) {
 		let activeCommands = await CommandNew.find({
-			streamerId: userIds[i],
+			channelId: userIds[i],
 			// active: true,
 		});
 
@@ -144,9 +144,9 @@ async function setup() {
 
 		// loop through commands add to userCommands
 		for (let j = 0; j < activeCommands.length; j++) {
-			if (activeCommands[j].defaultName) {
+			if (activeCommands[j].type) {
 				userCommands[userIds[i]][activeCommands[j].chatName] =
-					defaultCommands[activeCommands[j].defaultName];
+					defaultCommands[activeCommands[j].type];
 			} else {
 				userCommands[userIds[i]][activeCommands[j].chatName] = new BaseCommand(
 					activeCommands[j].text
