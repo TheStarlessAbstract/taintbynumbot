@@ -7,8 +7,8 @@ runUpdates();
 
 async function runUpdates() {
 	await db.connectToMongoDB();
-	await textcommands();
+	// await textcommands();
 	await lurk();
-	await drinkBitch();
+	// await drinkBitch();
 	await db.disconnectFromMongoDB();
 }
