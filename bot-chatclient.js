@@ -48,6 +48,7 @@ async function setupChatClientListeners() {
 			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
 			if (commandLink == undefined) return;
 			config.channelId = msg.channelId;
+			config.chatName = command;
 			config.argument = argument;
 
 			let isActive = await commandLink.checkChannelForActiveVersion(
