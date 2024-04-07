@@ -4,28 +4,25 @@ const {
 	getProcessedOutputString,
 } = require("../utils");
 
-const cooldown = 0;
-
 const commandResponse = async (config) => {
-	const channel = await command.checkChannel(config, "lurk");
-	if (!channel?.versions || !channel?.output) return;
-
-	const isCommandAvailable = await command.checkCommandStatus(config, channel);
-	if (!isCommandAvailable) return;
+	const version = command.checkCommandCanRun(config);
+	if (!version) return;
 
 	const chatCommandConfigMap = getChatCommandConfigMap(config);
-	if (!(chatCommandConfigMap instanceof Map)) return;
+	if (!chatCommandConfigMap) return;
 
-	const output = getProcessedOutputString(
-		channel,
-		"isLurking",
-		chatCommandConfigMap
-	);
-	if (typeof output !== "string") return;
+	if (version == "noArgument") {
+		const output = getProcessedOutputString(
+			channel,
+			"isLurking",
+			chatCommandConfigMap
+		);
+		if (!output) return;
 
-	return output;
+		return output;
+	}
+	return;
 };
 
-const command = new BotCommand(commandResponse, cooldown);
-
+const command = new BotCommand(commandResponse);
 module.exports = command;
