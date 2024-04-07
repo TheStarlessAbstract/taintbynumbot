@@ -1,7 +1,7 @@
 const Command = require("../../models/command.js"); // swap import with below when doing copy back to Command collection
 const CommandNew = require("../../models/commandnew.js");
 
-let twitchId = 100612361;
+let twitchId = "100612361";
 
 async function copyAndUpdate() {
 	let comm = template();
@@ -12,7 +12,7 @@ function template() {
 	return new CommandNew({
 		channelId: twitchId,
 		chatName: "drinkBitch",
-		defaultName: "hydrate",
+		type: "hydrate",
 		createdBy: twitchId,
 		createdOn: new Date(),
 		output: new Map([
@@ -52,16 +52,21 @@ function template() {
 			[
 				"noArgument",
 				{
+					isArgumentOptional: false,
+					hasArgument: false,
+					isArgumentNumber: false,
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					usableBy: {
-						broadcaster: false,
-						mods: true,
-						vips: true,
-						artists: true,
-						users: true,
-					},
+					usableBy: [
+						"broadcaster",
+						"artists",
+						"founders",
+						"mods",
+						"subs",
+						"vips",
+						"users",
+					],
 					cooldown: {
 						length: 5000,
 					},
