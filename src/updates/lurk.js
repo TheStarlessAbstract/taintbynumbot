@@ -1,7 +1,7 @@
 const Command = require("../../models/command.js"); // swap import with below when doing copy back to Command collection
 const CommandNew = require("../../models/commandnew.js");
 
-let twitchId = 100612361;
+let twitchId = "100612361";
 
 async function copyAndUpdate() {
 	let comm = template();
@@ -35,15 +35,9 @@ function template() {
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					usableBy: [
-						"broadcaster",
-						"artists",
-						"founders",
-						"mods",
-						"subs",
-						"vips",
-						"users",
-					],
+					usableBy: ["artists", "founders", "mods", "subs", "vips", "users"],
+					cooldown: { length: 0 },
+					cost: 0,
 				},
 			],
 		]),
