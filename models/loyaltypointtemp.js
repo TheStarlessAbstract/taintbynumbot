@@ -2,8 +2,8 @@ let mongoose = require("mongoose"),
 	Schema = mongoose.Schema;
 
 let LoyaltyPointTempSchema = new Schema({
-	twitchId: String,
-	userId: String,
+	channelId: String,
+	viewerId: String,
 	points: Number,
 	follower: Boolean,
 });
