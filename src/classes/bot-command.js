@@ -1,22 +1,13 @@
 const BaseCommand = require("../../classes/base-command.js");
 
 class BotCommand extends BaseCommand {
-	constructor(getCommand, cooldown) {
+	constructor(getCommand) {
 		super(getCommand);
-		this.cooldown = cooldown;
 		this.timer = new Date(0);
-	}
-
-	getCooldown() {
-		return this.cooldown;
 	}
 
 	getTimer() {
 		return this.timer;
-	}
-
-	setCooldown(cooldown) {
-		this.cooldown = cooldown;
 	}
 
 	setTimer(timer) {
