@@ -11,6 +11,7 @@ let OutputSchema = new Schema({
 	message: { type: String, required: true },
 	active: { type: Boolean, required: true },
 });
+
 let VersionSchema = new Schema({
 	isArgumentOptional: { type: Boolean, required: true },
 	hasArgument: Boolean,
@@ -36,6 +37,6 @@ let CommandNewSchema = new Schema({
 	versions: { type: Map, of: VersionSchema }, // "no argument", "numberArgument", "stringArgument"
 });
 
-CommandNewSchema.index({ streamerId: 1, chatName: 1 }, { unique: true });
+CommandNewSchema.index({ channelId: 1, chatName: 1 }, { unique: true });
 
 module.exports = mongoose.model("CommandNew", CommandNewSchema);
