@@ -13,6 +13,10 @@ let cooldown = 5000;
 let cost = 500;
 
 let commandResponse = async (config) => {
+	const channel = await command.checkChannel(config);
+	if (!channel) return;
+
+	//////
 	let currentTime = new Date();
 
 	if (
