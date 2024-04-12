@@ -5,15 +5,15 @@ const {
 } = require("../utils");
 
 const commandResponse = async (config) => {
-	const version = command.checkCommandCanRun(config);
-	if (!version) return;
+	const channel = command.checkCommandCanRun(config);
+	if (!channel) return;
 
 	const chatCommandConfigMap = getChatCommandConfigMap(config);
 	if (!chatCommandConfigMap) return;
 
-	if (version == "noArgument") {
+	if (channel.has("noArgument")) {
 		const output = getProcessedOutputString(
-			channel,
+			channel.output.get("noArgument"),
 			"isLurking",
 			chatCommandConfigMap
 		);
