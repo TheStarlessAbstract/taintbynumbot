@@ -5,24 +5,23 @@ const {
 } = require("../utils");
 
 const commandResponse = async (config) => {
-	const channel = command.checkCommandCanRun(config);
-	if (!channel) return;
+	//{version: string, output: {map}}
+	const commandDetails = commandType.checkCommandCanRun(config);
+	if (!commandDetails) return;
 
 	const chatCommandConfigMap = getChatCommandConfigMap(config);
 	if (!chatCommandConfigMap) return;
 
-	if (channel.has("noArgument")) {
-		const output = getProcessedOutputString(
-			channel.output.get("noArgument"),
-			"isLurking",
-			chatCommandConfigMap
-		);
-		if (!output) return;
+	if (commandDetails.version !== "noArgument") return;
 
-		return output;
-	}
-	return;
+	const output = getProcessedOutputString(
+		commandDetails.output.get("isLurking"),
+		chatCommandConfigMap
+	);
+	if (!output) return;
+
+	return output;
 };
 
-const command = new BotCommand(commandResponse);
-module.exports = command;
+const commandType = new BotCommand(commandResponse);
+module.exports = commandType;
