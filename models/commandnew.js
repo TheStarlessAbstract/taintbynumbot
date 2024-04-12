@@ -21,6 +21,7 @@ let VersionSchema = new Schema({
 	usableBy: [String],
 	cooldown: { type: CooldownSchema },
 	cost: Number,
+	hasAudioClip: Boolean,
 });
 
 let CommandNewSchema = new Schema({
@@ -28,7 +29,6 @@ let CommandNewSchema = new Schema({
 	chatName: { type: String, required: true }, // custom command name
 	type: String, // type of command
 	text: String, // only used for chat created commands || could be moved into output [default: text]
-	cost: Number, // maybe should be in versions
 	createdBy: String,
 	createdOn: Date,
 	lastEditedBy: String,
