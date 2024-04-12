@@ -2,40 +2,64 @@ require("dotenv").config();
 const { configRoleStrings } = require("../../utils");
 
 describe("configRoleStrings()", () => {
-	describe("When no roles in config", () => {
-		test("Result should be users", async () => {
-			//Assemble
-			config = {
-				isBroadcaster: false,
-				displayName: "design_by_rose",
-				channelId: 1,
-			};
-			permittedRoles = ["artists", "founders", "mods", "subs", "vips", "users"];
+	test("should return an array of strings representing the roles when all boolean properties are true", () => {
+		// Assemble
+		const config = {
+			isBroadcaster: true,
+			isMod: true,
+			isSub: true,
+			isFounder: true,
+			isArtist: true,
+			isVip: true,
+		};
 
-			//Act
-			let result = configRoleStrings(config);
+		// Act
+		const result = configRoleStrings(config);
 
-			//Assert
-			expect(result[0]).toBe("isUser");
-		});
+		// Assert
+		expect(result).toEqual([
+			"broadcaster",
+			"founders",
+			"artists",
+			"mods",
+			"subs",
+			"vips",
+		]);
 	});
 
-	describe("When roles in config", () => {
-		test("Result should be users", async () => {
-			//Assemble
-			config = {
-				isBroadcaster: false,
-				displayName: "design_by_rose",
-				channelId: 1,
-				isArtist: true,
-			};
-			permittedRoles = ["artists", "founders", "mods", "subs", "vips", "users"];
+	test("should return an array of strings representing the roles when only one boolean property is true", () => {
+		// Assemble
+		const config = {
+			isBroadcaster: false,
+			isMod: false,
+			isSub: false,
+			isFounder: false,
+			isArtist: true,
+			isVip: false,
+		};
 
-			//Act
-			let result = configRoleStrings(config);
+		// Act
+		const result = configRoleStrings(config);
 
-			//Assert
-			expect(result[0]).toBe("isArtist");
-		});
+		// Assert
+		expect(result).toEqual(["artists"]);
+	});
+
+	test("should return an array of strings when all boolean properties are false", () => {
+		// Assemble
+		const config = {
+			isBroadcaster: false,
+			isMod: false,
+			isSub: false,
+			isFounder: false,
+			isArtist: false,
+			isVip: false,
+		};
+
+		// Act
+		const result = configRoleStrings(config);
+
+		// Assert
+		expect(result).toEqual(["users"]);
 	});
 });
