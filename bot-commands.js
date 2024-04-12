@@ -6,7 +6,7 @@ const User = require("./models/user");
 
 const defaultCommands = {
 	lurk: require("./src/commands/lurk"),
-	// drinkBitch: require("./src/commands/drinkbitch"),
+	// drinkBitch: require("./src/commands/hydrate"),
 };
 
 const audioTimeout = require("./commands/audiotimeout");
