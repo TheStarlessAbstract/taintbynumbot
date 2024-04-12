@@ -2,7 +2,7 @@
  * Replaces placeholders in the given output string with corresponding values from the map.
  * @param {string} outputString - The string containing placeholders to be replaced.
  * @param {Map} map - A Map object containing key-value pairs where the keys are the placeholders and the values are the replacements.
- * @returns {string} - The modified string with placeholders replaced by their corresponding values from the map.
+ * @returns {string|undefined} - The modified string with placeholders replaced by their corresponding values from the map.
  */
 const processOutputString = (outputString, map) => {
 	if (
