@@ -1,58 +1,33 @@
-function getProcessedOutputString(channel, outputReference, configMap) {
-	let outputString = getOutputString(channel, outputReference);
-	if (!outputString) return;
+const processOutputString = require("./processOutputString.js");
 
-	let processedOutputString = processOutputString(outputString, configMap);
-	return processedOutputString;
-}
+/**
+ * Retrieves and processes an output string based on the provided channel, output reference, and configuration map.
+ * @param {object} channel - The channel to retrieve the output string from.
+ * @param {string} outputReference - The reference to the specific output.
+ * @param {Map} configMap - A map of configuration options.
+ * @returns {string} The processed output string, or undefined if the parameter types are invalid or if the configMap is empty.
+ */
+const getProcessedOutputString = (channel, outputReference, configMap) => {
+	if (
+		typeof channel !== "object" ||
+		typeof outputReference !== "string" ||
+		!(configMap instanceof Map) ||
+		configMap.size === 0 ||
+		!channel?.output
+	)
+		return;
+
+	const output = channel.output;
+	if (!output.has(outputReference)) return;
+	const outputValue = output.get(outputReference);
+	if (!outputValue || !outputValue.active || !outputValue.message) return;
+
+	const message = outputValue.message;
+	if (typeof message !== "string") return;
+
+	const processedMessage = processOutputString(message, configMap);
+
+	return processedMessage;
+};
 
 module.exports = getProcessedOutputString;
-
-function getOutputString(channel, outputReference) {
-	let outputMap = channel?.output;
-	if (
-		!outputMap ||
-		!(outputMap instanceof Map) ||
-		!outputReference ||
-		!(typeof outputReference == "string")
-	)
-		return;
-
-	let output = "";
-	if (!outputMap.get(outputReference).active) return;
-
-	output = outputMap.get(outputReference).message;
-	return output;
-}
-
-function processOutputString(outputString, map) {
-	if (
-		!outputString ||
-		!(typeof outputString == "string") ||
-		!map ||
-		!(map instanceof Map)
-	)
-		return;
-
-	const regex = /\{[^}]*\}/g;
-	const keysInOutputString = outputString.match(regex);
-	if (!keysInOutputString) return outputString;
-
-	const uniqueKeysInOutputString = [...new Set(keysInOutputString)];
-	const cleanedArrayOfKeys = removeFirstAndLastCharacterStringArray(
-		uniqueKeysInOutputString
-	);
-
-	for (let i = 0; i < cleanedArrayOfKeys.length; i++) {
-		outputString = outputString.replaceAll(
-			`{${cleanedArrayOfKeys[i]}}`,
-			map.get(cleanedArrayOfKeys[i])
-		);
-	}
-
-	return outputString;
-}
-
-function removeFirstAndLastCharacterStringArray(arrayOfStrings) {
-	return arrayOfStrings.map((string) => string.substring(1, string.length - 1));
-}
