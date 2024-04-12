@@ -1,209 +1,199 @@
-const { getProcessedOutputString } = require("../../utils");
+const {
+	getProcessedOutputString,
+	processOutputString,
+} = require("../../utils");
+
+jest.mock("../../utils/processOutputString");
 
 describe("getProcessedOutputString()", () => {
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	describe("When all arguments are undefined", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const channel = undefined;
-			const outputString = undefined;
-			const configMap = undefined;
+	test("should return the processed output string when all parameters are valid and the output reference is active", () => {
+		// Assemble
+		const channel = {
+			output: new Map([
+				["outputRef", { active: true, message: "Hello, World!" }],
+			]),
+		};
+		const outputReference = "outputRef";
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		processOutputString.mockReturnValue("Processed: Hello, World!");
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
+
+		// Assert
+		expect(result).toBe("Processed: Hello, World!");
+		expect(processOutputString).toHaveBeenCalled();
 	});
 
-	describe("When first argument is undefined", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const channel = undefined;
-			const outputString = "isLurking";
-			const configMap = new Map([
-				["displayName", "design_by_rose"],
-				["channelId", 1],
-				["isBroadcaster", false],
-			]);
+	test("should return undefined when the configMap is empty", () => {
+		// Assemble
+		const channel = {
+			output: new Map([
+				["outputRef", { active: true, message: "Hello, World!" }],
+			]),
+		};
+		const outputReference = "outputRef";
+		const configMap = new Map();
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When first argument is not expected type", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const channel = "any string";
-			const outputString = "isLurking";
-			const configMap = new Map([
-				["displayName", "design_by_rose"],
-				["channelId", 1],
-				["isBroadcaster", false],
-			]);
+	test("should return undefined when the channel parameter is null or undefined", () => {
+		// Assemble
+		const channel = null;
+		const outputReference = "outputRef";
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When second argument is undefined", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const outputMap = new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]);
-			const channel = {
-				output: outputMap,
-			};
-			const outputString = undefined;
-			const configMap = new Map([
-				["displayName", "design_by_rose"],
-				["channelId", 1],
-				["isBroadcaster", false],
-			]);
+	test("should return undefined when the outputReference parameter is null or undefined", () => {
+		// Assemble
+		const channel = {
+			output: new Map([
+				["outputRef", { active: true, message: "Hello, World!" }],
+			]),
+		};
+		const outputReference = null;
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When second argument is not expected type", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const outputMap = new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]);
-			const channel = {
-				output: outputMap,
-			};
-			const outputString = { type: "Not expected" };
-			const configMap = new Map([
-				["displayName", "design_by_rose"],
-				["channelId", 1],
-				["isBroadcaster", false],
-			]);
+	test("should return undefined when the configMap parameter is an empty Map", () => {
+		// Assemble
+		const channel = {
+			output: new Map([
+				["outputRef", { active: true, message: "Hello, World!" }],
+			]),
+		};
+		const outputReference = "outputRef";
+		const configMap = new Map();
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When third argument is undefined", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const outputMap = new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]);
-			const channel = {
-				output: outputMap,
-			};
-			const outputString = "isLurking";
-			const configMap = undefined;
+	test("should return undefined when the message associated with the output reference is empty", () => {
+		// Assemble
+		const channel = {
+			output: new Map([["outputRef", { active: true, message: "" }]]),
+		};
+		const outputReference = "outputRef";
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When third argument is unexpected type", () => {
-		test("Result should be undefined", async () => {
-			//Assemble
-			const outputMap = new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]);
-			const channel = {
-				output: outputMap,
-			};
-			const outputString = "isLurking";
-			const configMap = "Not expected";
+	test("should return undefined when the output reference is not found in the channel's output", () => {
+		// Assemble
+		const channel = {
+			output: new Map([
+				["outputRef", { active: true, message: "Hello, World!" }],
+			]),
+		};
+		const outputReference = "nonExistingOutputRef";
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBeUndefined();
-		});
+		// Assert
+		expect(result).toBeUndefined();
+		expect(processOutputString).not.toHaveBeenCalled();
 	});
 
-	describe("When all arguments expected type type", () => {
-		test("Result should be expected string", async () => {
-			//Assemble
-			const outputMap = new Map([
-				[
-					"isLurking",
-					{
-						message:
-							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-						active: true,
-					},
-				],
-			]);
-			const channel = {
-				output: outputMap,
-			};
-			const outputString = "isLurking";
-			const configMap = new Map([
-				["displayName", "design_by_rose"],
-				["channelId", 1],
-				["isBroadcaster", false],
-			]);
+	test("should return undefined when the channel object has a null output property", () => {
+		// Assemble
+		const channel = {
+			output: null,
+		};
+		const outputReference = "outputRef";
+		const configMap = new Map([
+			["option1", "value1"],
+			["option2", "value2"],
+		]);
 
-			//Act
-			const result = getProcessedOutputString(channel, outputString, configMap);
+		// Act
+		const result = getProcessedOutputString(
+			channel,
+			outputReference,
+			configMap
+		);
 
-			//Assert
-			expect(result).toBe(
-				"@design_by_rose finds a comfortable spot behind the bushes to perv on the stream"
-			);
-		});
+		// Assert
+		expect(result).toBeUndefined();
 	});
 });
