@@ -1,39 +1,59 @@
 const { isValueNumber } = require("../../utils");
 
-describe("isValueNumber", () => {
-	describe("When value not a number", () => {
-		test("Result should be false", async () => {
-			//Assemble
-			value = undefined;
+describe("isValueNumber()", () => {
+	test("should return true when given a valid number", () => {
+		// Assemble
+		const value = 42;
 
-			//Act
-			let result = isValueNumber(value);
+		// Act
+		const result = isValueNumber(value);
 
-			expect(result).toBeFalsy();
-		});
+		// Assert
+		expect(result).toBe(true);
 	});
 
-	describe("When value is a number", () => {
-		test("Result should be true", async () => {
-			//Assemble
-			value = 1;
+	test("should return false when given a string that cannot be parsed as a number", () => {
+		// Assemble
+		const value = "abc";
 
-			//Act
-			let result = isValueNumber(value);
+		// Act
+		const result = isValueNumber(value);
 
-			expect(result).toBeTruthy();
-		});
+		// Assert
+		expect(result).toBe(false);
 	});
 
-	describe("When value is a number as a string", () => {
-		test("Result should be true", async () => {
-			//Assemble
-			value = "1";
+	test("should return false when given NaN", () => {
+		// Assemble
+		const value = NaN;
 
-			//Act
-			let result = isValueNumber(value);
+		// Act
+		const result = isValueNumber(value);
 
-			expect(result).toBeTruthy();
-		});
+		// Assert
+		expect(result).toBe(false);
 	});
+
+	// Returns false when given null or undefined.
+	test("should return false when given undefined", () => {
+		// Assemble
+		const value = undefined;
+
+		// Act
+		const result = isValueNumber(value);
+
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	test("should return true when given a number as a string", () => {
+		// Assemble
+		const value = "42";
+
+		// Act
+		const result = isValueNumber(value);
+
+		// Assert
+		expect(result).toBe(true);
+	}); //
 });
