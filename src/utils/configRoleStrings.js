@@ -1,17 +1,19 @@
+/**
+ * Returns an array of strings representing the roles based on the properties of the `config` object.
+ * @param {Object} config - An object containing boolean properties representing different roles.
+ * @returns {Array} - An array of strings representing the roles.
+ */
 const configRoleStrings = (config) => {
-	let array = [];
+	const roles = [];
 
-	if (config.isBroadcaster) array.push("broadcaster");
-	if (config.isMod) array.push("mods");
-	if (config.isSub) array.push("subs");
-	if (config.isFounder) array.push("founders");
-	if (config.isArtist) array.push("artists");
-	if (config.isVip) array.push("vips");
+	if (config?.isBroadcaster) roles.push("broadcaster");
+	if (config?.isFounder) roles.push("founders");
+	if (config?.isArtist) roles.push("artists");
+	if (config?.isMod) roles.push("mods");
+	if (config?.isSub) roles.push("subs");
+	if (config?.isVip) roles.push("vips");
 
-	if (array.length == 0) array.push("users");
-	console.log(array);
-
-	return array;
+	return roles.length ? roles : ["users"];
 };
 
 module.exports = configRoleStrings;
