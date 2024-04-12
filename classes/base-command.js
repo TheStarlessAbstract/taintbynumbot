@@ -1,5 +1,5 @@
 const CommandNew = require("../models/commandnew.js");
-const LoyaltyPoints = require("../models/loyaltypoints.js");
+const LoyaltyPoints = require("../models/loyaltypoint.js");
 const { isValueNumber, configRoleStrings } = require("../src/utils");
 
 class BaseCommand {
@@ -25,9 +25,13 @@ class BaseCommand {
 		return this.channels;
 	}
 
+	/**
+	 * Retrieves a specific channel from the `channels` object in the `BaseCommand` class.
+	 * @param {string} channelId - The ID of the channel to retrieve.
+	 * @returns {Object|undefined} - The channel object with the specified `channelId` if it exists, or `undefined` if it does not exist.
+	 */
 	getChannel(channelId) {
-		if (!this.channels[channelId]) return false;
-		return this.channels[channelId];
+		return this.channels[channelId] || false;
 	}
 
 	getCommand() {
@@ -63,13 +67,14 @@ class BaseCommand {
 		const versionKey = this.getCommandVersionKey(config, channel);
 		if (!versionKey) return;
 
-		const commandAvailable = this.isCommandAvailable(
-			config,
-			channel.versions.get(versionKey)
-		);
+		const version = channel.versions.get(versionKey);
+		const cost = version?.cost;
+		const hasAudioClip = version.hasAudioClip;
+
+		const commandAvailable = this.isCommandAvailable(config, version);
 		if (!commandAvailable) return;
 
-		return versionKey;
+		return { versionKey, cost, hasAudioClip };
 	}
 
 	async checkChannelForActiveVersion(channelId, command) {
@@ -188,25 +193,35 @@ class BaseCommand {
 			channelId: config.channelId,
 			viewerId: config.userId,
 		}).exec();
-		if (!user || user.points < cost) return;
+		if (!user || user.points < cost) return { user: {}, canPay: false };
 
-		return true;
+		return { user: user, canPay: true };
 	}
 
 	async checkCommandCanRun(config) {
+		// returns {output: {map}, versions: {map}}
 		const channel = await this.checkChannel(config);
+		const response = { output: channel?.output };
 		if (!channel) return;
 
-		const versionKey = await this.checkCommandStatus(config, channel);
+		// returns string of version type
+		const { versionKey, cost, hasAudioClip } = await this.checkCommandStatus(
+			config,
+			channel
+		);
+		response.version = versionKey;
+		response.hasAudioClip = hasAudioClip;
 		if (!versionKey) return;
 
-		const cost = channel.versions.get(versionKey)?.cost;
+		response.userCanPayCost = true;
 		if (cost && cost > 0) {
-			const balance = await this.checkUserBalance(config, cost);
-			if (!balance) return;
+			const { user, canPay } = await this.checkUserBalance(config, cost);
+			response.cost = cost;
+			response.user = user;
+			response.userCanPayCost = canPay;
 		}
 
-		return { version: versionKey, output: channel.output };
+		return response;
 	}
 }
 
