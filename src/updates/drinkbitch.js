@@ -32,7 +32,7 @@ function template() {
 				},
 			],
 			[
-				"luckyShot",
+				"luckyRoll",
 				{
 					message:
 						"@{displayName} You lack the points to make Starless drink, but The Church of Latter-Day Taints takes pity on you. @TheStarlessAbstract drink, bitch!",
@@ -40,7 +40,7 @@ function template() {
 				},
 			],
 			[
-				"invalidBalance",
+				"lowBalance",
 				{
 					message:
 						"@{displayName} You lack the points to make Starless drink, hang about stream if you have nothing better to do, and maybe you too can make Starless !drinkbitch",
@@ -71,6 +71,11 @@ function template() {
 						length: 5000,
 					},
 					cost: 500,
+					hasAudioClip: true,
+					luck: {
+						active: true,
+						odds: 100,
+					},
 				},
 			],
 		]),
