@@ -1,33 +1,58 @@
 const { isBroadcaster } = require("../../utils");
 
-describe("isBroadcaster", () => {
-	let config;
+describe("isBroadcaster()", () => {
+	test("should return true when `isBroadcaster` property is true", () => {
+		// Assemble
+		const config = { isBroadcaster: true };
 
-	beforeEach(async () => {
-		config = {};
-	});
-	describe("When isBroadcaster() is true", () => {
-		test("Result should be true", async () => {
-			//Assemble
-			config.isBroadcaster = true;
+		// Act
+		const result = isBroadcaster(config);
 
-			//Act
-			let result = isBroadcaster(config);
-
-			expect(result).toBe(true);
-		});
+		// Assert
+		expect(result).toBe(true);
 	});
 
-	describe("When isBroadcaster() is false", () => {
-		test("Result should be false", async () => {
-			//Assemble
-			config.isBroadcaster = false;
+	test("should return false when `isBroadcaster` property is false", () => {
+		// Assemble
+		const config = { isBroadcaster: false };
 
-			//Act
-			let result = isBroadcaster(config);
+		// Act
+		const result = isBroadcaster(config);
 
-			//Assert
-			expect(result).toBe(false);
-		});
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	test("should return false when `isBroadcaster` property is not present", () => {
+		// Assemble
+		const config = {};
+
+		// Act
+		const result = isBroadcaster(config);
+
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	test("should return false when `isBroadcaster` property is a non-boolean value", () => {
+		// Assemble
+		const config = { isBroadcaster: "true" };
+
+		// Act
+		const result = isBroadcaster(config);
+
+		// Assert
+		expect(result).toBe(false);
+	});
+
+	test("should return false when `isBroadcaster` property is null or undefined", () => {
+		// Assemble
+		const config = { isBroadcaster: null };
+
+		// Act
+		const result = isBroadcaster(config);
+
+		// Assert
+		expect(result).toBe(false);
 	});
 });
