@@ -1,4 +1,4 @@
-const CommandNew = require("../models/commandnew.js");
+const CommandNew = require("../src/models/commandnew.js");
 const LoyaltyPoints = require("../models/loyaltypoint.js");
 const { isValueNumber, configRoleStrings } = require("../src/utils");
 
