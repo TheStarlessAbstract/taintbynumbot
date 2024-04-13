@@ -34,7 +34,7 @@ const commandResponse = async (config) => {
 		commandDetails.hasAudioClip &&
 		(outputType === "validBalance" || outputType === "luckyRoll")
 	) {
-		play(config.channelId, config.chatName);
+		play({ channelId: config.channelId, chatName: config.chatName });
 	}
 
 	const output = getProcessedOutputString(
