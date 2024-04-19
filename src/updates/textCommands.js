@@ -1,7 +1,7 @@
 const Helper = require("../../classes/helper.js");
 
 const Command = require("../../models/command.js");
-const CommandNew = require("../../models/commandnew.js");
+const CommandNew = require("../models/commandnew.js");
 const User = require("../../models/user.js");
 
 const helper = new Helper();
