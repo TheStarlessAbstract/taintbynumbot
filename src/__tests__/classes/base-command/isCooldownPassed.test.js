@@ -1,42 +1,108 @@
-require("dotenv").config();
-const BaseCommand = require("../../../../classes/base-command.js");
+const BaseCommand = require("../../../classes/base-command.js");
+const { isValueNumber } = require("../../../utils");
+
+jest.mock("../../../utils", () => ({
+	isValueNumber: jest.fn(),
+}));
 
 describe("isCooldownPassed()", () => {
-	let testCommand;
-
-	beforeEach(() => {
-		testCommand = new BaseCommand();
-	});
-
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	describe("When difference between lastUsed and time is less than cooldownLength", () => {
-		test("Result should be false", async () => {
-			//Assemble
-			lastUsed = new Date() - 1000;
-			cooldownLength = 20000;
+	test("should return true when the cooldown period has passed and the lastUsed timestamp is before the current time", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = new Date(Date.now() - 3000);
+		const cooldownLength = 1000;
 
-			//Act
-			result = await testCommand.isCooldownPassed(lastUsed, cooldownLength);
+		isValueNumber.mockReturnValue(true);
 
-			//Assert
-			expect(result).toBeFalsy();
-		});
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).toHaveBeenCalled();
+		expect(result).toBe(true);
 	});
 
-	describe("When difference between lastUsed and time is greater or equal to cooldownLength", () => {
-		test("Result should be false", async () => {
-			//Assemble
-			lastUsed = new Date() - 50000;
-			cooldownLength = 20000;
+	it("should return true when the cooldown period is 0", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = new Date();
+		const cooldownLength = 0;
 
-			//Act
-			result = await testCommand.isCooldownPassed(lastUsed, cooldownLength);
+		isValueNumber.mockReturnValue(true);
 
-			//Assert
-			expect(result).toBeTruthy();
-		});
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).toHaveBeenCalled();
+		expect(result).toBe(true);
+	});
+
+	test("should return false if the lastUsed parameter is not an instance of Date", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = "2021-01-01";
+		const cooldownLength = 1000;
+
+		isValueNumber.mockReturnValue(true);
+
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).not.toHaveBeenCalled();
+		expect(result).toBe(false);
+	});
+
+	test("should return false if the cooldownLength parameter is not a number", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = new Date();
+		const cooldownLength = "1000";
+
+		isValueNumber.mockReturnValue(false);
+
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).not.toHaveBeenCalledWith(1000);
+		expect(result).toBe(false);
+	});
+
+	test("should return false when the cooldown period has not passed and the lastUsed timestamp is after the current time", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = new Date(Date.now() + 3000);
+		const cooldownLength = 1000;
+
+		isValueNumber.mockReturnValue(true);
+
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).toHaveBeenCalled();
+		expect(result).toBe(false);
+	});
+
+	test("should return false when the cooldown period has not passed", () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const lastUsed = new Date(Date.now() - 3000);
+		const cooldownLength = 5000;
+
+		isValueNumber.mockReturnValue(true);
+
+		// Act
+		const result = testCommand.isCooldownPassed(lastUsed, cooldownLength);
+
+		// Assert
+		expect(isValueNumber).toHaveBeenCalled();
+		expect(result).toBe(false);
 	});
 });
