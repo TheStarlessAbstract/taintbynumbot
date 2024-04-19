@@ -1,4 +1,4 @@
-const CommandNew = require("../models/commandnew");
+const CommandNew = require("../src/models/commandnew");
 
 class Helper {
 	constructor() {}
