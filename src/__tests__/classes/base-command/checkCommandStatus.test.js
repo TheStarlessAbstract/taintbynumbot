@@ -1,5 +1,5 @@
 require("dotenv").config();
-const BaseCommand = require("../../../../classes/base-command.js");
+const BaseCommand = require("../../../classes/base-command.js");
 
 describe("checkCommandStatus()", () => {
 	let testCommand;
