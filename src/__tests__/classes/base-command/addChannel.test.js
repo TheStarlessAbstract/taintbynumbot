@@ -1,187 +1,268 @@
 const BaseCommand = require("../../../../classes/base-command.js");
 
 describe("addChannel()", () => {
-	let testCommand;
+	test("should add a new channel to the `channels` object when provided with a valid `channelId` and `channel` object containing `versions` and `output`", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			versions: new Map([
+				[
+					"noArgument",
+					{
+						description:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+			output: new Map([
+				[
+					"isLurking",
+					{
+						message:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
 
-	beforeEach(() => {
-		testCommand = new BaseCommand();
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
+
+		// Assert
+		expect(result).toBe(true);
+		expect(baseCommand.channels[channelId]).toEqual(channel);
 	});
 
-	afterEach(() => {
-		jest.clearAllMocks();
+	test("should add multiple channels to the `channels` object when provided with valid `channelId` and `channel` objects", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId1 = "channel1";
+		const channel1 = {
+			versions: new Map([
+				[
+					"version1",
+					{
+						description: "Version 1",
+						active: true,
+					},
+				],
+			]),
+			output: new Map([
+				[
+					"output1",
+					{
+						message: "Output 1",
+						active: true,
+					},
+				],
+			]),
+		};
+		const channelId2 = "channel2";
+		const channel2 = {
+			versions: new Map([
+				[
+					"version2",
+					{
+						description: "Version 2",
+						active: true,
+					},
+				],
+			]),
+			output: new Map([
+				[
+					"output2",
+					{
+						message: "Output 2",
+						active: true,
+					},
+				],
+			]),
+		};
+
+		// Act
+		const result1 = baseCommand.addChannel(channelId1, channel1);
+		const result2 = baseCommand.addChannel(channelId2, channel2);
+
+		// Assert
+		expect(result1).toBe(true);
+		expect(result2).toBe(true);
+		expect(baseCommand.channels[channelId1]).toEqual(channel1);
+		expect(baseCommand.channels[channelId2]).toEqual(channel2);
 	});
 
-	describe("When channelId is not a String", () => {
-		test("Result should be false", async () => {
-			//Assemble
-			channelId = undefined;
-			channel = {
-				output: new Map([
-					[
-						"isLurking",
-						{
-							message:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-				versions: new Map([
-					[
-						"noArgument",
-						{
-							description:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-			};
+	test("should return false and not add a channel when provided with an invalid channelId", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = 123;
+		const channel = {
+			versions: new Map([
+				[
+					"noArgument",
+					{
+						description:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+			output: new Map([
+				[
+					"isLurking",
+					{
+						message:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
 
-			//Act
-			result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-			//Assert
-			expect(result).toBeFalsy();
-		});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toBeUndefined();
 	});
 
-	describe("When channelId is a String", () => {
-		describe("And channel is undefined", () => {
-			test("Result should be false", async () => {
-				//Assemble
-				channelId = "1";
-				channel = undefined;
+	test("should return false and not add a channel when the channel object is missing the versions property", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			output: new Map([
+				[
+					"isLurking",
+					{
+						message:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
 
-				//Act
-				result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-				//Assert
-				expect(result).toBeFalsy();
-			});
-		});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toBeUndefined();
+	});
 
-		describe("And channel doesn't have versions property", () => {
-			test("Result should be false", async () => {
-				//Assemble
-				channelId = "1";
-				channel = {
-					output: new Map([
-						[
-							"isLurking",
-							{
-								message:
-									"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-								active: true,
-							},
-						],
-					]),
-				};
+	test("should return false and not add a channel when provided with a channel object missing the output property", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			versions: new Map([
+				[
+					"noArgument",
+					{
+						description:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
 
-				//Act
-				result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-				//Assert
-				expect(result).toBeFalsy();
-			});
-		});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toBeUndefined();
+	});
 
-		describe("And channel doesn't have output property", () => {
-			test("Result should be false", async () => {
-				//Assemble
-				channelId = "1";
-				channel = {
-					versions: new Map([
-						[
-							"noArgument",
-							{
-								description:
-									"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-								active: true,
-							},
-						],
-					]),
-				};
+	test("should return false and not add a channel when provided with a channel object with an empty versions Map", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			versions: new Map(),
+			output: new Map([
+				[
+					"isLurking",
+					{
+						message:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
 
-				//Act
-				result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-				//Assert
-				expect(result).toBeFalsy();
-			});
-		});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toBeUndefined();
+	});
 
-		describe("And channel has versions and output properties", () => {
-			describe("And channelId already exists in channels", () => {
-				test("Result should be false", async () => {
-					//Assemble
-					channelId = "1";
-					channel = {
-						output: new Map([
-							[
-								"isLurking",
-								{
-									message:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-						versions: new Map([
-							[
-								"noArgument",
-								{
-									description:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-					};
-					testCommand.addChannel(channelId, channel);
+	test("should return false and not add a channel when provided with a channel object with an empty output Map", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			versions: new Map([
+				[
+					"noArgument",
+					{
+						description:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+			output: new Map(),
+		};
 
-					//Act
-					result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-					//Assert
-					expect(result).toBeFalsy();
-				});
-			});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toBeUndefined();
+	});
 
-			describe("And channelId doesn't exist in channels", () => {
-				test("Result should be true", async () => {
-					//Assemble
-					channelId = "1";
-					channel = {
-						output: new Map([
-							[
-								"isLurking",
-								{
-									message:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-						versions: new Map([
-							[
-								"noArgument",
-								{
-									description:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-					};
+	test("should return false and not add a channel when attempting to add a channel with an existing channelId", () => {
+		// Assemble
+		const baseCommand = new BaseCommand();
+		const channelId = "channel1";
+		const channel = {
+			versions: new Map([
+				[
+					"noArgument",
+					{
+						description:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+			output: new Map([
+				[
+					"isLurking",
+					{
+						message:
+							"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
+						active: true,
+					},
+				],
+			]),
+		};
+		baseCommand.addChannel(channelId, channel);
 
-					//Act
-					result = testCommand.addChannel(channelId, channel);
+		// Act
+		const result = baseCommand.addChannel(channelId, channel);
 
-					//Assert
-					expect(result).toBeTruthy();
-				});
-			});
-		});
+		// Assert
+		expect(result).toBe(false);
+		expect(baseCommand.channels[channelId]).toEqual(channel);
 	});
 });
