@@ -6,7 +6,9 @@ const {
 	getUserRolesAsStrings,
 } = require("../utils/index.js");
 
-const { findUserPoints } = require("../queries/loyaltyPoints/");
+const {
+	findUserPoints,
+} = require("../queries/loyaltyPoints/findUserPoints.js");
 
 class BaseCommand {
 	constructor(command) {
@@ -236,7 +238,7 @@ class BaseCommand {
 	}
 
 	// checking to see what version of the command to use, if there are multiple versions
-	getCommandVersionKey(config, channel) {
+	getCommandVersionKey(config, versions) {
 		let hasArgument = false;
 		let isNumber = false;
 		let argument = config.argument;
@@ -245,7 +247,7 @@ class BaseCommand {
 			isNumber = isValueNumber(argument);
 		}
 
-		for (let [key, value] of channel.versions) {
+		for (let [key, value] of versions) {
 			if (!value.active) continue;
 			if (
 				!value.isArgumentOptional &&
