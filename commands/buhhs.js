@@ -1,4 +1,4 @@
-const BaseCommand = require("../classes/base-command");
+const BaseCommand = require("../src/classes/base-command");
 
 let commandResponse = () => {
 	return {
