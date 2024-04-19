@@ -1,4 +1,4 @@
-const BaseCommand = require("./base-command");
+const BaseCommand = require("../src/classes/base-command");
 
 class TimerCommand extends BaseCommand {
 	constructor(getCommand, cooldown) {
