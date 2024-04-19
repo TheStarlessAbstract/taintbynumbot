@@ -7,22 +7,17 @@ const processOutputString = require("./processOutputString.js");
  * @param {Map} configMap - A map of configuration options.
  * @returns {string|undefined} The processed output string, or undefined if the parameter types are invalid or if the configMap is empty.
  */
-const getProcessedOutputString = (channel, outputReference, configMap) => {
+const getProcessedOutputString = (output, configMap) => {
 	if (
-		typeof channel !== "object" ||
-		typeof outputReference !== "string" ||
+		typeof output !== "object" ||
 		!(configMap instanceof Map) ||
-		configMap.size === 0 ||
-		!channel?.output
+		configMap.size === 0
 	)
 		return;
 
-	const output = channel.output;
-	if (!output.has(outputReference)) return;
-	const outputValue = output.get(outputReference);
-	if (!outputValue || !outputValue.active || !outputValue.message) return;
+	if (!output || !output.active || !output.message) return;
 
-	const message = outputValue.message;
+	const message = output.message;
 	if (typeof message !== "string") return;
 
 	const processedMessage = processOutputString(message, configMap);
