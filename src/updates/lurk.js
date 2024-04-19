@@ -1,5 +1,5 @@
 const Command = require("../../models/command.js"); // swap import with below when doing copy back to Command collection
-const CommandNew = require("../../models/commandnew.js");
+const CommandNew = require("../models/commandnew.js");
 
 let twitchId = "100612361";
 
