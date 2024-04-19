@@ -1,27 +1,15 @@
 const { commandTypes } = require("../config");
+const types = commandTypes();
 
 class Channel {
 	constructor(channelId, channelName) {
 		this.id = channelId;
 		this.name = channelName;
 		this.messageCount = 0;
-		this.commands = {};
-	}
-
-	getMessageCount() {
-		return this.messageCount;
-	}
-
-	setMessageCount(count) {
-		this.messageCount = count;
-	}
-
-	increaseMessageCount() {
-		this.messageCount++;
-	}
-
-	decreaseMessageCount() {
-		this.messageCount--;
+		this.isLive = false;
+		this.lastIsLiveUpdate = false;
+		this.timedMessagesInterval = 60000;
+		this.commands = {}; // maybe a map instead
 	}
 
 	getName() {
@@ -32,16 +20,61 @@ class Channel {
 		this.name = name;
 	}
 
-	async getCommandDetails(name) {
-		if (!this.commands.hasOwnPropery(name)) return false;
+	getMessageCount() {
+		return this.messageCount;
+	}
+
+	setMessageCount(count) {
+		this.messageCount = count;
+	}
+
+	getIsLive() {
+		return this.isLive;
+	}
+
+	setIsLive(isLive) {
+		this.isLive = isLive;
+	}
+
+	getLastIsLiveUpdate() {
+		return this.lastIsLiveUpdate;
+	}
+
+	setLastIsLiveUpdate(lastIsLiveUpdate) {
+		this.lastIsLiveUpdate = lastIsLiveUpdate;
+	}
+
+	getTimedMessagesInterval() {
+		return this.timedMessagesInterval;
+	}
+
+	setTimedMessagesInterval(timedMessagesInterval) {
+		this.timedMessagesInterval = timedMessagesInterval;
+	}
+
+	increaseMessageCount() {
+		this.messageCount++;
+	}
+
+	decreaseMessageCount() {
+		this.messageCount--;
+	}
+
+	getCommandDetails(name) {
+		if (!this.commands.hasOwnProperty(name)) return false;
 		return this.commands[name];
 	}
 
-	addCommand(name, type, commandDetails) {
-		const { output, versions } = commandDetails;
-		const command = commandTypes[type];
+	addCommand(name, commandDetails) {
+		const { type } = commandDetails;
+		const reference = types[type];
+		this.commands[name] = reference;
 
-		this.commands[name] = { command, output, versions };
+		return this.commands[name];
+	}
+
+	getCommandReference(type) {
+		return types[type];
 	}
 }
 
