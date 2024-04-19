@@ -1,4 +1,4 @@
-const BaseCommand = require("../classes/base-command");
+const BaseCommand = require("../src/classes/base-command");
 const Helper = require("../classes/helper");
 
 const audio = require("../bot-audio");
