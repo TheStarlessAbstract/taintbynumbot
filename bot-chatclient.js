@@ -8,7 +8,7 @@ const messages = require("./bot-messages");
 const kings = require("./commands/kings");
 
 const User = require("./models/user");
-const CommandNew = require("./models/commandnew");
+const CommandNew = require("./src/classes/base-command");
 
 let botUsername = process.env.TWITCH_BOT_USERNAME;
 
