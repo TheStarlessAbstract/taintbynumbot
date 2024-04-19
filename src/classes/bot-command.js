@@ -1,4 +1,4 @@
-const BaseCommand = require("../../classes/base-command.js");
+const BaseCommand = require("./base-command.js");
 
 class BotCommand extends BaseCommand {
 	constructor(getCommand) {
