@@ -1,250 +1,213 @@
-require("dotenv").config();
-const _ = require("lodash");
-const CommandNew = require("../../../../models/commandnew.js");
+const CommandNew = require("../../../models/commandnew.js");
 const BaseCommand = require("../../../../classes/base-command.js");
+const { isNonEmptyMap, isNonEmptyString } = require("../../../utils");
 
-jest.mock("../../../../models/commandnew.js", () => ({
+jest.mock("../../../models/commandnew.js", () => ({
 	findOne: jest.fn(),
 }));
 
+jest.mock("../../../utils", () => ({
+	isNonEmptyString: jest.fn(),
+	isNonEmptyMap: jest.fn(),
+}));
+
 describe("checkChannel()", () => {
-	const channelId = "1";
-	let testCommand;
-
-	beforeEach(() => {
-		testCommand = new BaseCommand();
-	});
-
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	describe("When getChannel() returns undefined", () => {
-		describe("And CommandNew.findOne() returns undefined", () => {
-			test("Result should be undefined", async () => {
-				//Assemble
-				jest.spyOn(testCommand, "getChannel").mockReturnValue(undefined);
-				CommandNew.findOne.mockReturnValue(undefined);
-				jest.spyOn(testCommand, "addChannel").mockReturnValue(true);
+	test("should retrieve an existing channel object when provided with a valid channelId", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const channelObject = {
+			output: new Map([["outputKey", "outputValue"]]),
+			versions: new Map([["versionKey", "versionValue"]]),
+		};
+		const config = {
+			channelId: "validChannelId",
+			chatName: "validChatName",
+		};
 
-				config = {
-					isBroadcaster: false,
-					displayName: "design_by_rose",
-					channelId,
-				};
-				type = "lurk";
+		isNonEmptyString.mockReturnValue(true);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(channelObject);
+		isNonEmptyMap.mockReturnValue(false);
+		jest.spyOn(testCommand, "addChannel").mockReturnValue(false);
 
-				//Act
-				let result = await testCommand.checkChannel(config, type);
+		// Act
+		const result = await testCommand.checkChannel(config);
 
-				//Assert
-				expect(result).toBeUndefined();
-			});
-		});
-
-		describe("And CommandNew.findOne() returns a channel object", () => {
-			describe("And addChannel() returns a returns false", () => {
-				test("Result should be false", async () => {
-					//Assemble
-					jest.spyOn(testCommand, "getChannel").mockReturnValue(undefined);
-					_doc = {
-						channelId: channelId,
-						name: "lurk",
-						output: new Map([
-							[
-								"isLurking",
-								{
-									message:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-						versions: new Map([
-							[
-								"noArgument",
-								{
-									description:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-					};
-					CommandNew.findOne.mockReturnValue(_doc);
-					jest.spyOn(testCommand, "addChannel").mockReturnValue(false);
-
-					config = {
-						isBroadcaster: false,
-						displayName: "design_by_rose",
-						channelId,
-					};
-					type = "lurk";
-
-					//Act
-					let result = await testCommand.checkChannel(config, type);
-
-					//Assert
-					expect(result).toBeFalsy();
-				});
-			});
-
-			describe("And addChannel() returns a returns true", () => {
-				test("Result should be true", async () => {
-					//Assemble
-					jest.spyOn(testCommand, "getChannel").mockReturnValue(undefined);
-					_doc = {
-						channelId: channelId,
-						name: "lurk",
-						output: new Map([
-							[
-								"isLurking",
-								{
-									message:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-						versions: new Map([
-							[
-								"noArgument",
-								{
-									description:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-					};
-					CommandNew.findOne.mockReturnValue(_doc);
-					jest.spyOn(testCommand, "addChannel").mockReturnValue(true);
-
-					config = {
-						isBroadcaster: false,
-						displayName: "design_by_rose",
-						channelId,
-					};
-					type = "lurk";
-
-					//Act
-					let result = await testCommand.checkChannel(config, type);
-
-					//Assert
-					resultCheck = {
-						output: new Map([
-							[
-								"isLurking",
-								{
-									message:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-						versions: new Map([
-							[
-								"noArgument",
-								{
-									description:
-										"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-									active: true,
-								},
-							],
-						]),
-					};
-					expect(_.isEqual(result, resultCheck)).toBe(true);
-				});
-			});
-		});
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).toHaveBeenCalled();
+		expect(CommandNew.findOne).not.toHaveBeenCalled();
+		expect(isNonEmptyMap).not.toHaveBeenCalled();
+		expect(testCommand.addChannel).not.toHaveBeenCalled();
+		expect(result).toEqual(channelObject);
 	});
 
-	describe("When getChannel() returns a channel object", () => {
-		test("Result should be channel object", async () => {
-			//Assemble
-			jest.spyOn(testCommand, "getChannel").mockReturnValue({
-				output: new Map([
-					[
-						"isLurking",
-						{
-							message:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-				versions: new Map([
-					[
-						"noArgument",
-						{
-							description:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-			});
-			_doc = {
-				channelId: channelId,
-				name: "lurk",
-				output: new Map([
-					[
-						"isLurking",
-						{
-							message:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-				versions: new Map([
-					[
-						"noArgument",
-						{
-							description:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-			};
-			CommandNew.findOne.mockReturnValue(_doc);
-			jest.spyOn(testCommand, "addChannel").mockReturnValue();
+	test("should query the database and add a new channel object to the channels object when the channel does not exist", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const channelId = "validChannelId";
+		const chatName = "validChatName";
+		const channelObject = {
+			output: new Map([["outputKey", "outputValue"]]),
+			versions: new Map([["versionKey", "versionValue"]]),
+		};
+		const config = {
+			channelId: channelId,
+			chatName: chatName,
+		};
+		const commandObject = {
+			output: new Map([["outputKey", "outputValue"]]),
+			versions: new Map([["versionKey", "versionValue"]]),
+		};
 
-			config = {
-				isBroadcaster: false,
-				displayName: "design_by_rose",
-				channelId,
-			};
-			type = "lurk";
+		isNonEmptyString.mockReturnValue(true);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(null);
+		CommandNew.findOne.mockResolvedValue(commandObject);
+		isNonEmptyMap.mockReturnValue(true);
+		jest.spyOn(testCommand, "addChannel").mockReturnValue(true);
 
-			//Act
-			let result = await testCommand.checkChannel(config, type);
+		// Act
+		const result = await testCommand.checkChannel(config);
 
-			//Assert
-			resultCheck = {
-				output: new Map([
-					[
-						"isLurking",
-						{
-							message:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-				versions: new Map([
-					[
-						"noArgument",
-						{
-							description:
-								"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
-							active: true,
-						},
-					],
-				]),
-			};
-			expect(_.isEqual(result, resultCheck)).toBe(true);
-		});
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).toHaveBeenCalled();
+		expect(CommandNew.findOne).toHaveBeenCalledWith(
+			{ channelId: channelId, chatName: chatName },
+			{ output: 1, versions: 1 }
+		);
+		expect(isNonEmptyMap).toHaveBeenCalledTimes(2);
+		expect(testCommand.addChannel).toHaveBeenCalledWith(
+			channelId,
+			channelObject
+		);
+		expect(result).toEqual(channelObject);
+	});
+
+	test("should return undefined when channelId is a non-empty string but chatName is an empty string", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const config = {
+			channelId: "validChannelId",
+			chatName: "",
+		};
+
+		isNonEmptyString.mockReturnValueOnce(true).mockReturnValueOnce(false);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(null);
+
+		// Act
+		const result = await testCommand.checkChannel(config);
+
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).not.toHaveBeenCalled();
+		expect(result).toBeUndefined();
+	});
+
+	test("should return undefined when the output or versions maps are not non-empty", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const channelId = "validChannelId";
+		const chatName = "validChatName";
+		const config = {
+			channelId: channelId,
+			chatName: chatName,
+		};
+		const outputMap = new Map();
+		const versionsMap = new Map([["versionKey", "versionValue"]]);
+		const command = {
+			output: outputMap,
+			versions: versionsMap,
+		};
+
+		isNonEmptyString.mockReturnValue(true);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(null);
+		CommandNew.findOne.mockResolvedValue(command);
+		isNonEmptyMap.mockReturnValueOnce(false).mockReturnValueOnce(true);
+		jest.spyOn(testCommand, "addChannel").mockReturnValue(false);
+
+		// Act
+		const result = await testCommand.checkChannel(config);
+
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).toHaveBeenCalledWith(channelId);
+		expect(CommandNew.findOne).toHaveBeenCalledWith(
+			{ channelId, chatName },
+			{ output: 1, versions: 1 }
+		);
+		expect(isNonEmptyMap).toHaveBeenCalledWith(outputMap);
+		expect(isNonEmptyMap).not.toHaveBeenCalledTimes(2);
+		expect(testCommand.addChannel).not.toHaveBeenCalledWith(channelId, command);
+		expect(result).toBeUndefined();
+	});
+
+	test("should return undefined when the channel object cannot be added to the channels object", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const channelId = "validChannelId";
+		const chatName = "validChatName";
+		const config = {
+			channelId: channelId,
+			chatName: chatName,
+		};
+		const outputMap = new Map([["outputKey", "outputValue"]]);
+		const versionsMap = new Map([["versionKey", "versionValue"]]);
+		const command = {
+			output: outputMap,
+			versions: versionsMap,
+		};
+
+		isNonEmptyString.mockReturnValue(true);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(null);
+		CommandNew.findOne.mockResolvedValue(command);
+		isNonEmptyMap.mockResolvedValue(true);
+		jest.spyOn(testCommand, "addChannel").mockReturnValue(false);
+
+		// Act
+		const result = await testCommand.checkChannel(config);
+
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).toHaveBeenCalledWith(channelId);
+		expect(CommandNew.findOne).toHaveBeenCalledWith(
+			{ channelId, chatName },
+			{ output: 1, versions: 1 }
+		);
+		expect(isNonEmptyMap).toHaveBeenCalledTimes(2);
+		expect(testCommand.addChannel).toHaveBeenCalledWith(channelId, command);
+		expect(result).toBeUndefined();
+	});
+
+	test("should return undefined when the command object cannot be found in the database", async () => {
+		// Assemble
+		const testCommand = new BaseCommand();
+		const channelId = "validChannelId";
+		const chatName = "validChatName";
+		const config = {
+			channelId: channelId,
+			chatName: chatName,
+		};
+
+		isNonEmptyString.mockReturnValue(true);
+		jest.spyOn(testCommand, "getChannel").mockReturnValue(null);
+		CommandNew.findOne.mockResolvedValue(null);
+		isNonEmptyMap.mockReturnValue(false);
+
+		// Act
+		const result = await testCommand.checkChannel(config);
+
+		// Assert
+		expect(isNonEmptyString).toHaveBeenCalledTimes(2);
+		expect(testCommand.getChannel).toHaveBeenCalledWith(channelId);
+		expect(CommandNew.findOne).toHaveBeenCalledWith(
+			{ channelId, chatName },
+			{ output: 1, versions: 1 }
+		);
+		expect(isNonEmptyMap).not.toHaveBeenCalled();
+		expect(result).toBeUndefined();
 	});
 });
