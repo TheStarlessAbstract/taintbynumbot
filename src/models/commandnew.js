@@ -33,7 +33,7 @@ let CommandNewSchema = new Schema({
 	createdOn: Date,
 	lastEditedBy: String,
 	lastEditedOn: String,
-	output: { type: Map, of: OutputSchema },
+	output: { type: Map, of: OutputSchema }, // not requried as text only commands don't have output or versions fields
 	versions: { type: Map, of: VersionSchema }, // "no argument", "numberArgument", "stringArgument"
 });
 
