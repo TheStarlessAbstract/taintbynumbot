@@ -9,11 +9,6 @@ const {
 	getChatCommandConfigMap,
 } = require("../utils/index.js");
 
-// chatClient.onMessage(async (channelName, user, message, msg) => {
-// 	await onMessageHandler(channelName, user, message, msg);
-// });
-// chatClient.onMessage(onMessageHandler);
-
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
 
 const onMessageHandler = async (channelName, user, message, msg) => {
@@ -21,7 +16,6 @@ const onMessageHandler = async (channelName, user, message, msg) => {
 	const channelId = msg.channelId;
 	let channel = channels.getChannel(channelId); // function that retrives channel by id, from channels Map/array/thing
 	if (!channel) {
-		//query DB for channel
 		channel = new Channel(channelId, channel);
 		channels.addChannel(channelId, channel); // function to add channel to channels Map/array/thing
 	}
