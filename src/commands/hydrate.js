@@ -1,51 +1,35 @@
-const BaseCommand = require("../../classes/base-command");
+const BotCommand = require("../classes/bot-command");
 const { play } = require("../services/audio");
-const {
-	diceRoll,
-	getChatCommandConfigMap,
-	getProcessedOutputString,
-} = require("../utils");
+const { getProcessedOutputString } = require("../utils");
 
 const commandResponse = async (config) => {
-	const commandDetails = commandType.checkCommandCanRun(config);
-	if (!commandDetails) return;
-
-	const chatCommandConfigMap = getChatCommandConfigMap(config);
-	if (!chatCommandConfigMap) return;
-
-	if (commandDetails.version !== "noArgument") return;
+	console.log("drink bitch");
+	if (config.versionKey !== "noArgument") return;
 
 	let outputType = "validBalance";
-
-	if (!commandDetails.userCanPayCost && !diceRoll(commandDetails.luck.odds)) {
+	if (!config.userCanPayCost && !config.diceRoll && !config.bypass) {
 		outputType = "lowBalance";
 	}
-
-	if (!commandDetails.userCanPayCost) {
+	if (!config.userCanPayCost && config.diceRoll && !config.bypass) {
 		outputType = "luckyRoll";
 	}
 
-	if (commandDetails.userCanPayCost) {
-		commandDetails.user.points -= commandDetails.cost;
-		await commandDetails.user.save();
-	}
+	const output = getProcessedOutputString(
+		config.output.get(outputType),
+		config.configMap
+	);
+	if (!output) return;
 
 	if (
-		commandDetails.hasAudioClip &&
+		config.hasAudioClip &&
 		(outputType === "validBalance" || outputType === "luckyRoll")
 	) {
 		play({ channelId: config.channelId, chatName: config.chatName });
 	}
 
-	const output = getProcessedOutputString(
-		commandDetails.output.get(outputType),
-		chatCommandConfigMap
-	);
-	if (!output) return;
-
 	return output;
 };
 
-const command = new BaseCommand(commandResponse);
+const command = new BotCommand(commandResponse);
 
 module.exports = command;
