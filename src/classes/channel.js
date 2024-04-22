@@ -66,11 +66,7 @@ class Channel {
 	}
 
 	addCommand(name, commandDetails) {
-		const { type } = commandDetails;
-		const reference = types[type];
-		this.commands[name] = reference;
-
-		return this.commands[name];
+		this.commands[name] = commandDetails;
 	}
 
 	getCommandReference(type) {
