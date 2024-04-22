@@ -6,6 +6,7 @@ const commands = require("./bot-commands");
 const loyalty = require("./bot-loyalty");
 const messages = require("./bot-messages");
 const kings = require("./commands/kings");
+const onMessage = require("./src/handlers/onMessageHandler");
 
 const User = require("./models/user");
 const CommandNew = require("./src/classes/base-command");
@@ -38,44 +39,9 @@ async function setupChatClientListeners() {
 		}
 	});
 
+	onMessage.init();
 	chatClient.onMessage(async (channel, user, message, msg) => {
-		users.get(msg.channelId).messageCount++;
-
-		if (shouldIgnoreMessage(user, botUsername, message)) return;
-		if (!userInfoCheck(msg.userInfo)) {
-			const config = msg.userInfo;
-			let [command, argument] = message.slice(1).split(/\s(.+)/);
-			let commandLink = commands.list[msg.channelId][command.toLowerCase()];
-			if (commandLink == undefined) return;
-			config.channelId = msg.channelId;
-			config.chatName = command;
-			config.argument = argument;
-
-			let isActive = await commandLink.checkChannelForActiveVersion(
-				config.channelId,
-				command
-			);
-
-			if (!isActive) return;
-
-			let response = await commandLink.getCommand();
-			if (typeof response === "function") {
-				let result = await response(config);
-				if (!result) return;
-
-				if (Array.isArray(result)) {
-					for (let i = 0; i < result.length; i++) {
-						chatClient.say(channel, result[i]);
-					}
-				} else {
-					chatClient.say(channel, result);
-				}
-			} else if (typeof response === "string") {
-				chatClient.say(channel, response);
-			}
-		} else {
-			console.log("userInfo types changed");
-		}
+		onMessage.handler(channel, user, message, msg);
 	});
 }
 
