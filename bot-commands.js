@@ -6,7 +6,7 @@ const User = require("./models/user");
 
 const defaultCommands = {
 	lurk: require("./src/commands/lurk"),
-	// drinkBitch: require("./src/commands/hydrate"),
+	drinkBitch: require("./src/commands/hydrate"),
 };
 
 // const audioTimeout = require("./commands/audiotimeout");
@@ -123,8 +123,6 @@ async function setup() {
 	// find all users whose role is not "bot"
 	let users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
 	let userIds = getUserIds(users);
-
-	console.log(users);
 
 	// loop though IDs to get all active commands for all users
 	for (let i = 0; i < userIds.length; i++) {
