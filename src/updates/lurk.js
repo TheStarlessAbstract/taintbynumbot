@@ -12,12 +12,12 @@ function template() {
 	return new CommandNew({
 		channelId: twitchId,
 		chatName: "lurk",
-		type: "lurk",
+		type: "text",
 		createdBy: twitchId,
 		createdOn: new Date(),
 		output: new Map([
 			[
-				"isLurking",
+				"text",
 				{
 					message:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
@@ -27,7 +27,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument", // string, number
+				"noArgument",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -35,9 +35,8 @@ function template() {
 					description:
 						"@{displayName} finds a comfortable spot behind the bushes to perv on the stream",
 					active: true,
-					usableBy: ["artists", "founders", "mods", "subs", "vips", "users"],
+					usableBy: ["artists", "founders", "mods", "subs", "vips", "viewers"],
 					cooldown: { length: 0 },
-					cost: 0,
 				},
 			],
 		]),
