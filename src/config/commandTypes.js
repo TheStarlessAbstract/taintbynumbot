@@ -1,7 +1,7 @@
 const commandTypes = () => {
 	return {
-		lurk: require("../commands/lurk"),
-		// drinkBitch: require("./src/co}mmands/hydrate"),
+		hydrate: require("../commands/hydrate"),
+		text: require("../commands/text"),
 	};
 };
 
