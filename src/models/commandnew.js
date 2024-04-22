@@ -1,18 +1,29 @@
-let mongoose = require("mongoose"),
+const mongoose = require("mongoose"),
 	Schema = mongoose.Schema;
 
-let CooldownSchema = new Schema({
+const CooldownSchema = new Schema({
 	length: { type: Number, required: true },
 	lastUsed: Number,
 	bypassRoles: [String],
 });
 
-let OutputSchema = new Schema({
+const OutputSchema = new Schema({
 	message: { type: String, required: true },
 	active: { type: Boolean, required: true },
 });
 
-let VersionSchema = new Schema({
+const LuckSchema = new Schema({
+	active: Boolean,
+	odds: Number,
+});
+
+const CostSchema = new Schema({
+	active: Boolean,
+	points: Number,
+	bypassRoles: [String],
+});
+
+const VersionSchema = new Schema({
 	isArgumentOptional: { type: Boolean, required: true },
 	hasArgument: Boolean,
 	isArgumentNumber: Boolean,
@@ -20,11 +31,12 @@ let VersionSchema = new Schema({
 	active: { type: Boolean, required: true }, // can this command be used in chat
 	usableBy: [String],
 	cooldown: { type: CooldownSchema },
-	cost: Number,
+	cost: { type: CostSchema },
 	hasAudioClip: Boolean,
+	luck: { type: LuckSchema },
 });
 
-let CommandNewSchema = new Schema({
+const CommandNewSchema = new Schema({
 	channelId: { type: String, required: true },
 	chatName: { type: String, required: true }, // custom command name
 	type: String, // type of command
