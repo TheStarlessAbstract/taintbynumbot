@@ -1,4 +1,4 @@
-const onMessageHandler = require("../../handlers/onMessageHandler.js");
+const onMessage = require("../../handlers/onMessageHandler.js");
 const { findOne } = require("../../queries/commands");
 
 jest.mock("../../queries/commands", () => ({
@@ -97,7 +97,7 @@ describe("onMessageHandler()", () => {
 			type: "lurk",
 		});
 
-		const result = await onMessageHandler(channelName, user, text, msg);
+		const result = await onMessage.handler(channelName, user, text, msg);
 
 		expect(result).toBe(
 			"@TaintByNumbot finds a comfortable spot behind the bushes to perv on the stream"
