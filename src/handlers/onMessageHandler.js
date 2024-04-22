@@ -1,5 +1,6 @@
 const ChannelList = require("../classes/channelList.js");
 const Channel = require("../classes/channel.js");
+const twitchRepo = require("../../repos/twitch.js");
 const { findOne } = require("../queries/commands");
 const { findUserPoints } = require("../queries/loyaltyPoints");
 const {
@@ -7,25 +8,33 @@ const {
 	isValueNumber,
 	getUserRolesAsStrings,
 	getChatCommandConfigMap,
+	diceRoll,
 } = require("../utils/index.js");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
 
-const onMessageHandler = async (channelName, user, message, msg) => {
-	if (hasUserInfoFormatChanged(msg.userInfo)) return; // checks to see if propery types have changed, or expected properties are missing
+let chatClient;
+
+function init() {
+	chatClient = twitchRepo.getChatClient();
+}
+
+const handler = async (channelName, user, message, msg) => {
+	if (hasUserInfoFormatChanged(msg.userInfo)) return;
 	const channelId = msg.channelId;
-	let channel = channels.getChannel(channelId); // function that retrives channel by id, from channels Map/array/thing
+	let channel = channels.getChannel(channelId);
 	if (!channel) {
-		channel = new Channel(channelId, channel);
-		channels.addChannel(channelId, channel); // function to add channel to channels Map/array/thing
+		channel = new Channel(channelId, channelName);
+		channels.addChannel(channelId, channel);
 	}
 	channel.increaseMessageCount();
-	// is this channel the same instance as the one in channels, does it need to be updated there
 
-	if (!hasCommandPrefix(message)) return; // checks message prefix to validate command format
+	if (!hasCommandPrefix(message)) return;
 	let botUsername = "";
-	if (isUserIgnoredForCommands(user, botUsername)) return; // certain users/bots to ignore commands from
-	const { commandName, argument } = getCommandNameAndArgument(message);
+	if (isUserIgnoredForCommands(user, botUsername)) return;
+	const commandAndArgument = getCommandNameAndArgument(message);
+	const commandName = commandAndArgument.commandName.toLowerCase();
+	const argument = commandAndArgument.argument;
 	const messageDetails = getMessageDetails(
 		msg,
 		channelName,
@@ -33,58 +42,75 @@ const onMessageHandler = async (channelName, user, message, msg) => {
 		argument
 	);
 
-	// function will check instance for commandname and return if found, otherwis wil query DB
-	let commandDetails = channel.getCommandDetails(commandName); // {reference, output, versions, text, type}
+	let commandDetails = channel.getCommandDetails(commandName);
 	if (!commandDetails) {
 		commandDetails = await findOne(
 			{ channelId: channelId, chatName: commandName },
 			{ output: 1, versions: 1, text: 1, type: 1 }
 		);
 		if (!commandDetails) return false;
-		commandDetails.reference = channel.addCommand(commandName, commandDetails); /// unsure what here
+		commandDetails.reference = channel.getCommandReference(commandDetails.type);
+		channel.addCommand(commandName, commandDetails);
 	}
-	const reference = commandDetails.reference;
-	// determine input type
-	const versionKey = reference.getCommandVersionKey(
+
+	const versionKey = commandDetails.reference.getCommandVersionKey(
 		messageDetails,
 		commandDetails.versions
 	);
 	if (!versionKey) return;
-
-	// match input type to available versions -> commandDetails.versions
 	const version = commandDetails.versions.get(versionKey);
-	// check if command version has a cost
-	const cost = version?.cost;
-	const hasAudioClip = version.hasAudioClip;
+	if (!version) return;
+
 	const roleStrings = getUserRolesAsStrings(messageDetails);
 	if (!roleStrings) return;
-
 	const userPermission = hasUserPermission(roleStrings, version);
 	if (!userPermission) return;
 
-	if (cost) {
-		// check if user can pay
-		const { user, canPay } = await checkUserBalance(config, cost);
-		let diceRoll = false;
-		if (!canPay) {
-			//roll dice
+	const commandConfig = {
+		channelId: channelId,
+		chatName: commandName,
+		hasCost: version.cost?.active,
+		cost: version.cost?.points,
+		hasAudioClip: version.hasAudioClip,
+		hasLuck: version.luck?.active,
+		odds: version.luck?.odds,
+		versionKey: versionKey,
+		output: commandDetails.output,
+	};
+
+	if (commandConfig.hasCost) {
+		const { user, canPay, bypass } = await checkUserBalance(
+			messageDetails,
+			commandConfig.cost
+		);
+		if (!user) return;
+		commandConfig.user = user;
+		commandConfig.bypass = bypass;
+
+		if (!canPay && commandConfig.hasLuck && !bypass) {
+			commandConfig.diceRoll = diceRoll(commandConfig.odds);
 		}
-		if (!diceRoll && !canPay) return;
-		if (canPay) {
-			user.points -= cost;
+		if (canPay && !bypass) {
+			user.points -= commandConfig.cost;
 			user.save();
 		}
+		commandConfig.userCanPayCost = canPay;
 	}
 
-	const configMap = getChatCommandConfigMap(messageDetails);
-	const output = commandDetails.output;
-	const command = reference.getCommand();
-	const result = await command({ versionKey, configMap, output, hasAudioClip });
+	commandConfig.configMap = getChatCommandConfigMap(messageDetails);
+	const command = commandDetails.reference.getCommand();
+	const result = await command(commandConfig);
+	if (!result) return;
 
-	return result;
+	if (typeof result === "string") chatClient.say(channelName, result);
+	if (Array.isArray(result)) {
+		for (let i = 0; i < result.length; i++) {
+			chatClient.say(channelName, result[i]);
+		}
+	}
 };
 
-module.exports = onMessageHandler;
+module.exports = { init, handler };
 
 function hasCommandPrefix(message) {
 	return message.startsWith("!"); // Maybe give option to use another character for command prefix, then need to get based on channel message is in
@@ -191,19 +217,15 @@ function isCooldownPassed(lastUsed, cooldownLength) {
 }
 
 function hasUserPermission(roleStrings, version) {
-	const userAllowed = hasPermittedRoles(roleStrings, version.usableBy);
+	const { usableBy, cooldown } = version;
+	const userAllowed = hasPermittedRoles(roleStrings, usableBy);
 	if (!userAllowed) return false;
+	if (!cooldown || !cooldown?.length > 0) return true;
 
-	if (!version?.cooldown) return true;
-
-	const bypass = hasPermittedRoles(roleStrings, version.cooldown?.bypassRoles);
+	const bypass = hasPermittedRoles(roleStrings, cooldown?.bypassRoles);
 	if (bypass) return true;
 
-	const cooldownPassed = isCooldownPassed(
-		version.cooldown.lastUsed,
-		version.cooldown.length
-	);
-
+	const cooldownPassed = isCooldownPassed(cooldown.lastUsed, cooldown.length);
 	return cooldownPassed;
 }
 
@@ -220,7 +242,9 @@ async function checkUserBalance({ channelId, userId }, cost) {
 		viewerId: userId,
 	});
 
-	if (!user || user.points < cost) return { user: {}, canPay: false };
+	if (!user) return;
+	if (channelId === userId) return { user, bypass: true };
+	if (!user || user.points < cost) return { user, canPay: false };
 
 	return { user, canPay: true };
 }
