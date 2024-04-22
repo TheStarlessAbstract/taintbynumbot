@@ -11,23 +11,15 @@ async function copyAndUpdate() {
 function template() {
 	return new CommandNew({
 		channelId: twitchId,
-		chatName: "drinkBitch",
+		chatName: "drinkbitch",
 		type: "hydrate",
 		createdBy: twitchId,
 		createdOn: new Date(),
 		output: new Map([
 			[
-				"userNotInDatabase",
-				{
-					message:
-						"@{displayName} It doesn't look like you have been here before, hang around, enjoy the mods abusing Starless, and maybe you too in time can make Starless !drinkBitch",
-					active: true,
-				},
-			],
-			[
 				"validBalance",
 				{
-					message: "@TheStarlessAbstract drink, bitch!",
+					message: "@{displayName} drink, bitch!",
 					active: true,
 				},
 			],
@@ -65,12 +57,14 @@ function template() {
 						"mods",
 						"subs",
 						"vips",
-						"users",
+						"viewers",
 					],
 					cooldown: {
 						length: 5000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
 					},
-					cost: 500,
+					cost: { active: true, points: 500, bypassRoles: ["broadcaster"] },
 					hasAudioClip: true,
 					luck: {
 						active: true,
