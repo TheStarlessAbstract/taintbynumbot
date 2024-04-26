@@ -1,12 +1,12 @@
-const BotCommand = require("../classes/bot-command");
+const BaseCommand = require("../classes/base-command");
 const { getProcessedOutputString } = require("../utils");
 
 /**
  * Processes the command response based on the provided configuration.
  * @param {Object} config - The configuration object containing the version and output information of the command.
- * @returns {Promise<string>} - The processed output string of the command.
+ * @returns {string} - The processed output string of the command.
  */
-const commandResponse = async (config) => {
+const commandResponse = (config) => {
 	if (config.versionKey !== "noArgument") return;
 
 	const output = getProcessedOutputString(
@@ -18,5 +18,6 @@ const commandResponse = async (config) => {
 	return output;
 };
 
-const commandType = new BotCommand(commandResponse);
+const commandType = new BaseCommand(commandResponse);
+
 module.exports = commandType;
