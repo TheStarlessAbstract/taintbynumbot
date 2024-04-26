@@ -67,6 +67,8 @@ const handler = async (channelName, user, message, msg) => {
 
 	const commandConfig = {
 		channelId: channelId,
+		userId: messageDetails.userId,
+		username: user,
 		chatName: commandName,
 		hasCost: version.cost?.active,
 		cost: version.cost?.points,
