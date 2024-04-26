@@ -1,63 +1,40 @@
 const BaseCommand = require("../classes/base-command");
-const Helper = require("../classes/helper");
+const { getChannelFollowers } = require("../services/twitch/channels");
+const { getProcessedOutputString } = require("../utils");
 
-const twitchRepo = require("./../repos/twitch");
+const commandResponse = async (config) => {
+	if (config.versionKey !== "noArgument") return;
 
-const helper = new Helper();
+	const channelFollowers = await getChannelFollowers(
+		config.channelId,
+		config.userId
+	);
 
-let twitchId = process.env.TWITCH_USER_ID;
+	let outputType = "following";
 
-let commandResponse = () => {
-	return {
-		response: async (config) => {
-			let result = [];
+	if (!channelFollowers.data[0]) {
+		outputType = "notFollowing";
+	}
 
-			if (!helper.isStreamer(config.userInfo)) {
-				const apiClient = twitchRepo.getApiClient();
-				const channelFollower = await apiClient.channels.getChannelFollowers(
-					twitchId,
-					twitchId,
-					config.userInfo.userId
-				);
+	let output = getProcessedOutputString(
+		config.output.get(outputType),
+		config.configMap
+	);
+	if (!output) return;
 
-				if (channelFollower.data[0]) {
-					let follower = channelFollower.data[0];
-					const currentTimestamp = Date.now();
-					const followStartTimestamp = follower.followDate.getTime();
-					let followLength = getFollowLength(
-						currentTimestamp - followStartTimestamp
-					);
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" has been staring into the Abstract abyss for " +
-							followLength
-					);
-				} else {
-					result.push(
-						"@" +
-							config.userInfo.displayName +
-							" hit that follow button, otherwise this command is doing a whole lot of nothing for you"
-					);
-				}
-			}
+	if (outputType === "following") {
+		const follower = channelFollowers.data[0];
+		const currentTimestamp = Date.now();
+		const followStartTimestamp = follower.followDate.getTime();
+		const followLength = getFollowLength(
+			currentTimestamp - followStartTimestamp
+		);
 
-			return result;
-		},
-	};
+		output = output.replace("{followLength}", followLength);
+	}
+
+	return output;
 };
-
-let versions = [
-	{
-		description:
-			"How long has it been since you last unfollowed, and then refollowed",
-		usage: "!followage",
-		usableBy: "users",
-		active: true,
-	},
-];
-
-const followage = new BaseCommand(commandResponse, versions);
 
 function getFollowLength(followTime) {
 	let second = Math.floor(followTime / 1000);
@@ -101,4 +78,6 @@ function getFollowLength(followTime) {
 	return followString;
 }
 
-exports.command = followage;
+const command = new BaseCommand(commandResponse);
+
+module.exports = command;
