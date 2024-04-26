@@ -3,7 +3,7 @@ const mongoose = require("mongoose"),
 
 const CooldownSchema = new Schema({
 	length: { type: Number, required: true },
-	lastUsed: Number,
+	lastUsed: Date,
 	bypassRoles: [String],
 });
 
