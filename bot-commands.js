@@ -4,24 +4,17 @@ const Command = require("./models/command");
 const CommandNew = require("./src/models/commandnew");
 const User = require("./models/user");
 
-const defaultCommands = {
-	lurk: require("./src/commands/lurk"),
-	drinkBitch: require("./src/commands/hydrate"),
-};
+const defaultCommands = {};
 
 // const audioTimeout = require("./commands/audiotimeout");
-// const buhhs = require("./commands/buhhs");
 // const commandAdd = require("./commands/command-add");
 // const commandDelete = require("./commands/command-delete");
 // const commandEdit = require("./commands/command-edit");
 // const deaths = require("./commands/deaths");
 // const f = require("./commands/f");
-// const followage = require("./commands/followage");
-// const game = require("./commands/game");
 // const kingsRemain = require("./commands/kings-remain");
 // const kingsReset = require("./commands/kings-reset");
 // const kings = require("./commands/kings");
-// // const lurk = require("./commands/lurk");
 // const messagesAdd = require("./commands/message-add");
 // const messagesDelete = require("./commands/message-delete");
 // const messagesEdit = require("./commands/message-edit");
@@ -30,7 +23,6 @@ const defaultCommands = {
 // const quoteDelete = require("./commands/quote-delete");
 // const quoteEdit = require("./commands/quote-edit");
 // const quote = require("./commands/quote");
-// const so = require("./commands/so");
 // const song = require("./commands/song");
 // const steam = require("./commands/steam");
 // const tinderAdd = require("./commands/tinder-add");
@@ -58,7 +50,6 @@ const commands = {
 	// addtinder: tinderAdd.command,
 	// addquote: quoteAdd.command,
 	// audiotimeout: audioTimeout.command,
-	// buhhs: buhhs.command,
 	// // chug: {
 	// // 	response: async (config) => {
 	// // 		let result = [];
@@ -104,15 +95,11 @@ const commands = {
 	// editquote: quoteEdit.command,
 	// edittinder: tinderEdit.command,
 	// f: f.command,
-	// followage: followage.command,
-	// game: game.command,
 	// kingsremain: kingsRemain.command,
 	// kingsreset: kingsReset.command,
 	// kings: kings.command,
-	// // lurk: lurk.command,
 	// points: points.command,
 	// quote: quote.command,
-	// so: so.command,
 	// song: song.command,
 	// steam: steam.command,
 	// tinderquote: tinder.command,
