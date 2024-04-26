@@ -8,6 +8,6 @@ let LoyaltyPointNewSchema = new Schema({
 	follower: Boolean,
 });
 
-LoyaltyPointNewSchema.index({ twitchId: 1, viewerId: 1 }, { unique: true });
+LoyaltyPointNewSchema.index({ channelId: 1, viewerId: 1 }, { unique: true });
 
 module.exports = mongoose.model("LoyaltyPointNew", LoyaltyPointNewSchema);
