@@ -1,14 +1,12 @@
 const db = require("../../bot-mongoose.js");
-const textcommands = require("./textCommands.js");
-const lurk = require("./lurk.js");
-const drinkBitch = require("./drinkbitch.js");
+const commands = require("./commands");
+const models = require("./models");
 
-runUpdates();
+init();
 
-async function runUpdates() {
+async function init() {
 	await db.connectToMongoDB();
-	await textcommands();
-	await lurk();
-	await drinkBitch();
+	await commands();
+	// await models();
 	await db.disconnectFromMongoDB();
 }
