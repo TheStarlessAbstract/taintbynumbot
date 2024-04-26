@@ -8,7 +8,6 @@ const {
 	isValueNumber,
 	getUserRolesAsStrings,
 	getChatCommandConfigMap,
-	diceRoll,
 } = require("../utils/index.js");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
