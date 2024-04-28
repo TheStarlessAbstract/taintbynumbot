@@ -1,9 +1,7 @@
 require("dotenv").config();
 
 const db = require("../../bot-mongoose.js");
-
 const game = require("../../commands/game");
-
 const pubSubClient = require("../../bot-pubsubclient");
 
 let twitchId = process.env.TWITCH_USER_ID;
