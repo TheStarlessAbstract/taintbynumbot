@@ -2,7 +2,10 @@ const BaseCommand = require("../classes/base-command");
 const { updateChannelInfo } = require("../services/twitch/channels");
 const { getStreamByUserId } = require("../services/twitch/streams");
 const { searchCategories } = require("../services/twitch/search");
-const { getProcessedOutputString } = require("../utils");
+const {
+	getProcessedOutputString,
+	startsWithCaseInsensitive,
+} = require("../utils");
 
 const commandResponse = async (config) => {
 	if (
@@ -13,22 +16,27 @@ const commandResponse = async (config) => {
 
 	let output;
 	let outputType;
+	let game;
+	// game = await searchCategories("Baldur's Gate 3");
+	// console.log(game.data);
 
 	if (config.versionKey == "noArgument") {
 		let stream = await getStreamByUserId(config.channelId);
-		if (!stream) {
-			outputType = "noStream";
-		} else {
+		outputType = "noStream";
+		if (stream) {
 			outputType = "streamIsLive";
+			config.configMap.set("gameName", stream.gameName);
 		}
 	}
 	if (config.versionKey == "stringArgument") {
-		const game = await searchCategories(config.argument); // find game
-		if (!game) {
-			outputType = "gameNotFound";
-		} else {
+		outputType = "gameNotFound";
+		game = await searchCategories(config.argument);
+		for (let i = 0; i < game.length; i++) {
+			if (!startsWithCaseInsensitive(game[i].name, config.argument)) continue;
+
+			config.configMap.set("gameName", data[i].name);
 			outputType = "gameFound";
-			await updateChannelInfo();
+			break;
 		}
 	}
 
@@ -37,6 +45,10 @@ const commandResponse = async (config) => {
 		config.configMap
 	);
 	if (!output) return;
+
+	// if (outputType === "gameFound") {
+	// 	await updateChannelInfo();
+	// }
 
 	return output;
 };
@@ -47,56 +59,56 @@ module.exports = command;
 
 ////////////////
 
-let gamesPaginated = await apiClient.search.searchCategoriesPaginated(
-	config.argument
-);
+// let gamesPaginated = await apiClient.search.searchCategoriesPaginated(
+// 	config.argument
+// );
 
-let currentPageGames = await gamesPaginated.getNext();
-let pages = 0;
+// let currentPageGames = await gamesPaginated.getNext();
+// let pages = 0;
 
-let gameId;
-while (currentPageGames.length > 0 && pages < 3) {
-	for (let i = 0; i < currentPageGames.length; i++) {
-		if (
-			helper.startsWithCaseInsensitive(
-				currentPageGames[i].name,
-				config.argument
-			)
-		) {
-			gameId = currentPageGames[i].id;
-			break;
-		}
-	}
+// let gameId;
+// while (currentPageGames.length > 0 && pages < 3) {
+// 	for (let i = 0; i < currentPageGames.length; i++) {
+// 		if (
+// 			helper.startsWithCaseInsensitive(
+// 				currentPageGames[i].name,
+// 				config.argument
+// 			)
+// 		) {
+// 			gameId = currentPageGames[i].id;
+// 			break;
+// 		}
+// 	}
 
-	if (gameId == undefined) {
-		currentPageGames = await gamesPaginated.getNext();
-		pages++;
-	} else {
-		break;
-	}
-}
+// 	if (gameId == undefined) {
+// 		currentPageGames = await gamesPaginated.getNext();
+// 		pages++;
+// 	} else {
+// 		break;
+// 	}
+// }
 
-if (gameId == undefined) {
-	result.push(
-		"@" + config.userInfo.displayName + " no game found by that name."
-	);
-	return result;
-}
+// if (gameId == undefined) {
+// 	result.push(
+// 		"@" + config.userInfo.displayName + " no game found by that name."
+// 	);
+// 	return result;
+// }
 
-try {
-	await apiClient.channels.updateChannelInfo(twitchId, {
-		gameId: gameId,
-	});
-} catch (e) {
-	result.push("Twitch has not updated the game for reasons - Try again later");
-	return result;
-}
+// try {
+// 	await apiClient.channels.updateChannelInfo(twitchId, {
+// 		gameId: gameId,
+// 	});
+// } catch (e) {
+// 	result.push("Twitch has not updated the game for reasons - Try again later");
+// 	return result;
+// }
 
-channel = await apiClient.channels.getChannelInfoById(twitchId);
+// channel = await apiClient.channels.getChannelInfoById(twitchId);
 
-result.push(
-	"@" +
-		config.userInfo.displayName +
-		" -> The stream game has been updated to: " +
-		channel.gameName
-);
+// result.push(
+// 	"@" +
+// 		config.userInfo.displayName +
+// 		" -> The stream game has been updated to: " +
+// 		channel.gameName
+// );
