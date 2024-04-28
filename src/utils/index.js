@@ -7,6 +7,7 @@ const processOutputString = require("./processOutputString.js");
 const getChatCommandConfigMap = require("./getChatCommandConfigMap.js");
 const getProcessedOutputString = require("./getProcessedOutputString.js");
 const getRandomBetweenInclusiveMax = require("./getRandomBetweenInclusiveMax.js");
+const startsWithCaseInsensitive = require("./startsWithCaseInsensitive.js");
 
 module.exports = {
 	isBroadcaster,
@@ -18,4 +19,5 @@ module.exports = {
 	getChatCommandConfigMap,
 	getProcessedOutputString,
 	getRandomBetweenInclusiveMax,
+	startsWithCaseInsensitive,
 };
