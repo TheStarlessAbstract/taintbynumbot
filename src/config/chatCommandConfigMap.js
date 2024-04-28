@@ -5,7 +5,9 @@
 const chatCommandConfigMap = () => {
 	// Create a new Map object and initialize it with default configuration properties
 	return new Map([
+		["channelName", ""],
 		["displayName", ""],
+		["gameName", ""],
 		["channelId", ""],
 		["isBroadcaster", ""],
 	]);
