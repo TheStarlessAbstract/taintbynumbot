@@ -1,10 +1,10 @@
 const commandTypes = () => {
 	return {
-		hydrate: require("../commands/hydrate"),
-		text: require("../commands/text"),
-		followage: require("../commands/followage"),
-		shoutout: require("../commands/shoutout"),
-		game: require("../commands/game"),
+		hydrate: require("../classes/commands/hydrate.js"),
+		text: require("../classes/commands/text.js"),
+		followage: require("../classes/commands/followage"),
+		shoutout: require("../classes/commands/shoutout"),
+		// game: require("../classes/commands/game"),
 	};
 };
 
