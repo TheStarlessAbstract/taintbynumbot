@@ -30,7 +30,7 @@ const commandResponse = async (config) => {
 	}
 	if (config.versionKey == "stringArgument") {
 		outputType = "gameNotFound";
-		game = await searchCategories(config.argument);
+		game = await searchCategories(config.argument, { limit: 100 });
 		for (let i = 0; i < game.length; i++) {
 			if (!startsWithCaseInsensitive(game[i].name, config.argument)) continue;
 
@@ -112,3 +112,53 @@ module.exports = command;
 // 		" -> The stream game has been updated to: " +
 // 		channel.gameName
 // );
+
+// Test with inputString "ass c"
+const inputString = "ass c";
+const filteredItems = filterItemsByName(items, inputString);
+
+console.log(filteredItems);
+
+function filterItemsByName(array, input) {
+	const sanitizedInput = input
+		.toLowerCase()
+		.trim()
+		.replace(/[^a-zA-Z0-9\s]/g, "");
+	const inputParts = sanitizedInput
+		.split(/\s+/)
+		.filter((part) => part.trim() !== "");
+
+	// Attempt direct matching first
+	const directMatches = array.filter((item) =>
+		startsWithSanitizedInput(item.name, sanitizedInput)
+	);
+
+	if (directMatches.length > 0) {
+		return directMatches; // Return direct matches if found
+	} else {
+		// If no direct matches, use substring matching
+		return array.filter((item) => matchesItemName(item.name, inputParts));
+	}
+}
+
+// Function to check if item name starts with the sanitized input
+function startsWithSanitizedInput(name, sanitizedInput) {
+	const sanitizedItemName = name.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
+	return sanitizedItemName.startsWith(sanitizedInput);
+}
+
+// Function to check if item name contains all input parts in order as substrings
+function matchesItemName(name, parts) {
+	const sanitizedItemName = name.toLowerCase().replace(/[^a-zA-Z0-9\s]/g, "");
+	let currentIndex = 0;
+
+	for (const part of parts) {
+		const index = sanitizedItemName.indexOf(part, currentIndex);
+		if (index === -1) {
+			return false;
+		}
+		currentIndex = index + part.length;
+	}
+
+	return true;
+}
