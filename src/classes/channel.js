@@ -28,6 +28,14 @@ class Channel {
 		this.messageCount = count;
 	}
 
+	increaseMessageCount() {
+		this.messageCount++;
+	}
+
+	decreaseMessageCount() {
+		this.messageCount--;
+	}
+
 	getIsLive() {
 		return this.isLive;
 	}
@@ -52,14 +60,6 @@ class Channel {
 		this.timedMessagesInterval = timedMessagesInterval;
 	}
 
-	increaseMessageCount() {
-		this.messageCount++;
-	}
-
-	decreaseMessageCount() {
-		this.messageCount--;
-	}
-
 	getCommandDetails(name) {
 		if (!this.commands.hasOwnProperty(name)) return false;
 		return this.commands[name];
@@ -67,6 +67,10 @@ class Channel {
 
 	addCommand(name, commandDetails) {
 		this.commands[name] = commandDetails;
+	}
+
+	getCommand(name) {
+		return this.commands[name];
 	}
 
 	getCommandReference(type) {
