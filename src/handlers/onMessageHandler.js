@@ -1,11 +1,13 @@
 const ChannelList = require("../classes/channelList.js");
 const Channel = require("../classes/channel.js");
+const BaseCommand = require("../classes/commands/baseCommand.js");
 const twitchRepo = require("../../repos/twitch.js");
 const { findOne } = require("../queries/commands");
 const { findUserPoints } = require("../queries/loyaltyPoints");
 const {
-	isNonEmptyString,
 	isValueNumber,
+	isNonEmptyString,
+	getCommandAction,
 	getUserRolesAsStrings,
 	getChatCommandConfigMap,
 } = require("../utils/index.js");
@@ -18,7 +20,7 @@ function init() {
 	chatClient = twitchRepo.getChatClient();
 }
 
-const handler = async (channelName, user, message, msg) => {
+const handler = async (channelName, userName, message, msg) => {
 	if (hasUserInfoFormatChanged(msg.userInfo)) return;
 	const channelId = msg.channelId;
 	let channel = channels.getChannel(channelId);
@@ -30,7 +32,7 @@ const handler = async (channelName, user, message, msg) => {
 
 	if (!hasCommandPrefix(message)) return;
 	let botUsername = "";
-	if (isUserIgnoredForCommands(user, botUsername)) return;
+	if (isUserIgnoredForCommands(userName, botUsername)) return;
 	const commandAndArgument = getCommandNameAndArgument(message);
 	const commandName = commandAndArgument.commandName.toLowerCase();
 	const argument = commandAndArgument.argument;
@@ -40,66 +42,60 @@ const handler = async (channelName, user, message, msg) => {
 		commandName,
 		argument
 	);
-
-	let commandDetails = channel.getCommandDetails(commandName);
-	if (!commandDetails) {
-		commandDetails = await findOne(
+	let commandA = channel.getCommand(commandName);
+	if (!commandA) {
+		let commandDetails = await findOne(
 			{ channelId: channelId, chatName: commandName },
-			{ output: 1, versions: 1, text: 1, type: 1 }
+			{ type: 1, output: 1, versions: 1 }
 		);
 		if (!commandDetails) return false;
-		commandDetails.reference = channel.getCommandReference(commandDetails.type);
-		channel.addCommand(commandName, commandDetails);
+		commandClass = getCommandAction(commandDetails.type);
+		commandA = new commandClass(channelId, commandName, commandDetails);
+		channel.addCommand(commandName, commandA);
 	}
 
-	const versionKey = commandDetails.reference.getCommandVersionKey(
-		messageDetails,
-		commandDetails.versions
-	);
+	const { versionKey, version } = commandA.getCommandVersion(messageDetails);
 	if (!versionKey) return;
-	const version = commandDetails.versions.get(versionKey);
-	if (!version) return;
 
 	const roleStrings = getUserRolesAsStrings(messageDetails);
 	if (!roleStrings) return;
-	const userPermission = hasUserPermission(roleStrings, version);
+	const userPermission = hasUserPermission(
+		roleStrings,
+		version.usableBy,
+		version.cooldown
+	);
 	if (!userPermission) return;
 
 	const commandConfig = {
 		channelId: channelId,
 		userId: messageDetails.userId,
-		username: user,
+		username: userName,
 		chatName: commandName,
-		hasCost: version.cost?.active,
-		cost: version.cost?.points,
-		hasAudioClip: version.hasAudioClip,
-		hasLuck: version.luck?.active,
-		odds: version.luck?.odds,
 		versionKey: versionKey,
-		output: commandDetails.output,
 	};
 
-	if (commandConfig.hasCost) {
+	if (version?.cost) {
 		const { user, canPay, bypass } = await checkUserBalance(
-			messageDetails,
-			commandConfig.cost
+			messageDetails.channelId,
+			messageDetails.userId,
+			version?.cost.points
 		);
 		if (!user) return;
-		commandConfig.user = user;
-		commandConfig.bypass = bypass;
 
-		if (!canPay && commandConfig.hasLuck && !bypass) {
-			commandConfig.diceRoll = diceRoll(commandConfig.odds);
+		if (!canPay && version?.luck?.active && !bypass) {
+			commandConfig.diceRoll = diceRoll(version.luck?.odds);
 		}
 		if (canPay && !bypass) {
-			user.points -= commandConfig.cost;
+			user.points -= version.cost?.points;
 			user.save();
 		}
+		commandConfig.user = user;
+		commandConfig.bypass = bypass;
 		commandConfig.userCanPayCost = canPay;
 	}
 
 	commandConfig.configMap = getChatCommandConfigMap(messageDetails);
-	const command = commandDetails.reference.getCommand();
+	const command = commandA.getAction();
 	const result = await command(commandConfig);
 	if (!result) return;
 
@@ -217,8 +213,7 @@ function isCooldownPassed(lastUsed, cooldownLength) {
 	return timeDifference >= cooldownLength;
 }
 
-function hasUserPermission(roleStrings, version) {
-	const { usableBy, cooldown } = version;
+function hasUserPermission(roleStrings, usableBy, cooldown) {
 	const userAllowed = hasPermittedRoles(roleStrings, usableBy);
 	if (!userAllowed) return false;
 	if (!cooldown || !cooldown?.length > 0) return true;
@@ -230,7 +225,7 @@ function hasUserPermission(roleStrings, version) {
 	return cooldownPassed;
 }
 
-async function checkUserBalance({ channelId, userId }, cost) {
+async function checkUserBalance(channelId, userId, cost) {
 	if (
 		!isNonEmptyString(channelId) ||
 		!isNonEmptyString(userId) ||
@@ -244,8 +239,9 @@ async function checkUserBalance({ channelId, userId }, cost) {
 	});
 
 	if (!user) return;
-	if (channelId === userId) return { user, bypass: true };
-	if (!user || user.points < cost) return { user, canPay: false };
+	if (channelId === userId) return { user, canPay: true, bypass: true };
+	if (!user || user.points < cost)
+		return { user: null, canPay: false, bypass: false };
 
-	return { user, canPay: true };
+	return { user, canPay: true, bypass: false };
 }
