@@ -210,7 +210,7 @@ describe("game command", () => {
 		let name = "ass's c";
 
 		// Act
-		let games = await searchCategories(name, { limit: 10 });
+		let games = await searchCategories(name, { limit: 100 });
 		let filteredGames = games.data.filter((game) => {
 			const gameNameLowerCase = game.name.toLowerCase();
 			const queryNameLowerCase = name.toLowerCase();
