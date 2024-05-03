@@ -94,7 +94,7 @@ describe("onMessageHandler()", () => {
 				],
 			]),
 			text: 1,
-			type: "lurk",
+			type: "drinkbitch",
 		});
 
 		const result = await onMessage.handler(channelName, user, text, msg);
