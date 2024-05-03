@@ -19,7 +19,7 @@ describe("hydrate command", () => {
 
 	test("Result should be undefined", async () => {
 		//Assemble
-		jest.spyOn(lurk, "checkCommandCanRun").mockReturnValue({
+		jest.spyOn(hydrate, "checkCommandCanRun").mockReturnValue({
 			output: new Map([
 				[
 					"isLurking",
