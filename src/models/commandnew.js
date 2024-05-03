@@ -40,7 +40,6 @@ const CommandNewSchema = new Schema({
 	channelId: { type: String, required: true },
 	chatName: { type: String, required: true }, // custom command name
 	type: String, // type of command
-	text: String, // only used for chat created commands || could be moved into output [default: text]
 	createdBy: String,
 	createdOn: Date,
 	lastEditedBy: String,
