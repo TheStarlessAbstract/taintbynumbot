@@ -7,7 +7,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node bot.js",
+    "start": "node --trace-warnings bot.js",
     "test": "jest --detectOpenHandles",
     "server": "node server.js"
   },
