@@ -1,15 +1,11 @@
 const ChannelList = require("../classes/channelList.js");
 const Channel = require("../classes/channel.js");
 const twitchRepo = require("../../repos/twitch.js");
-const { findOne } = require("../queries/commands");
-const { findUserPoints } = require("../queries/loyaltyPoints");
-const { isValueNumber } = require("../utils/inputCheck");
+const commands = require("../queries/commands");
+const points = require("../queries/loyaltyPoints");
+const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
 const { getCommandAction } = require("../utils/messageHandler");
-const {
-	isNonEmptyString,
-	getUserRolesAsStrings,
-	getChatCommandConfigMap,
-} = require("../utils/index.js");
+const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
 
@@ -43,7 +39,7 @@ const handler = async (channelName, userName, message, msg) => {
 	);
 	let commandA = channel.getCommand(commandName);
 	if (!commandA) {
-		let commandDetails = await findOne(
+		let commandDetails = await commands.findOne(
 			{ channelId: channelId, chatName: commandName },
 			{ type: 1, output: 1, versions: 1 }
 		);
@@ -233,7 +229,7 @@ async function checkUserBalance(channelId, userId, cost) {
 	)
 		return;
 
-	const user = await findUserPoints({
+	const user = await points.findOne({
 		channelId: channelId,
 		viewerId: userId,
 	});
