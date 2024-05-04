@@ -10,6 +10,7 @@ const chatCommandConfigMap = () => {
 		["gameName", ""],
 		["channelId", ""],
 		["isBroadcaster", ""],
+		["title", ""],
 	]);
 };
 
