@@ -32,6 +32,8 @@ async function action(config) {
 		config.configMap
 	);
 
+	if (!output) outputType = "error";
+
 	if (user) {
 		await shoutoutUser(config.channelId, user.id);
 	}
