@@ -16,7 +16,7 @@ async function action(config) {
 		this.getOutput(outputType),
 		config.configMap
 	);
-	if (!output) return;
+	if (!output) outputType = "error";
 
 	if (
 		config.hasAudioClip &&
