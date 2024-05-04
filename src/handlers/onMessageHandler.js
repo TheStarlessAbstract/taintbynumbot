@@ -1,13 +1,12 @@
 const ChannelList = require("../classes/channelList.js");
 const Channel = require("../classes/channel.js");
-const BaseCommand = require("../classes/commands/baseCommand.js");
 const twitchRepo = require("../../repos/twitch.js");
 const { findOne } = require("../queries/commands");
 const { findUserPoints } = require("../queries/loyaltyPoints");
+const { isValueNumber } = require("../utils/inputCheck");
+const { getCommandAction } = require("../utils/messageHandler");
 const {
-	isValueNumber,
 	isNonEmptyString,
-	getCommandAction,
 	getUserRolesAsStrings,
 	getChatCommandConfigMap,
 } = require("../utils/index.js");
@@ -72,6 +71,7 @@ const handler = async (channelName, userName, message, msg) => {
 		username: userName,
 		chatName: commandName,
 		versionKey: versionKey,
+		argument: argument,
 	};
 
 	if (version?.cost) {
