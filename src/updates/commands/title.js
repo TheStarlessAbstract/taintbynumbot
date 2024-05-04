@@ -24,6 +24,34 @@ function template() {
 					active: true,
 				},
 			],
+			[
+				"streamIsLive",
+				{
+					message: "@{displayName} - The current stream title is: {title}",
+					active: true,
+				},
+			],
+			[
+				"existingTitle",
+				{
+					message: "",
+					active: false,
+				},
+			],
+			[
+				"updateTitle",
+				{
+					message: "@{displayName} - Title has been set to: {newTitle}",
+					active: true,
+				},
+			],
+			[
+				"error",
+				{
+					message: "@{displayName} - There was an error in updating the title",
+					active: true,
+				},
+			],
 		]),
 		versions: new Map([
 			[
@@ -32,7 +60,7 @@ function template() {
 					isArgumentOptional: false,
 					hasArgument: false,
 					isArgumentNumber: false,
-					description: "Gets current game category for the stream",
+					description: "Gets current title for the stream",
 					active: true,
 					usableBy: [
 						"broadcaster",
@@ -56,11 +84,13 @@ function template() {
 					isArgumentOptional: false,
 					hasArgument: true,
 					isArgumentNumber: false,
-					description: "Sets the currenty game category for the stream",
+					description: "Updates the title for the stream",
 					active: true,
 					usableBy: ["broadcaster", "mods"],
 					cooldown: {
-						length: 5000,
+						length: 10000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
 					},
 				},
 			],
