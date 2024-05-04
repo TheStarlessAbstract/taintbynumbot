@@ -7,7 +7,6 @@ async function action(config) {
 		this.getOutput("text"),
 		config.configMap
 	);
-	if (!output) return;
 
 	return output;
 }
