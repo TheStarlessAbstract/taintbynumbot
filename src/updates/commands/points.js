@@ -17,17 +17,46 @@ function template() {
 		createdOn: new Date(),
 		output: new Map([
 			[
-				"noStream",
+				"userNotFound",
 				{
 					message:
-						"@{displayName} - {channelName} doesn't seem to be streaming right now",
+						"@{displayName} I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points.",
 					active: true,
+				},
+			],
+			[
+				"userPoints",
+				{
+					message: "@{displayName}: You have {userPoints} Tainty Points",
+					active: true,
+				},
+			],
+			[
+				"noParams",
+				{
+					message: "",
+					active: false,
+				},
+			],
+			[
+				"gifted",
+				{
+					message:
+						"Our glorious leader Starless, has given @{displayName} ${giftAmount} Tainty Points",
+					active: true,
+				},
+			],
+			[
+				"error",
+				{
+					message: "",
+					active: false,
 				},
 			],
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"getUserPoints",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -44,14 +73,14 @@ function template() {
 						"viewers",
 					],
 					cooldown: {
-						length: 10000,
+						length: 5000,
 						lastUsed: new Date(),
 						bypassRoles: ["broadcaster", "mods"],
 					},
 				},
 			],
 			[
-				"stringArgument",
+				"giveUserPoints",
 				{
 					isArgumentOptional: false,
 					hasArgument: true,
