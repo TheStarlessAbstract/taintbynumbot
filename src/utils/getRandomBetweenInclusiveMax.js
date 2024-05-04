@@ -1,4 +1,4 @@
-const isValueNumber = require("./inputCheck/isValueNumber.js");
+const isValueNumber = require("./valueChecks/isValueNumber.js");
 
 /**
  * Generates a random integer between a minimum and maximum value, inclusive.
