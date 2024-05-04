@@ -39,11 +39,18 @@ function template() {
 				},
 			],
 			[
-				"gameFound",
+				"updateGame",
 				{
 					message:
-						"@{displayName} -> The stream game has been set to: {gameName}",
+						"@{displayName} -> The stream game has been set to: {newGameName}",
 					active: true,
+				},
+			],
+			[
+				"existingGame",
+				{
+					message: "",
+					active: false,
 				},
 			],
 		]),
@@ -54,7 +61,7 @@ function template() {
 					isArgumentOptional: false,
 					hasArgument: false,
 					isArgumentNumber: false,
-					description: "Gets current game category for the stream",
+					description: "Gets the game category for the stream",
 					active: true,
 					usableBy: [
 						"broadcaster",
@@ -78,11 +85,13 @@ function template() {
 					isArgumentOptional: false,
 					hasArgument: true,
 					isArgumentNumber: false,
-					description: "Sets the currenty game category for the stream",
+					description: "Updates the game category for the stream",
 					active: true,
 					usableBy: ["broadcaster", "mods"],
 					cooldown: {
 						length: 5000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
 					},
 				},
 			],
