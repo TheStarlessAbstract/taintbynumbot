@@ -8,7 +8,7 @@ const CooldownSchema = new Schema({
 });
 
 const OutputSchema = new Schema({
-	message: { type: String, required: true },
+	message: String,
 	active: { type: Boolean, required: true },
 });
 
