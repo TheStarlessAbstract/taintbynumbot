@@ -1,4 +1,4 @@
-// const { isValueNumber } = require("../utils");
+const { isValueNumber } = require("../../utils/inputCheck");
 
 class BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
