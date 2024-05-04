@@ -1,4 +1,4 @@
-const { isValueNumber } = require("../../utils/inputCheck");
+const { isValueNumber, isNonEmptyString } = require("../../utils/valueChecks");
 
 class BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
@@ -107,6 +107,24 @@ class BaseCommand {
 			return { versionKey: key, version: value };
 		}
 		return null;
+	}
+
+	getArgumentParams(argument) {
+		if (!isNonEmptyString(argument)) return;
+		const splitArgs = argument.split(/\s(.+)/);
+		const parmas = {
+			a: "",
+			b: "",
+		};
+
+		for (let i = 0; i < splitArgs.length; i++) {
+			if (isValueNumber(splitArgs[i])) splitArgs[i] = Number(splitArgs[i]);
+		}
+
+		parmas.a = splitArgs[0];
+		params.b = splitArgs[1] || undefined;
+
+		return parmas;
 	}
 }
 
