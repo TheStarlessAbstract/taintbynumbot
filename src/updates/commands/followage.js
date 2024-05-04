@@ -32,6 +32,13 @@ function template() {
 					active: true,
 				},
 			],
+			[
+				"error",
+				{
+					message: "Error",
+					active: false,
+				},
+			],
 		]),
 		versions: new Map([
 			[
