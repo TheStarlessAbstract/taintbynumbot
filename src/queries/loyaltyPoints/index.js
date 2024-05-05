@@ -1,5 +1,5 @@
-const { findUserPoints } = require("./findUserPoints.js");
+const findOne = require("./findOne.js");
 
 module.exports = {
-	findUserPoints,
+	findOne,
 };
