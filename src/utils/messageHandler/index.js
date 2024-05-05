@@ -1,5 +1,5 @@
-const getCommandAction = require("./getCommandAction.js");
+const getCommandType = require("./getCommandType.js");
 
 module.exports = {
-	getCommandAction,
+	getCommandType,
 };
