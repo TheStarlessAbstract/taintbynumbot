@@ -4,4 +4,4 @@ async function findOne(query, projection, options) {
 	return LoyaltyPoints.findOne(query, projection, options).exec();
 }
 
-module.exports = { findOne };
+module.exports = findOne;
