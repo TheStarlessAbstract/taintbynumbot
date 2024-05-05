@@ -6,9 +6,7 @@ const {
 	getUserRolesAsStrings,
 } = require("../utils/index.js");
 
-const {
-	findUserPoints,
-} = require("../queries/loyaltyPoints/findUserPoints.js");
+const { findOne } = require("../queries/loyaltyPoints");
 
 class BaseCommand {
 	constructor(command) {
@@ -95,7 +93,7 @@ class BaseCommand {
 		)
 			return;
 
-		const user = await findUserPoints({
+		const user = await findOne({
 			channelId: channelId,
 			viewerId: userId,
 		});
