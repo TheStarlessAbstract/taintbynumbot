@@ -18,7 +18,6 @@ const defaultCommands = {};
 // const messagesAdd = require("./commands/message-add");
 // const messagesDelete = require("./commands/message-delete");
 // const messagesEdit = require("./commands/message-edit");
-// const points = require("./commands/points");
 // const quoteAdd = require("./commands/quote-add");
 // const quoteDelete = require("./commands/quote-delete");
 // const quoteEdit = require("./commands/quote-edit");
@@ -98,7 +97,6 @@ const commands = {
 	// kingsremain: kingsRemain.command,
 	// kingsreset: kingsReset.command,
 	// kings: kings.command,
-	// points: points.command,
 	// quote: quote.command,
 	// song: song.command,
 	// steam: steam.command,
