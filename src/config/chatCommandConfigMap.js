@@ -1,12 +1,14 @@
 const chatCommandConfigMap = () => {
 	return new Map([
-		["channelId", ""],
 		["channelName", ""],
+		["chatName", ""],
 		["displayName", ""],
+		["followLength", ""],
 		["gameName", ""],
 		["giftAmount", ""],
-		["isBroadcaster", ""],
+		["giftTo", ""],
 		["points", ""],
+		["shoutee", ""],
 		["title", ""],
 	]);
 };
