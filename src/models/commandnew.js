@@ -34,6 +34,7 @@ const VersionSchema = new Schema({
 	cost: { type: CostSchema },
 	hasAudioClip: Boolean,
 	luck: { type: LuckSchema },
+	action: Object,
 });
 
 const CommandNewSchema = new Schema({
