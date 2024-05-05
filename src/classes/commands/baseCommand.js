@@ -1,10 +1,13 @@
 const { isValueNumber, isNonEmptyString } = require("../../utils/valueChecks");
+const commandActions = require("../../config/commandActions");
+const actionTypes = commandActions();
 
 class BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
 		this.channelId = channelId;
 		this.name = name;
 		this.type = type;
+		this.actions = {};
 		this.versions = versions;
 		this.output = output;
 	}
@@ -49,8 +52,15 @@ class BaseCommand {
 		this.versions.delete(key);
 	}
 
-	getAction() {
-		return this.action;
+	getVersionAction(versionKey) {
+		if (!this.versions.has(versionKey)) return;
+		if (!this.actions?.[versionKey]) this.addVersionAction(versionKey);
+
+		return this.actions[versionKey];
+	}
+
+	addVersionAction(versionKey) {
+		this.actions[versionKey] = actionTypes[this.type][versionKey].bind(this);
 	}
 
 	getProcessedOutputString(output, variableMap) {
@@ -106,7 +116,7 @@ class BaseCommand {
 
 			return { versionKey: key, version: value };
 		}
-		return null;
+		return { versionKey: null, version: null };
 	}
 
 	getArgumentParams(argument) {
@@ -122,7 +132,7 @@ class BaseCommand {
 		}
 
 		parmas.a = splitArgs[0];
-		params.b = splitArgs[1] || undefined;
+		parmas.b = splitArgs[1] || undefined;
 
 		return parmas;
 	}
