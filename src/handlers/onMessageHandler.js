@@ -4,7 +4,7 @@ const twitchRepo = require("../../repos/twitch.js");
 const commands = require("../queries/commands");
 const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
-const { getCommandAction } = require("../utils/messageHandler");
+const { getCommandType } = require("../utils/messageHandler");
 const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
@@ -44,16 +44,16 @@ const handler = async (channelName, userName, message, msg) => {
 			{ type: 1, output: 1, versions: 1 }
 		);
 		if (!commandDetails) return false;
-		commandClass = getCommandAction(commandDetails.type);
-		commandA = new commandClass(channelId, commandName, commandDetails);
+		const CommandType = getCommandType(commandDetails.type);
+		commandA = new CommandType(channelId, commandName, commandDetails);
 		channel.addCommand(commandName, commandA);
 	}
-
 	const { versionKey, version } = commandA.getCommandVersion(messageDetails);
 	if (!versionKey) return;
 
 	const roleStrings = getUserRolesAsStrings(messageDetails);
 	if (!roleStrings) return;
+
 	const userPermission = hasUserPermission(
 		roleStrings,
 		version.usableBy,
@@ -68,6 +68,7 @@ const handler = async (channelName, userName, message, msg) => {
 		chatName: commandName,
 		versionKey: versionKey,
 		argument: argument,
+		permitted: userPermission,
 	};
 
 	if (version?.cost) {
@@ -91,8 +92,8 @@ const handler = async (channelName, userName, message, msg) => {
 	}
 
 	commandConfig.configMap = getChatCommandConfigMap(messageDetails);
-	const command = commandA.getAction();
-	const result = await command(commandConfig);
+	const action = commandA.getVersionAction(versionKey);
+	const result = await action(commandConfig);
 	if (!result) return;
 
 	if (typeof result === "string") chatClient.say(channelName, result);
