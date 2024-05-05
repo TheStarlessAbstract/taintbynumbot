@@ -42,9 +42,9 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"getFollowLength",
 				{
-					isArgumentOptional: false,
+					isArgumentOptional: true,
 					hasArgument: false,
 					isArgumentNumber: false,
 					description:
@@ -52,7 +52,9 @@ function template() {
 					active: true,
 					usableBy: ["artists", "founders", "mods", "subs", "vips", "viewers"],
 					cooldown: {
-						length: 0,
+						length: 5000,
+						lastUsed: new Date(),
+						bypassRoles: ["mods"],
 					},
 				},
 			],
