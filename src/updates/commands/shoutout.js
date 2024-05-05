@@ -11,7 +11,7 @@ async function copyAndUpdate() {
 function template() {
 	return new Command({
 		channelId: twitchId,
-		chatName: "so",
+		chatName: "shout",
 		type: "shoutout",
 		createdBy: twitchId,
 		createdOn: new Date(),
@@ -26,21 +26,22 @@ function template() {
 			[
 				"shoutoutAndStreams",
 				{
-					message: "@{user} last streamed ${game}. I hear they love the Taint!",
+					message:
+						"@{shoutee} last streamed ${gameName}. I hear they love the Taint!",
 					active: true,
 				},
 			],
 			[
 				"shoutoutNoStreams",
 				{
-					message: "Check out @{user}. I hear they love the Taint!",
+					message: "Check out @{shoutee}. I hear they love the Taint!",
 					active: true,
 				},
 			],
 			[
 				"notFound",
 				{
-					message: "Couldn't find a user by the name of {user}",
+					message: "Couldn't find a user by the name of {shoutee}",
 					active: true,
 				},
 			],
@@ -54,7 +55,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"stringArgument",
+				"giveUserShoutout",
 				{
 					isArgumentOptional: false,
 					hasArgument: true,
@@ -63,7 +64,9 @@ function template() {
 					active: true,
 					usableBy: ["broadcaster", "mods"],
 					cooldown: {
-						length: 10000,
+						length: 5000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
 					},
 				},
 			],
