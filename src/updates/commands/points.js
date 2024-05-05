@@ -27,7 +27,7 @@ function template() {
 			[
 				"userPoints",
 				{
-					message: "@{displayName}: You have {userPoints} Tainty Points",
+					message: "@{displayName}: You have {points} Tainty Points",
 					active: true,
 				},
 			],
@@ -42,7 +42,7 @@ function template() {
 				"gifted",
 				{
 					message:
-						"Our glorious leader Starless, has given @{displayName} ${giftAmount} Tainty Points",
+						"Our glorious leader Starless, has given @{giftTo} {giftAmount} Tainty Points",
 					active: true,
 				},
 			],
@@ -87,9 +87,11 @@ function template() {
 					isArgumentNumber: false,
 					description: "Sets the currenty game category for the stream",
 					active: true,
-					usableBy: ["broadcaster", "mods"],
+					usableBy: ["broadcaster"],
 					cooldown: {
 						length: 5000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
 					},
 				},
 			],
