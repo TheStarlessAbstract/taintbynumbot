@@ -6,6 +6,7 @@ const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
 const { getCommandType } = require("../utils/messageHandler");
 const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
+const { getChannelInfoById } = require("../services/twitch/channels");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
 
@@ -20,7 +21,8 @@ const handler = async (channelName, userName, message, msg) => {
 	const channelId = msg.channelId;
 	let channel = channels.getChannel(channelId);
 	if (!channel) {
-		channel = new Channel(channelId, channelName);
+		const twitchChannel = await getChannelInfoById(channelId);
+		channel = new Channel(channelId, twitchChannel.displayName);
 		channels.addChannel(channelId, channel);
 	}
 	channel.increaseMessageCount();
@@ -33,7 +35,7 @@ const handler = async (channelName, userName, message, msg) => {
 	const argument = commandAndArgument.argument;
 	const messageDetails = getMessageDetails(
 		msg,
-		channelName,
+		channel.name,
 		commandName,
 		argument
 	);
