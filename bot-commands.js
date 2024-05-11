@@ -28,7 +28,6 @@ const defaultCommands = {};
 // const tinderDelete = require("./commands/tinder-delete");
 // const tinderEdit = require("./commands/tinder-edit");
 // const tinder = require("./commands/tinder");
-// const title = require("./commands/title");
 
 let chugLastUseTime = "";
 
@@ -101,7 +100,6 @@ const commands = {
 	// song: song.command,
 	// steam: steam.command,
 	// tinderquote: tinder.command,
-	// title: title.command,
 };
 
 async function setup() {
