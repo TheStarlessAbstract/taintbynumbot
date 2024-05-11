@@ -7,7 +7,8 @@ const points = require("./points.js");
 const shoutout = require("./shoutout.js");
 const followage = require("./followage.js");
 const drinkBitch = require("./drinkbitch.js");
-const textcommands = require("./textCommands.js");
+const quote = require("./quote.js");
+const text = require("./text.js");
 
 async function init() {
 	const dbStatus = await db.getReadyState();
@@ -23,7 +24,8 @@ async function init() {
 	await shoutout();
 	await followage();
 	await drinkBitch();
-	await textcommands();
+	await quote();
+	await text();
 
 	if (dbStatus === "Mongoose disconnected") {
 		await db.disconnectFromMongoDB();
