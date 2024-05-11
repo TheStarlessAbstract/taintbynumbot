@@ -1,13 +1,14 @@
 const commandTypes = () => {
 	return {
-		// game: require("../classes/commands/game.js"),
-		// text: require("../classes/commands/text.js"),
-		// title: require("../classes/commands/title.js"),
-		points: require("../classes/commands/points/points"),
-		// points: require("../classes/commands/points.js"),
-		// hydrate: require("../classes/commands/hydrate.js"),
-		shoutout: require("../classes/commands/shoutout/shoutout.js"),
-		followage: require("../classes/commands/followage/followage"),
+		game: require("../classes/commands/game/class"),
+		// song: require("../classes/commands/song/class"),
+		list: require("../classes/commands/list/class"),
+		text: require("../classes/commands/text/class"),
+		title: require("../classes/commands/title/class"),
+		points: require("../classes/commands/points/class"),
+		hydrate: require("../classes/commands/hydrate/class"),
+		shoutout: require("../classes/commands/shoutout/class"),
+		followage: require("../classes/commands/followage/class"),
 	};
 };
 
