@@ -55,7 +55,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"getStreamTitle",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -79,7 +79,7 @@ function template() {
 				},
 			],
 			[
-				"stringArgument",
+				"setStreamTitle",
 				{
 					isArgumentOptional: false,
 					hasArgument: true,
