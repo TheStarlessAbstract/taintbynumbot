@@ -27,7 +27,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"sayToChat",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -44,7 +44,17 @@ function template() {
 						"vips",
 						"viewers",
 					],
-					cooldown: { length: 0 },
+					cooldown: {
+						length: 0,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster"],
+					},
+					cost: { active: false, points: 0, bypassRoles: ["broadcaster"] },
+					hasAudioClip: false,
+					luck: {
+						active: false,
+						odds: 100000,
+					},
 				},
 			],
 		]),
