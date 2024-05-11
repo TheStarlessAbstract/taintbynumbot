@@ -63,7 +63,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"getStreamGame",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -87,7 +87,7 @@ function template() {
 				},
 			],
 			[
-				"stringArgument",
+				"setStreamGame",
 				{
 					isArgumentOptional: false,
 					hasArgument: true,
