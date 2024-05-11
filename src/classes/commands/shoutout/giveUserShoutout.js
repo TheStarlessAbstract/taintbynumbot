@@ -4,35 +4,38 @@ const { shoutoutUser } = require("../../../services/twitch/chat");
 
 const giveUserShoutout = async function (config) {
 	if (config.versionKey !== "giveUserShoutout") return;
-	let outputType;
-	if (!config?.permitted) {
-		outputType = "modsOnly";
+	let output;
 
+	if (!config?.permitted) {
 		output = this.getProcessedOutputString(
-			this.getOutput(outputType),
+			this.getOutput("notPermitted"),
 			config.configMap
 		);
-
 		return output;
 	}
 
-	config.configMap.set("shoutee", config.argument);
-	const user = await getUserByName(config.argument);
+	let username = config.argument;
+	if (username.startsWith("@")) {
+		username = username.substring(1);
+	}
+
+	config.configMap.set("shoutee", username);
+	const user = await getUserByName(username);
 
 	if (!user) {
-		outputType = "notFound";
 		output = this.getProcessedOutputString(
-			this.getOutput(outputType),
+			this.getOutput("notFound"),
 			config.configMap
 		);
-
 		return output;
 	}
 
+	// confirm userid has channel, checks last streamed game
 	const channel = await getChannelInfoById(user.id);
-	outputType = "shoutoutAndStreams";
-	if (!channel || !channel.gameName) {
-		outputType = "shoutoutNoStreams";
+	let outputType = "shoutoutNoStreams";
+	if (channel?.gameName) {
+		config.configMap.set("gameName", channel?.gameName);
+		outputType = "shoutoutAndStreams";
 	}
 
 	output = this.getProcessedOutputString(
@@ -43,7 +46,6 @@ const giveUserShoutout = async function (config) {
 	if (channel) {
 		await shoutoutUser(config.channelId, user.id);
 	}
-
 	return output;
 };
 
