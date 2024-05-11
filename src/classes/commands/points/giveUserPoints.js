@@ -6,9 +6,16 @@ const {
 
 const giveUserPoints = async function (config) {
 	if (config.versionKey !== "giveUserPoints") return;
-
 	let output;
-	let outputType = "userPoints";
+
+	if (!config?.permitted) {
+		output = this.getProcessedOutputString(
+			this.getOutput("notPermitted"),
+			config.configMap
+		);
+		return output;
+	}
+
 	const user = await findOne(
 		{
 			channelId: config.channelId,
@@ -16,9 +23,16 @@ const giveUserPoints = async function (config) {
 		},
 		{ points: 1 }
 	);
-	if (!user) outputType = "userNotFound";
+	if (!user) {
+		output = this.getProcessedOutputString(
+			this.getOutput("userNotFound"),
+			config.configMap
+		);
+		return output;
+	}
+
 	let { a: giftTo, b: giftAmount } = this.getArgumentParams(config.argument);
-	outputType = "noParams";
+	let outputType = "noParams";
 	if (isNonEmptyString(giftTo) && isValueNumber(giftAmount)) {
 		if (giftTo.startsWith("@")) {
 			giftTo = giftTo.substring(1);
