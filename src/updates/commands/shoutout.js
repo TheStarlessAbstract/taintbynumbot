@@ -11,13 +11,13 @@ async function copyAndUpdate() {
 function template() {
 	return new Command({
 		channelId: twitchId,
-		chatName: "shout",
+		chatName: "so",
 		type: "shoutout",
 		createdBy: twitchId,
 		createdOn: new Date(),
 		output: new Map([
 			[
-				"modsOnly",
+				"notPermitted",
 				{
 					message: "@{displayName} !{chatName} is for Mods only",
 					active: true,
