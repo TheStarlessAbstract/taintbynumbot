@@ -46,10 +46,17 @@ function template() {
 					active: false,
 				},
 			],
+			[
+				"notPermitted",
+				{
+					message: "",
+					active: false,
+				},
+			],
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"getHydrated",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
