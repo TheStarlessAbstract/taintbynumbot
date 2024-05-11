@@ -27,7 +27,7 @@ function template() {
 		]),
 		versions: new Map([
 			[
-				"noArgument",
+				"sayToChat",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
