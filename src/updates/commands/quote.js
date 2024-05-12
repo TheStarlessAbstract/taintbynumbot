@@ -26,7 +26,7 @@ function template() {
 			[
 				"randomFound",
 				{
-					message: "{entryNumber}. {entry}",
+					message: "{index}. {text}",
 					active: true,
 				},
 			],
