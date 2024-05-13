@@ -138,8 +138,8 @@ function getRandomBetween(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function playAudio(audioLink) {
-	io.emit("playAudio", audioLink);
+function playAudio(audioLink, channelId) {
+	io.emit(`playAudio:${channelId}`, audioLink);
 }
 
 function setDeaths(newDeaths, newGameDeaths, newAllDeaths, newAverage) {
