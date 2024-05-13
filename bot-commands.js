@@ -18,16 +18,8 @@ const defaultCommands = {};
 // const messagesAdd = require("./commands/message-add");
 // const messagesDelete = require("./commands/message-delete");
 // const messagesEdit = require("./commands/message-edit");
-// const quoteAdd = require("./commands/quote-add");
-// const quoteDelete = require("./commands/quote-delete");
-// const quoteEdit = require("./commands/quote-edit");
-// const quote = require("./commands/quote");
 // const song = require("./commands/song");
 // const steam = require("./commands/steam");
-// const tinderAdd = require("./commands/tinder-add");
-// const tinderDelete = require("./commands/tinder-delete");
-// const tinderEdit = require("./commands/tinder-edit");
-// const tinder = require("./commands/tinder");
 
 let chugLastUseTime = "";
 
@@ -45,8 +37,6 @@ const userCommands = {
 const commands = {
 	// addcomm: commandAdd.command,
 	// addmessage: messagesAdd.command,
-	// addtinder: tinderAdd.command,
-	// addquote: quoteAdd.command,
 	// audiotimeout: audioTimeout.command,
 	// // chug: {
 	// // 	response: async (config) => {
@@ -86,17 +76,12 @@ const commands = {
 	// deaths: deaths.command,
 	// delcomm: commandDelete.command,
 	// delmessage: messagesDelete.command,
-	// delquote: quoteDelete.command,
-	// deltinder: tinderDelete.command,
 	// editcomm: commandEdit.command,
 	// editmessage: messagesEdit.command,
-	// editquote: quoteEdit.command,
-	// edittinder: tinderEdit.command,
 	// f: f.command,
 	// kingsremain: kingsRemain.command,
 	// kingsreset: kingsReset.command,
 	// kings: kings.command,
-	// quote: quote.command,
 	// song: song.command,
 	// steam: steam.command,
 	// tinderquote: tinder.command,
