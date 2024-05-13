@@ -152,7 +152,7 @@ router.get("/deathcounteroverlay", (req, res) => {
 });
 
 router.post("/playaudio", (req, res) => {
-	serverIo.playAudio(req.body.url);
+	serverIo.playAudio(req.body.url, req.body.channelId);
 	res.sendStatus(201);
 });
 
