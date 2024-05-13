@@ -19,7 +19,7 @@
                 lastPlayedFinished = true;
             }, false);
 
-            socket.on("playAudio", (url) => {
+            socket.on("playAudio:100612361", (url) => {
                 if(lastPlayedFinished){
                     source.src = url;
                 x.load();
