@@ -20,7 +20,10 @@ async function play(audioLink) {
 
 		if (!audioTimeoutActive) {
 			lastAudioPlayed = new Date().getTime();
-			let resp = await axios.post(url + "/playaudio", { url: audioLink });
+			let resp = await axios.post(url + "/playaudio", {
+				url: audioLink,
+				channelId: 100612361,
+			});
 		}
 	}
 }
