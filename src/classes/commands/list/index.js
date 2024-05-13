@@ -1,5 +1,9 @@
-const getRandomFromList = require("./getRandomFromList");
+const getRandom = require("./getRandom");
+const getRandomByString = require("./getRandomByString");
+const getByIndex = require("./getByIndex");
 
 module.exports = {
-	getRandomFromList,
+	getRandom,
+	getRandomByString,
+	getByIndex,
 };
