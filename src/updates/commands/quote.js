@@ -24,7 +24,7 @@ function template() {
 				},
 			],
 			[
-				"randomFound",
+				"found",
 				{
 					message: "{index}. {text}",
 					active: true,
@@ -37,10 +37,17 @@ function template() {
 					active: false,
 				},
 			],
+			[
+				"idNotFound",
+				{
+					message: "No {item} for index number {index}",
+					active: true,
+				},
+			],
 		]),
 		versions: new Map([
 			[
-				"getRandomFromList",
+				"getRandom",
 				{
 					isArgumentOptional: false,
 					hasArgument: false,
@@ -57,7 +64,55 @@ function template() {
 						"viewers",
 					],
 					cooldown: {
-						length: 10000,
+						length: 4000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster", "mods"],
+					},
+				},
+			],
+			[
+				"getRandomByString",
+				{
+					isArgumentOptional: false,
+					hasArgument: true,
+					isArgumentNumber: false,
+					description: "Gets a random Quote that contains a supplied string",
+					active: true,
+					usableBy: [
+						"broadcaster",
+						"artists",
+						"founders",
+						"mods",
+						"subs",
+						"vips",
+						"viewers",
+					],
+					cooldown: {
+						length: 4000,
+						lastUsed: new Date(),
+						bypassRoles: ["broadcaster", "mods"],
+					},
+				},
+			],
+			[
+				"getByIndex",
+				{
+					isArgumentOptional: false,
+					hasArgument: true,
+					isArgumentNumber: true,
+					description: "Gets a Quote with supplied index",
+					active: true,
+					usableBy: [
+						"broadcaster",
+						"artists",
+						"founders",
+						"mods",
+						"subs",
+						"vips",
+						"viewers",
+					],
+					cooldown: {
+						length: 4000,
 						lastUsed: new Date(),
 						bypassRoles: ["broadcaster", "mods"],
 					},
