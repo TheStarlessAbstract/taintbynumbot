@@ -1,3 +1,4 @@
+const { aggregate } = require("../../../queries/audioLinks");
 const { play } = require("../../../services/audio");
 
 const getHydrated = async function (config) {
@@ -5,17 +6,20 @@ const getHydrated = async function (config) {
 	let output;
 
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
 		);
-		return output;
+	}
+
+	if (!config.userCanPayCost && !config.diceRoll && !config.bypass) {
+		return this.getProcessedOutputString(
+			this.getOutput("lowBalance"),
+			config.configMap
+		);
 	}
 
 	let outputType = "validBalance";
-	if (!config.userCanPayCost && !config.diceRoll && !config.bypass) {
-		outputType = "lowBalance";
-	}
 	if (!config.userCanPayCost && config.diceRoll && !config.bypass) {
 		outputType = "luckyRoll";
 	}
@@ -25,12 +29,22 @@ const getHydrated = async function (config) {
 		config.configMap
 	);
 
-	if (
-		config.hasAudioClip &&
-		(outputType === "validBalance" || outputType === "luckyRoll")
-	) {
-		play({ channelId: config.channelId, chatName: config.chatName });
-	}
+	if (!this.versionHasAudioClip(config.versionKey)) return output;
+
+	const pipeline = [
+		{
+			$match: {
+				channelId: config.channelId,
+				command: config.chatName,
+			},
+		},
+		{ $sample: { size: 1 } },
+	];
+	const audioLinks = await aggregate(pipeline);
+	console.log(audioLinks);
+	if (audioLinks.length === 0) return output;
+
+	play(config.channelId, audioLinks[0].url);
 
 	return output;
 };
