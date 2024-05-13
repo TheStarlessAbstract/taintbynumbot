@@ -5,7 +5,7 @@ const ListSchema = new Schema({
 	channelId: { type: String, required: true },
 	name: { type: String, required: true }, // quote/tinder - has to be the command name
 	index: { type: Number, required: true },
-	text: String,
+	text: { type: String, required: true },
 	createdBy: String,
 	createdOn: Date,
 	lastEditedBy: String,
