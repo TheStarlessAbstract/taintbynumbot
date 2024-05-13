@@ -43,7 +43,7 @@ const handler = async (channelName, userName, message, msg) => {
 	if (!commandA) {
 		let commandDetails = await commands.findOne(
 			{ channelId: channelId, chatName: commandName },
-			{ type: 1, output: 1, versions: 1 }
+			{ type: 1, output: 1, versions: 1, listTypeName: 1 }
 		);
 		if (!commandDetails) return false;
 		const CommandType = getCommandType(commandDetails.type);
