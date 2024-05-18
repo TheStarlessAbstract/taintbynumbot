@@ -5,10 +5,12 @@ const getUserRolesAsStrings = require("./getUserRolesAsStrings.js");
 const getChatCommandConfigMap = require("./getChatCommandConfigMap.js");
 const startsWithCaseInsensitive = require("./startsWithCaseInsensitive.js");
 const getRandomBetweenInclusiveMax = require("./getRandomBetweenInclusiveMax.js");
+const modify = require("./modify");
 const valueChecks = require("./valueChecks");
 const messageHandler = require("./messageHandler");
 
 module.exports = {
+	modify,
 	valueChecks,
 	messageHandler,
 	isBroadcaster,
