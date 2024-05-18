@@ -1,27 +1,40 @@
 const spotify = require("../../../../services/spotify");
+const { getStreamByUserId } = require("../../../services/twitch/streams");
 
 const getCurrentlyPlaying = async function (config) {
 	if (config.versionKey !== "getCurrentlyPlaying") return;
-	let output;
+	if (!config?.permitted) {
+		return this.getProcessedOutputString(
+			this.getOutput("notPermitted"),
+			config.configMap
+		);
+	}
 
 	const stream = await getStreamByUserId(config.channelId);
 	if (!stream) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("noStream"),
 			config.configMap
 		);
-
-		return output;
 	}
 
-	config.configMap.set("title", stream.title);
+	const response = await spotify.getCurrentPlaying(config.channelId);
 
-	output = this.getProcessedOutputString(
-		this.getOutput("streamIsLive"),
+	if (!response.playing) {
+		return this.getProcessedOutputString(
+			this.getOutput("noMusic"),
+			config.configMap
+		);
+	}
+
+	config.configMap.set("songTitle", response.title);
+	config.configMap.set("artist", response.artist);
+	config.configMap.set("spotifyUrl", response.url);
+
+	return this.getProcessedOutputString(
+		this.getOutput("listeningTo"),
 		config.configMap
 	);
-
-	return output;
 };
 
 module.exports = getCurrentlyPlaying;
