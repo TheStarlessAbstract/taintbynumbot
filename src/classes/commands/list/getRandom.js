@@ -1,4 +1,5 @@
 const { aggregate } = require("../../../queries/list");
+const { firstLetterToUpperCase } = require("../../../utils/modify");
 
 const getRandom = async function (config) {
 	if (config.versionKey !== "getRandom") return;
@@ -26,12 +27,10 @@ const getRandom = async function (config) {
 	const listItems = await aggregate(pipeline);
 
 	if (listItems.length === 0) {
-		output = this.getProcessedOutputString(
-			this.getOutput("noneFound"),
+		return this.getProcessedOutputString(
+			this.getOutput("randomNotFound"),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	config.configMap.set("index", listItems[0].index);
