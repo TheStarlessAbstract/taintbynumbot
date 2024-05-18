@@ -17,9 +17,23 @@ function template() {
 		createdOn: new Date(),
 		output: new Map([
 			[
-				"noneFound",
+				"randomNotFound",
 				{
-					message: "Could not find a random {item}",
+					message: "Could not find a random {chatNameFirstLetterUppercase}",
+					active: true,
+				},
+			],
+			[
+				"idNotFound",
+				{
+					message: "No {chatNameFirstLetterUppercase} for index number {index}",
+					active: true,
+				},
+			],
+			[
+				"stringNotFound",
+				{
+					message: "Could not find a {chatNameFirstLetterUppercase}",
 					active: true,
 				},
 			],
