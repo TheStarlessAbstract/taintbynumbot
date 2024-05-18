@@ -1,15 +1,15 @@
 const { aggregate } = require("../../../queries/list");
+const { firstLetterToUpperCase } = require("../../../utils/modify");
 
 const getRandomByString = async function (config) {
 	if (config.versionKey !== "getRandomByString") return;
 	let output;
 
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
 		);
-		return output;
 	}
 
 	const pipeline = [
@@ -26,12 +26,10 @@ const getRandomByString = async function (config) {
 	const listItems = await aggregate(pipeline);
 
 	if (listItems.length === 0) {
-		output = this.getProcessedOutputString(
-			this.getOutput("noneFound"),
+		return this.getProcessedOutputString(
+			this.getOutput("stringNotFound"),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	config.configMap.set("index", listItems[0].index);
