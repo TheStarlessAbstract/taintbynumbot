@@ -41,11 +41,22 @@ async function getCurrentPlaying(channelId) {
 				result = `The song playing is: ${response.data.item.name} by ${response.data.item.artists[0].name}.
 				Link: ${response.data.item.external_urls.spotify}`;
 			}
-
-			break;
 	}
 
-	return result;
+	if (response.statusCode) {
+		return { playing: false, error: response.statusCode };
+	}
+
+	if (response.data.is_playing) {
+		return {
+			playing: true,
+			title: response.data.item.name,
+			artist: response.data.item.artists[0].name,
+			url: response.data.item.external_urls.spotify,
+		};
+	} else {
+		return { playing: false };
+	}
 }
 
 async function requestToken(queryStringInput) {
