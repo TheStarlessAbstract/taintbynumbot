@@ -6,17 +6,16 @@ const {
 
 const editItem = async function (config) {
 	if (config.versionKey !== "editItem") return;
-	let output;
-
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
 		);
-		return output;
 	}
 
 	const { a: index, b: textUpdate } = this.getArgumentParams(config.argument);
+	config.configMap.set(index, index);
+	config.configMap.set(textUpdate, textUpdate);
 	let outputType;
 
 	if (!isValueNumber(index)) {
@@ -26,12 +25,10 @@ const editItem = async function (config) {
 		outputType = "invalidText";
 	}
 	if (outputType) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput(outputType),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	const item = await findOne({
@@ -48,23 +45,19 @@ const editItem = async function (config) {
 	}
 
 	if (outputType) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput(outputType),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	item.text = textUpdate;
 	await item.save();
 
-	output = this.getProcessedOutputString(
+	return this.getProcessedOutputString(
 		this.getOutput("updated"),
 		config.configMap
 	);
-
-	return output;
 };
 
 module.exports = editItem;
