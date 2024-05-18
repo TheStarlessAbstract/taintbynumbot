@@ -12,6 +12,8 @@ const quoteAdd = require("./quoteAdd.js");
 const quoteDelete = require("./quoteDelete.js");
 const quoteEdit = require("./quoteEdit.js");
 const text = require("./text.js");
+const song = require("./song.js");
+const steam = require("./steam.js");
 
 async function init() {
 	const dbStatus = await db.getReadyState();
@@ -32,6 +34,8 @@ async function init() {
 	await quoteDelete();
 	await quoteEdit();
 	await text();
+	await song();
+	await steam();
 
 	if (dbStatus === "Mongoose disconnected") {
 		await db.disconnectFromMongoDB();
