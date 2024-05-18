@@ -6,11 +6,10 @@ const addItem = async function (config) {
 	let output;
 
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
 		);
-		return output;
 	}
 
 	const item = await findOne({
@@ -20,12 +19,10 @@ const addItem = async function (config) {
 	});
 
 	if (item) {
-		output = this.getProcessedOutputString(
+		returnthis.getProcessedOutputString(
 			this.getOutput("alreadyExists"),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	const options = {
@@ -56,12 +53,10 @@ const addItem = async function (config) {
 
 	config.configMap.set("text", config.argument);
 
-	output = this.getProcessedOutputString(
+	return this.getProcessedOutputString(
 		this.getOutput("added"),
 		config.configMap
 	);
-
-	return output;
 };
 
 module.exports = addItem;
