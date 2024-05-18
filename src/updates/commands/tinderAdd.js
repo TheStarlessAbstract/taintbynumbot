@@ -20,21 +20,21 @@ function template() {
 			[
 				"alreadyExists",
 				{
-					message: "This {item} has already been added",
+					message: "This {chatNameFirstLetterUppercase} has already been added",
 					active: true,
 				},
 			],
 			[
 				"added",
 				{
-					message: "{item} added: ",
+					message: "{chatNameFirstLetterUppercase} added",
 					active: true,
 				},
 			],
 			[
 				"notPermitted",
 				{
-					message: "User not premitted to add {item}",
+					message: "User not premitted to add {chatNameFirstLetterUppercase}",
 					active: false,
 				},
 			],
