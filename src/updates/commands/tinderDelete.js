@@ -20,21 +20,22 @@ function template() {
 			[
 				"notPermitted",
 				{
-					message: "Not permitted",
+					message: "Not permitted to delete",
 					active: false,
 				},
 			],
 			[
 				"notDeleted",
 				{
-					message: "{item} was not deleted",
+					message: "{chatNameFirstLetterUppercase} was not deleted",
 					active: true,
 				},
 			],
 			[
 				"deleted",
 				{
-					message: "{item} number {index} has been deleted ",
+					message:
+						"{chatNameFirstLetterUppercase} number {index} has been deleted ",
 					active: true,
 				},
 			],
