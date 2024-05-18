@@ -18,58 +18,44 @@ function template() {
 		listTypeName: "quote",
 		output: new Map([
 			[
-				"alreadyExists",
-				{
-					message: "This {item} has already been added",
-					active: true,
-				},
-			],
-			[
-				"added",
-				{
-					message: "{item} added: ",
-					active: true,
-				},
-			],
-			[
 				"notPermitted",
 				{
-					message: "User not premitted to add {item}",
+					message: "User not premitted to add {chatNameFirstLetterUppercase}",
 					active: false,
 				},
 			],
 			[
 				"invalidIndex",
 				{
-					message: "Invalid index provided",
+					message: "Invalid {chatNameFirstLetterUppercase}index provided",
 					active: true,
 				},
 			],
 			[
 				"invalidText",
 				{
-					message: "Invalid {item} text provided",
+					message: "Invalid {chatNameFirstLetterUppercase} text provided",
 					active: true,
 				},
 			],
 			[
 				"notFound",
 				{
-					message: "{item} number {index} not found",
+					message: "{chatNameFirstLetterUppercase} number {index} not found",
 					active: true,
 				},
 			],
 			[
 				"currentText",
 				{
-					message: "{item} already says {updateText}",
+					message: "{chatNameFirstLetterUppercase} already says {updateText}",
 					active: true,
 				},
 			],
 			[
 				"updated",
 				{
-					message: "{item} updated",
+					message: "{chatNameFirstLetterUppercase} updated",
 					active: true,
 				},
 			],
