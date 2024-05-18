@@ -1,7 +1,8 @@
 const commandTypes = () => {
 	return {
 		game: require("../classes/commands/game/class"),
-		// song: require("../classes/commands/song/class"),
+		song: require("../classes/commands/song/class"),
+		steam: require("../classes/commands/steam/class"),
 		list: require("../classes/commands/list/class"),
 		listadd: require("../classes/commands/listAdd/class"),
 		listedit: require("../classes/commands/listEdit/class"),
