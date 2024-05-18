@@ -18,7 +18,6 @@ const defaultCommands = {};
 // const messagesAdd = require("./commands/message-add");
 // const messagesDelete = require("./commands/message-delete");
 // const messagesEdit = require("./commands/message-edit");
-// const song = require("./commands/song");
 // const steam = require("./commands/steam");
 
 let chugLastUseTime = "";
@@ -82,9 +81,7 @@ const commands = {
 	// kingsremain: kingsRemain.command,
 	// kingsreset: kingsReset.command,
 	// kings: kings.command,
-	// song: song.command,
 	// steam: steam.command,
-	// tinderquote: tinder.command,
 };
 
 async function setup() {
