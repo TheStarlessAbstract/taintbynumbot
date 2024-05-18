@@ -5,6 +5,7 @@ const commands = require("../queries/commands");
 const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
 const { getCommandType } = require("../utils/messageHandler");
+const { firstLetterToUpperCase } = require("../utils/modify");
 const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
 const { getChannelInfoById } = require("../services/twitch/channels");
 
@@ -68,6 +69,7 @@ const handler = async (channelName, userName, message, msg) => {
 		userId: messageDetails.userId,
 		username: userName,
 		chatName: commandName,
+		chatNameFirstLetterUppercase: firstLetterToUpperCase(commandName),
 		versionKey: versionKey,
 		argument: argument,
 		permitted: userPermission,
