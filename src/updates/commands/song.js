@@ -17,9 +17,31 @@ function template() {
 		createdOn: new Date(),
 		output: new Map([
 			[
+				"notPermitted",
+				{
+					message: "User not premitted to add {chatNameFirstLetterUppercase}",
+					active: false,
+				},
+			],
+			[
 				"listeningTo",
 				{
-					message: "@{displayName} - !{chatName} is for Mods only",
+					message:
+						"The song playing is: {songTitle} by {artist}. Link: {spotifyUrl}",
+					active: true,
+				},
+			],
+			[
+				"noStream",
+				{
+					message: "Stream is currently offline",
+					active: true,
+				},
+			],
+			[
+				"noMusic",
+				{
+					message: "No tunes on Spotify currently",
 					active: true,
 				},
 			],
@@ -50,7 +72,7 @@ function template() {
 						"viewers",
 					],
 					cooldown: {
-						length: 5000,
+						length: 30000,
 						lastUsed: new Date(),
 						bypassRoles: ["broadcaster", "mods", "vips"],
 					},
