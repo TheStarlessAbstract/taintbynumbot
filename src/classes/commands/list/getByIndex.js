@@ -5,11 +5,10 @@ const getByIndex = async function (config) {
 	let output;
 
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
 		);
-		return output;
 	}
 
 	const item = await findOne({
@@ -18,13 +17,12 @@ const getByIndex = async function (config) {
 		index: config.argument,
 	});
 	config.configMap.set("index", config.argument);
+
 	if (!item) {
-		output = this.getProcessedOutputString(
+		return this.getProcessedOutputString(
 			this.getOutput("idNotFound"),
 			config.configMap
 		);
-
-		return output;
 	}
 
 	config.configMap.set("text", item.text);
