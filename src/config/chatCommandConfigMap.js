@@ -10,6 +10,7 @@ const chatCommandConfigMap = () => {
 		["points", ""],
 		["shoutee", ""],
 		["title", ""],
+		["chatNameFirstLetterUppercase", ""],
 	]);
 };
 
