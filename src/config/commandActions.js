@@ -1,7 +1,8 @@
 const commandActions = () => {
 	return {
 		game: require("../classes/commands/game"),
-		// song: require("../classes/commands/song"),
+		song: require("../classes/commands/song"),
+		steam: require("../classes/commands/steam"),
 		list: require("../classes/commands/list"),
 		listadd: require("../classes/commands/listAdd"),
 		listedit: require("../classes/commands/listEdit"),
