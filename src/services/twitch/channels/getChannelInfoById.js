@@ -1,4 +1,4 @@
-const twitchRepo = require("../../../../repos/twitch.js");
+const twitchRepo = require("../../../repos/twitch.js");
 
 const getChannelInfoById = async (id) => {
 	const apiClient = twitchRepo.getApiClient();
