@@ -14,12 +14,13 @@ const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,
 let chatClient;
 
 function init() {
-	chatClient = twitchRepo.getChatClient();
+	chatClient = twitchRepo.getChatClient(); // is this needed??? can move to before chatClient.say()
 }
 
 const handler = async (channelName, userName, message, msg) => {
 	if (hasUserInfoFormatChanged(msg.userInfo)) return;
 	const channelId = msg.channelId;
+
 	let channel = channels.getChannel(channelId);
 	if (!channel) {
 		const twitchChannel = await getChannelInfoById(channelId);
