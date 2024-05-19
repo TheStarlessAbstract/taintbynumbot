@@ -43,9 +43,7 @@ async function setupChatClientListeners() {
 }
 
 async function connected() {
-	if (!helper.isTest()) {
-		console.log(" * Connected to Twitch chat * ");
-	}
+	console.log(" * Connected to Twitch chat * ");
 }
 
 async function checkLive() {
