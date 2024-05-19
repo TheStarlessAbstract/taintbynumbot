@@ -1,6 +1,6 @@
 const ChannelList = require("../classes/channelList.js");
 const Channel = require("../classes/channel.js");
-const twitchRepo = require("../../repos/twitch.js");
+const twitchRepo = require("../repos/twitch.js");
 const commands = require("../queries/commands");
 const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
@@ -10,12 +10,6 @@ const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
 const { getChannelInfoById } = require("../services/twitch/channels");
 
 const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
-
-let chatClient;
-
-function init() {
-	chatClient = twitchRepo.getChatClient(); // is this needed??? can move to before chatClient.say()
-}
 
 const handler = async (channelName, userName, message, msg) => {
 	if (hasUserInfoFormatChanged(msg.userInfo)) return;
@@ -41,6 +35,7 @@ const handler = async (channelName, userName, message, msg) => {
 		commandName,
 		argument
 	);
+
 	let commandA = channel.getCommand(commandName);
 	if (!commandA) {
 		let commandDetails = await commands.findOne(
@@ -68,9 +63,9 @@ const handler = async (channelName, userName, message, msg) => {
 	const commandConfig = {
 		channelId: channelId,
 		userId: messageDetails.userId,
-		username: userName,
+		username: messageDetails.displayName,
 		chatName: commandName,
-		chatNameFirstLetterUppercase: firstLetterToUpperCase(commandName),
+		chatNameFirstLetterUppercase: messageDetails.chatNameFirstLetterUppercase,
 		versionKey: versionKey,
 		argument: argument,
 		permitted: userPermission,
@@ -100,6 +95,7 @@ const handler = async (channelName, userName, message, msg) => {
 	const action = commandA.getVersionAction(versionKey);
 	const result = await action(commandConfig);
 	if (!result) return;
+	const chatClient = twitchRepo.getChatClient();
 
 	if (typeof result === "string") chatClient.say(channelName, result);
 	if (Array.isArray(result)) {
@@ -109,7 +105,7 @@ const handler = async (channelName, userName, message, msg) => {
 	}
 };
 
-module.exports = { init, handler };
+module.exports = { handler };
 
 function hasCommandPrefix(message) {
 	return message.startsWith("!"); // Maybe give option to use another character for command prefix, then need to get based on channel message is in
@@ -189,11 +185,26 @@ function getCommandNameAndArgument(message) {
 }
 
 function getMessageDetails(msg, channel, command, argument) {
-	const details = msg.userInfo;
-	details.channelId = msg.channelId;
-	details.channelName = channel;
-	details.chatName = command;
-	details.argument = argument;
+	const details = {
+		channelId: msg.channelId,
+		channelName: channel,
+		chatName: command,
+		argument: argument,
+		chatNameFirstLetterUppercase: firstLetterToUpperCase(command),
+		badgeInfo: msg.userInfo.badgeInfo,
+		badges: msg.userInfo.badges,
+		color: msg.userInfo.color,
+		displayName: msg.userInfo.displayName,
+		isArtist: msg.userInfo.isArtist,
+		isBroadcaster: msg.userInfo.isBroadcaster,
+		isFounder: msg.userInfo.isFounder,
+		isMod: msg.userInfo.isMod,
+		isSubscriber: msg.userInfo.isSubscriber,
+		isVip: msg.userInfo.isVip,
+		userId: msg.userInfo.userId,
+		userName: msg.userInfo.userName,
+		userType: msg.userInfo.userType,
+	};
 
 	return details;
 }
