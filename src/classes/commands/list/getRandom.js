@@ -1,5 +1,4 @@
 const { aggregate } = require("../../../queries/list");
-const { firstLetterToUpperCase } = require("../../../utils/modify");
 
 const getRandom = async function (config) {
 	if (config.versionKey !== "getRandom") return;
@@ -24,8 +23,8 @@ const getRandom = async function (config) {
 		},
 		{ $sample: { size: 1 } },
 	];
-	const listItems = await aggregate(pipeline);
 
+	const listItems = await aggregate(pipeline);
 	if (listItems.length === 0) {
 		return this.getProcessedOutputString(
 			this.getOutput("randomNotFound"),
