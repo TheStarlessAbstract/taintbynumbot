@@ -5,9 +5,9 @@ class Channel {
 	constructor(channelId, channelName) {
 		this.id = channelId;
 		this.name = channelName;
-		this.messageCount = 0;
 		this.isLive = false;
 		this.lastIsLiveUpdate = false;
+		this.messageCount = 0;
 		this.timedMessagesInterval = 60000;
 		this.commands = {}; // maybe a map instead
 	}
