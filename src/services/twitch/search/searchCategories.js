@@ -1,4 +1,4 @@
-const twitchRepo = require("../../../../repos/twitch.js");
+const twitchRepo = require("../../../repos/twitch.js");
 
 const searchCategories = async (query, pagination) => {
 	const apiClient = twitchRepo.getApiClient();
