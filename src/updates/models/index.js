@@ -1,5 +1,6 @@
 const db = require("../../../bot-mongoose.js");
 const loyaltyPoints = require("./loyaltyPoints.js");
+const users = require("./users.js");
 
 async function init() {
 	const dbStatus = await db.getReadyState();
@@ -7,7 +8,8 @@ async function init() {
 		await db.connectToMongoDB();
 	}
 
-	await loyaltyPoints();
+	// await loyaltyPoints();
+	await users();
 
 	if (dbStatus === "Mongoose disconnected") {
 		await db.disconnectFromMongoDB();
