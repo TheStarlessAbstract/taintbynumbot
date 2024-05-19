@@ -33,36 +33,56 @@ function template() {
 			[
 				"idError",
 				{
-					message: "idError",
+					message:
+						"@{userName} - Steam couldn't find your name, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL",
 					active: true,
 				},
 			],
-
 			[
 				"privateError",
 				{
-					message: "No games found",
+					message:
+						"@{userName} - Your games are private, so I can't suggest a game. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public",
 					active: true,
 				},
 			],
 			[
 				"timePlayed",
 				{
-					message: "{game} - time played",
-					active: false,
+					message:
+						"@{userName} - you haven't played more than {hours} hour(s) in {game}, why not play it next",
+					active: true,
 				},
 			],
 			[
 				"achievements%",
 				{
-					message: "{game} - achievements%",
-					active: false,
+					message:
+						"@{userName} - you haven't unlocked more than {percent} in {game}, go get that 100%",
+					active: true,
 				},
 			],
 			[
 				"randomGame",
 				{
-					message: "{game} - randomGame",
+					message:
+						"@{userName} - Can't choose what to play? Why not try {game}",
+					active: false,
+				},
+			],
+			[
+				"noGames",
+				{
+					message:
+						"@{userName} - I couldn't find any games in your Steam library",
+					active: false,
+				},
+			],
+			[
+				"noMatch",
+				{
+					message:
+						"@{userName} - I couldn't find any games that match your request",
 					active: false,
 				},
 			],
@@ -74,7 +94,7 @@ function template() {
 					isArgumentOptional: false,
 					hasArgument: true,
 					isArgumentNumber: false,
-					description: "Suggests a song from users steam library",
+					description: "Suggests a game from users Steam library",
 					active: true,
 					usableBy: [
 						"broadcaster",
