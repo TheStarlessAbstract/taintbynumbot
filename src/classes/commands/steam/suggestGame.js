@@ -49,19 +49,29 @@ const suggestGame = async function (config) {
 			config.configMap
 		);
 	}
+
+	if (steamGames.length === 0) {
+		return this.getProcessedOutputString(
+			this.getOutput("noGames"),
+			config.configMap
+		);
+	}
+
 	let outputType;
 
 	if (isValueNumber(option)) {
 		// minutes played
-		steamGames = steamGames.filter((game) => game.playTime <= option);
+		const minutes = option * 60;
+		steamGames = steamGames.filter((game) => game.playTime <= minutes);
+		config.configMap.set("hours", option);
 		outputType = "timePlayed";
 	} else if (option) {
 		// percentage achievements
 		const percent = option.slice(0, -1);
 		steamGames = await this.achievementsCompleted(steamId, steamGames, percent);
+		config.configMap.set("percent", option);
 		outputType = "achievements%";
-	}
-	if (!option) {
+	} else if (!option) {
 		outputType = "randomGame";
 	}
 
