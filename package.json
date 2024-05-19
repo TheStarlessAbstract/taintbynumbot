@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node --trace-warnings bot.js",
     "test": "jest --detectOpenHandles",
-    "server": "node server.js"
+    "server": "node server.js",
+    "bot":"node --trace-warnings src/app.js"
   },
   "author": "TheStarlessAbstract",
   "license": "ISC",
