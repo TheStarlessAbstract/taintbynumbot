@@ -1,4 +1,4 @@
-const twitchRepo = require("../../../../repos/twitch.js");
+const twitchRepo = require("../../../repos/twitch.js");
 
 const shoutoutUser = async (from, to) => {
 	const apiClient = twitchRepo.getApiClient();
