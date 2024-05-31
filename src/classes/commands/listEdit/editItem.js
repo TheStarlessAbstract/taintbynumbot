@@ -3,6 +3,7 @@ const {
 	isValueNumber,
 	isNonEmptyString,
 } = require("../../../utils/valueChecks");
+const { splitArgs } = require("../../../utils/modify");
 
 const editItem = async function (config) {
 	if (config.versionKey !== "editItem") return;
@@ -13,7 +14,7 @@ const editItem = async function (config) {
 		);
 	}
 
-	const { a: index, b: textUpdate } = this.getArgumentParams(config.argument);
+	const { first: index, second: textUpdate } = splitArgs(config.argument, 0);
 	config.configMap.set(index, index);
 	config.configMap.set(textUpdate, textUpdate);
 	let outputType;
