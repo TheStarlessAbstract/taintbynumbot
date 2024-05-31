@@ -13,6 +13,7 @@ const commandTypes = () => {
 		hydrate: require("../classes/commands/hydrate/class"),
 		shoutout: require("../classes/commands/shoutout/class"),
 		followage: require("../classes/commands/followage/class"),
+		messageadd: require("../classes/commands/messageAdd/class"),
 	};
 };
 
