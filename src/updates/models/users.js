@@ -3,6 +3,7 @@ require("dotenv").config();
 const db = require("../../../bot-mongoose.js");
 
 const User = require("../../../models/user.js");
+const Messages = require("../../../models/message.js");
 const UserNew = require("../../models/usernew.js");
 
 async function init() {
@@ -43,6 +44,21 @@ async function init() {
 				expiresIn: users[i].twitchToken.expiresIn,
 				obtainmentTimestamp: new Date(),
 			});
+		}
+
+		if (user.displayName === "TheStarlessAbstract") {
+			const oldMessages = await Messages.find({ twitchId: user.channelId });
+			const messages = [];
+			for (let i = 0; i < oldMessages.length; i++) {
+				messages.push({
+					index: oldMessages[i].index,
+					text: oldMessages[i].text,
+					addedBy: oldMessages[i].addedBy,
+				});
+			}
+			user.messages = messages;
+			user.messageCountTrigger = 1;
+			user.messageIntervalLength = 0.5;
 		}
 
 		list.push(user);
