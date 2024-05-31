@@ -5,6 +5,8 @@ const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
 
 const { find, findOne } = require("./../queries/users");
 const twitchController = require("../controllers/twitch");
+const channelsService = require("../services/channels/channels");
+const channelService = require("../services/channel/channel");
 
 const clientId = process.env.TWITCH_CLIENT_ID;
 const clientSecret = process.env.TWITCH_CLIENT_SECRET;
@@ -16,7 +18,7 @@ let pubSubClient;
 async function init() {
 	const users = await find(
 		{ "tokens.twitch": { $exists: true } },
-		"channelId role tokens.twitch"
+		"channelId displayName messages messageCountTrigger messageIntervalLength role tokens.twitch"
 	);
 
 	if (users.length === 0) return;
@@ -29,7 +31,17 @@ async function init() {
 
 		let intent = [`chat`];
 		if (users[i].role != "bot") {
-			intent = [`pubsub:${users[i].channelId}`];
+			const channel = await channelService.createChannel(
+				users[i].channelId,
+				users[i].displayName,
+				users[i].messages,
+				users[i].messageCountTrigger,
+				users[i].messageIntervalLength
+			);
+
+			const res = await channelsService.addChannel(channel.id, channel);
+			if (!res) continue;
+			intent = [`pubsub:${channel.channelId}`];
 		}
 
 		authProvider.addUser(users[i].channelId, token, intent);
