@@ -1,9 +1,7 @@
 const { findOne, create } = require("../../../queries/list");
-const List = require("../../../models/list.js");
 
 const addItem = async function (config) {
 	if (config.versionKey !== "addItem") return;
-	let output;
 
 	if (!config?.permitted) {
 		return this.getProcessedOutputString(
