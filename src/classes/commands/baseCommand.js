@@ -119,24 +119,6 @@ class BaseCommand {
 		return { versionKey: null, version: null };
 	}
 
-	getArgumentParams(argument) {
-		if (!isNonEmptyString(argument)) return;
-		const splitArgs = argument.split(/\s(.+)/);
-		const parmas = {
-			a: "",
-			b: "",
-		};
-
-		for (let i = 0; i < splitArgs.length; i++) {
-			if (isValueNumber(splitArgs[i])) splitArgs[i] = Number(splitArgs[i]);
-		}
-
-		parmas.a = splitArgs[0];
-		parmas.b = splitArgs[1] || undefined;
-
-		return parmas;
-	}
-
 	shuffle(array) {
 		if (Array.isArray(array) && array.length > 0) {
 			let m = array.length,
