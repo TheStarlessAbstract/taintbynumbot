@@ -3,6 +3,7 @@ const {
 	isValueNumber,
 	isNonEmptyString,
 } = require("../../../utils/valueChecks");
+const { splitArgs } = require("../../../utils/modify");
 
 const giveUserPoints = async function (config) {
 	if (config.versionKey !== "giveUserPoints") return;
@@ -31,7 +32,7 @@ const giveUserPoints = async function (config) {
 		return output;
 	}
 
-	let { a: giftTo, b: giftAmount } = this.getArgumentParams(config.argument);
+	let { first: giftTo, second: giftAmount } = splitArgs(config.argument, 0);
 	let outputType = "noParams";
 	if (isNonEmptyString(giftTo) && isValueNumber(giftAmount)) {
 		if (giftTo.startsWith("@")) {
