@@ -1,5 +1,4 @@
 const { aggregate } = require("../../../queries/list");
-const { firstLetterToUpperCase } = require("../../../utils/modify");
 
 const getRandomByString = async function (config) {
 	if (config.versionKey !== "getRandomByString") return;
