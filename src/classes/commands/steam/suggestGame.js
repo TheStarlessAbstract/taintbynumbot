@@ -1,7 +1,7 @@
 const { getStreamByUserId } = require("../../../services/twitch/streams");
-
-const steam = require("../../../../bot-steam");
+const { splitArgs } = require("../../../utils/modify");
 const { isValueNumber } = require("../../../utils/valueChecks");
+const steam = require("../../../../bot-steam");
 
 const suggestGame = async function (config) {
 	if (config.versionKey !== "suggestGame") return;
@@ -20,8 +20,9 @@ const suggestGame = async function (config) {
 			config.configMap
 		);
 	}
-	const { a: steamUsername, b: option } = this.getArgumentParams(
-		config.argument
+	const { first: steamUsername, second: option } = splitArgs(
+		config.argument,
+		0
 	);
 	let steamId;
 
