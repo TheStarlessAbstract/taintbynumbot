@@ -27,6 +27,16 @@ const TokenSchema = new Schema({
 	},
 });
 
+const MessageSchema = new Schema({
+	index: { type: Number, required: true, unique: true },
+	text: {
+		type: String,
+		required: true,
+		unique: true,
+	},
+	addedBy: { type: String, required: true },
+});
+
 const UserNewSchema = new Schema({
 	channelId: { type: String, unique: true, required: true },
 	displayName: { type: String, unique: true, required: true },
@@ -36,6 +46,9 @@ const UserNewSchema = new Schema({
 		required: true,
 	},
 	tokens: { type: Map, of: TokenSchema },
+	messages: [MessageSchema],
+	messageCountTrigger: Number,
+	messageIntervalLength: Number,
 });
 
 module.exports = mongoose.model("UserNew", UserNewSchema);
