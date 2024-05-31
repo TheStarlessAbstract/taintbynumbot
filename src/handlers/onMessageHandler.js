@@ -1,34 +1,31 @@
-const ChannelList = require("../classes/channelList.js");
-const Channel = require("../classes/channel.js");
-const twitchRepo = require("../repos/twitch.js");
+const Channel = require("../classes/channel");
+const twitchRepo = require("../repos/twitch");
 const commands = require("../queries/commands");
 const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
 const { getCommandType } = require("../utils/messageHandler");
-const { firstLetterToUpperCase } = require("../utils/modify");
+const { firstLetterToUpperCase, splitArgs } = require("../utils/modify");
 const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
 const { getChannelInfoById } = require("../services/twitch/channels");
-
-const channels = new ChannelList(); // ["channelID": {name: "", messageCount: #,commands:{}}]
+const channelsService = require("../services/channels/channels");
 
 const handler = async (channelName, userName, message, msg) => {
 	if (hasUserInfoFormatChanged(msg.userInfo)) return;
 	const channelId = msg.channelId;
 
-	let channel = channels.getChannel(channelId);
-	if (!channel) {
-		const twitchChannel = await getChannelInfoById(channelId);
-		channel = new Channel(channelId, twitchChannel.displayName);
-		channels.addChannel(channelId, channel);
-	}
+	let channel = channelsService.getChannel(channelId);
+	// if (!channel) {
+	// 	const twitchChannel = await getChannelInfoById(channelId);
+	// 	channel = new Channel(channelId, twitchChannel.displayName);
+	// 	channelsService.addChannel(channelId, channel);
+	// }
 	channel.increaseMessageCount();
 
 	if (!hasCommandPrefix(message)) return;
 	let botUsername = "";
 	if (isUserIgnoredForCommands(userName, botUsername)) return;
-	const commandAndArgument = getCommandNameAndArgument(message);
-	const commandName = commandAndArgument.commandName.toLowerCase();
-	const argument = commandAndArgument.argument;
+	let { first: commandName, second: argument } = splitArgs(message, 1);
+	commandName = commandName.toLowerCase();
 	const messageDetails = getMessageDetails(
 		msg,
 		channel.name,
@@ -177,11 +174,6 @@ function confirmMaps(item) {
 	if (!issuesRaised) {
 		issuesRaised = !(item instanceof Map);
 	}
-}
-
-function getCommandNameAndArgument(message) {
-	const [commandName, argument] = message.slice(1).split(/\s(.+)/);
-	return { commandName, argument };
 }
 
 function getMessageDetails(msg, channel, command, argument) {
