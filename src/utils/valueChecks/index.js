@@ -1,5 +1,5 @@
-const isValueNumber = require("./isValueNumber.js");
-const isNonEmptyString = require("./isNonEmptyString.js");
+const isValueNumber = require("./isValueNumber");
+const isNonEmptyString = require("./isNonEmptyString");
 
 module.exports = {
 	isValueNumber,
