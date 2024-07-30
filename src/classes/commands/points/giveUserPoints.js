@@ -1,4 +1,5 @@
 const { findOne } = require("../../../queries/loyaltyPoints");
+const { getUserByName } = require("../../../services/twitch/users");
 const {
 	isValueNumber,
 	isNonEmptyString,
@@ -17,38 +18,41 @@ const giveUserPoints = async function (config) {
 		return output;
 	}
 
-	const user = await findOne(
+	let { first: giftTo, second: giftAmount } = splitArgs(config.argument, 0);
+	if (!isNonEmptyString(giftTo) || !isValueNumber(giftAmount))
+		return this.getProcessedOutputString(
+			this.getOutput("noParams"),
+			config.configMap
+		);
+
+	if (giftTo.startsWith("@")) {
+		giftTo = giftTo.substring(1);
+	}
+
+	const twitchUser = await getUserByName(giftTo);
+
+	const dbUser = await findOne(
 		{
-			channelId: config.channelId,
-			viewerId: config.userId,
+			channelId: this.channelId,
+			viewerId: twitchUser.id,
 		},
 		{ points: 1 }
 	);
-	if (!user) {
-		output = this.getProcessedOutputString(
+	if (!dbUser)
+		return this.getProcessedOutputString(
 			this.getOutput("userNotFound"),
 			config.configMap
 		);
-		return output;
-	}
 
-	let { first: giftTo, second: giftAmount } = splitArgs(config.argument, 0);
-	let outputType = "noParams";
-	if (isNonEmptyString(giftTo) && isValueNumber(giftAmount)) {
-		if (giftTo.startsWith("@")) {
-			giftTo = giftTo.substring(1);
-		}
-		outputType = "gifted";
-		user.points += giftAmount;
-		config.configMap.set("giftAmount", giftAmount);
-		config.configMap.set("giftTo", giftTo);
-	}
+	dbUser.points += giftAmount;
+	config.configMap.set("giftAmount", giftAmount);
+	config.configMap.set("giftTo", giftTo);
 
 	output = this.getProcessedOutputString(
-		this.getOutput(outputType),
+		this.getOutput("gifted"),
 		config.configMap
 	);
-	if (outputType == "gifted") await user.save();
+	await dbUser.save();
 
 	return output;
 };
