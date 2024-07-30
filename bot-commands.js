@@ -7,17 +7,7 @@ const User = require("./models/user");
 const defaultCommands = {};
 
 // const audioTimeout = require("./commands/audiotimeout");
-// const commandAdd = require("./commands/command-add");
-// const commandDelete = require("./commands/command-delete");
-// const commandEdit = require("./commands/command-edit");
-// const deaths = require("./commands/deaths");
-// const f = require("./commands/f");
-// const kingsRemain = require("./commands/kings-remain");
-// const kingsReset = require("./commands/kings-reset");
 // const kings = require("./commands/kings");
-// const messagesAdd = require("./commands/message-add");
-// const messagesDelete = require("./commands/message-delete");
-// const messagesEdit = require("./commands/message-edit");
 
 let chugLastUseTime = "";
 
@@ -33,8 +23,6 @@ const userCommands = {
 };
 
 const commands = {
-	// addcomm: commandAdd.command,
-	// addmessage: messagesAdd.command,
 	// audiotimeout: audioTimeout.command,
 	// // chug: {
 	// // 	response: async (config) => {
@@ -71,14 +59,6 @@ const commands = {
 	// // 		return result;
 	// // 	},
 	// // },
-	// deaths: deaths.command,
-	// delcomm: commandDelete.command,
-	// delmessage: messagesDelete.command,
-	// editcomm: commandEdit.command,
-	// editmessage: messagesEdit.command,
-	// f: f.command,
-	// kingsremain: kingsRemain.command,
-	// kingsreset: kingsReset.command,
 	// kings: kings.command,
 };
 
