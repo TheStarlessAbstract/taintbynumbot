@@ -37,7 +37,7 @@ const handler = async (channelName, userName, message, msg) => {
 	if (!commandA) {
 		let commandDetails = await commands.findOne(
 			{ channelId: channelId, chatName: commandName },
-			{ type: 1, output: 1, versions: 1, listTypeName: 1 }
+			{ type: 1, output: 1, versions: 1, commandGroup: 1 }
 		);
 		if (!commandDetails) return false;
 		const CommandType = getCommandType(commandDetails.type);
@@ -105,7 +105,7 @@ const handler = async (channelName, userName, message, msg) => {
 module.exports = { handler };
 
 function hasCommandPrefix(message) {
-	return message.startsWith("!"); // Maybe give option to use another character for command prefix, then need to get based on channel message is in
+	return message.startsWith("!") && message.length > 1; // Maybe give option to use another character for command prefix, then need to get based on channel message is in
 }
 
 function isUserIgnoredForCommands(user, botUsername) {
