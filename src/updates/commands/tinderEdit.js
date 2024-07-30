@@ -15,7 +15,7 @@ function template() {
 		type: "listedit",
 		createdBy: twitchId,
 		createdOn: new Date(),
-		listTypeName: "tinder",
+		commandGroup: "tinder",
 		output: new Map([
 			[
 				"notPermitted",
