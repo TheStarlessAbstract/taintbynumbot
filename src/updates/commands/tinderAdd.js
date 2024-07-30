@@ -15,7 +15,7 @@ function template() {
 		type: "listadd",
 		createdBy: twitchId,
 		createdOn: new Date(),
-		listTypeName: "tinder",
+		commandGroup: "tinder",
 		output: new Map([
 			[
 				"alreadyExists",
