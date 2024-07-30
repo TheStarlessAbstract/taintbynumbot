@@ -34,7 +34,7 @@ const editItem = async function (config) {
 
 	const item = await findOne({
 		channelId: config.channelId,
-		name: this.listTypeName,
+		name: this.commandGroup,
 		index: index,
 	});
 
