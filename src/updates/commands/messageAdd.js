@@ -11,7 +11,7 @@ async function copyAndUpdate() {
 function template() {
 	return new Command({
 		channelId: twitchId,
-		chatName: "mess++",
+		chatName: "addmessage",
 		type: "messageadd",
 		createdBy: twitchId,
 		createdOn: new Date(),
