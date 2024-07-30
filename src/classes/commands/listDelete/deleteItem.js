@@ -9,11 +9,11 @@ const deleteItem = async function (config) {
 		);
 	}
 
-	config.configMap.set(index, config.argument);
+	config.configMap.set("index", config.argument);
 
 	const item = await deleteOne({
 		channelId: config.channelId,
-		name: this.listTypeName,
+		name: this.commandGroup,
 		index: config.argument,
 	});
 
