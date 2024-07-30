@@ -1,4 +1,4 @@
-const BaseCommand = require("../baseCommand");
+const BaseCommand = require("../baseCommand.js");
 
 class Text extends BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
