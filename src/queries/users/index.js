@@ -1,7 +1,9 @@
-const find = require("./find.js");
-const findOne = require("./findOne.js");
+const find = require("./find");
+const findOne = require("./findOne");
+const updateOne = require("./updateOne");
 
 module.exports = {
 	find,
 	findOne,
+	updateOne,
 };
