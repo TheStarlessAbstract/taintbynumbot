@@ -11,7 +11,7 @@ async function copyAndUpdate() {
 function template() {
 	return new Command({
 		channelId: twitchId,
-		chatName: "steambitch",
+		chatName: "steam",
 		type: "steam",
 		createdBy: twitchId,
 		createdOn: new Date(),
