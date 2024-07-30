@@ -21,7 +21,7 @@ function template() {
 				{
 					message:
 						"@{displayName} I hate to say it, but it looks like you haven't been here for a whole 5 minutes yet. Hang around a bit longer to get your self some Tainty Points.",
-					active: true,
+					active: false,
 				},
 			],
 			[
