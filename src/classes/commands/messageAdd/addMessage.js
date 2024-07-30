@@ -14,9 +14,7 @@ const addMessage = async function (config) {
 	const channel = getChannel(config.channelId);
 	if (!channel) return;
 
-	// move existing check to channel class, called from addMessage, or function performed there return from addMessage {object, err}
 	const messageExists = channel.checkMessageExists(config.argument);
-
 	if (messageExists)
 		return this.getProcessedOutputString(
 			this.getOutput("messageExists"),
