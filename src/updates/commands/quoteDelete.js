@@ -15,7 +15,7 @@ function template() {
 		type: "listdelete",
 		createdBy: twitchId,
 		createdOn: new Date(),
-		listTypeName: "quote",
+		commandGroup: "quote",
 		output: new Map([
 			[
 				"notPermitted",
