@@ -1,21 +1,31 @@
-const { findOne } = require("../../../queries/loyaltyPoints");
+const { getChannel } = require("../../../services/channels/channels");
+const { updateOne } = require("../../../queries/users");
 
 const getUserPoints = async function (config) {
-	if (config.versionKey !== "getUserPoints") return;
-	let output;
+	if (config.versionKey !== "deleteMessage") return;
+	let outputType;
 
-	const user = await findOne(
-		{
-			channelId: config.channelId,
-			viewerId: config.userId,
-		},
-		{ points: 1 }
+	if (!config?.permitted) outputType = "notPermitted";
+	if (!outputType && !config.argument) outputType = "noArgument";
+	if (outputType)
+		return this.getProcessedOutputString(
+			this.getOutput(outputType),
+			config.configMap
+		);
+
+	config.configMap.set("index", config.argument);
+
+	const res = await updateOne(
+		{ channelId: config.channelId, "messages.index": config.argument },
+		{ $pull: { messages: { index: config.argument } } }
 	);
 
-	let outputType = "userNotFound";
-	if (user) {
-		config.configMap.set("points", user.points);
-		outputType = "userPoints";
+	outputType = "deleted";
+	if (res.matchedCount === 0) outputType = "notFound";
+	if (!res.acknowledged) outputType = "error";
+	else {
+		const channel = getChannel(config.channelId);
+		channel.deleteMessageByIndex(config.argument);
 	}
 
 	output = this.getProcessedOutputString(
