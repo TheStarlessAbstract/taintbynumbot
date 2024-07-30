@@ -16,6 +16,7 @@ const getByIndex = async function (config) {
 		name: config.chatName,
 		index: config.argument,
 	});
+
 	config.configMap.set("index", config.argument);
 
 	if (!item) {
