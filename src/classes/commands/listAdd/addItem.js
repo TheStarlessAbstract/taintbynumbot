@@ -12,7 +12,7 @@ const addItem = async function (config) {
 
 	const item = await findOne({
 		channelId: config.channelId,
-		name: this.listTypeName,
+		name: this.commandGroup,
 		text: config.argument,
 	});
 
@@ -33,7 +33,7 @@ const addItem = async function (config) {
 	const lastEntry = await findOne(
 		{
 			channelId: config.channelId,
-			name: this.listTypeName,
+			name: this.commandGroup,
 		},
 		projection,
 		options
@@ -43,7 +43,7 @@ const addItem = async function (config) {
 	await create({
 		index: index,
 		channelId: config.channelId,
-		name: this.listTypeName,
+		name: this.commandGroup,
 		text: config.argument,
 		createdBy: config.userId,
 		createdOn: new Date(),
