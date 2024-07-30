@@ -2,6 +2,7 @@ const { getRandomBetweenInclusiveMax } = require("../utils");
 const { say } = require("../services/twitch/chatClient");
 const { commandTypes } = require("../config");
 const types = commandTypes();
+const Text = require("./commands/text/class");
 
 class Channel {
 	constructor(
@@ -22,6 +23,7 @@ class Channel {
 		this.messsageInterval = this.startMessageInterval();
 
 		this.commands = {}; // maybe a map instead
+		this.cardGames = {}; // name propery == commandname
 	}
 
 	getName() {
@@ -77,8 +79,22 @@ class Channel {
 		return this.commands[name];
 	}
 
-	addCommand(name, commandDetails) {
-		this.commands[name] = commandDetails;
+	addCommand(name, command) {
+		this.commands[name] = command;
+	}
+
+	addTextCommand(name, type, output, versions) {
+		const command = new Text(this.id, name, { type, output, versions });
+		this.commands[name] = command;
+	}
+
+	editTextCommand(name, textUpdate) {
+		const textOutput = this.commands[name]?.output.get("text");
+		if (textOutput) textOutput.message = textUpdate;
+	}
+
+	deleteCommand(name) {
+		delete this.commands[name];
 	}
 
 	getCommand(name) {
@@ -128,7 +144,7 @@ class Channel {
 
 	checkMessageExists(messageQuery) {
 		messageQuery = messageQuery.toLowerCase();
-		return this.messages.some(
+		return this.messages.find(
 			(message) => messageQuery === message.text.toLowerCase()
 		);
 	}
@@ -151,6 +167,26 @@ class Channel {
 
 		this.messages.push(message);
 		return message;
+	}
+
+	getMessageByIndex(index) {
+		return this.messages.find((message) => message.index === index);
+	}
+
+	deleteMessageByIndex(index) {
+		const messageIndex = this.messages.findIndex(
+			(message) => message.index === index
+		);
+
+		this.messages.splice(messageIndex, 1);
+	}
+
+	addCardGame(name, game) {
+		this.cardGames[name] = game;
+	}
+
+	getCardGame(name) {
+		return this.cardGames[name];
 	}
 }
 
