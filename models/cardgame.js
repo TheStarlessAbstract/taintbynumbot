@@ -13,20 +13,21 @@ let CardSchema = new Schema({
 
 let PrizeSchema = new Schema({
 	active: Boolean,
-	method: String,
+	method: String, //
 	amount: Number,
 	rate: Number,
 	lastDrawn: Number,
 });
 
 let BonusSchema = new Schema({
+	//jagerbonus??
 	name: String,
 	active: Boolean,
 	amount: Number,
-	appliesTo: String,
+	appliesTo: String, // card type
 	message: String,
 	hasAudioAlert: Boolean,
-	prize: PrizeSchema,
+	prize: PrizeSchema, // points gifted
 });
 
 let CardGameSchema = new Schema({
