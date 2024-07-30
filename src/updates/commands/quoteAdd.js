@@ -15,7 +15,7 @@ function template() {
 		type: "listadd",
 		createdBy: twitchId,
 		createdOn: new Date(),
-		listTypeName: "quote",
+		commandGroup: "quote",
 		output: new Map([
 			[
 				"alreadyExists",
