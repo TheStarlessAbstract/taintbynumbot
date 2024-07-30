@@ -19,6 +19,7 @@ async function copyAndUpdate() {
 		});
 
 		let list = [];
+
 		for (let j = 0; j < activeCommands.length; j++) {
 			list.push({
 				channelId: activeCommands[j].streamerId,
