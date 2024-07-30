@@ -9,10 +9,10 @@ init();
 
 async function init() {
 	await db.connectToMongoDB();
-	await commands();
+	// await commands();
 	// await audio();
 	// await quote();
 	// await tinder();
-	// await models();
+	await models();
 	await db.disconnectFromMongoDB();
 }
