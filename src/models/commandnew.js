@@ -39,12 +39,12 @@ const VersionSchema = new Schema({
 const CommandNewSchema = new Schema({
 	channelId: { type: String, required: true },
 	chatName: { type: String, required: true }, // custom command name !addquote
-	type: String, // type of command list
+	type: String, // type of command
 	createdBy: String,
 	createdOn: Date,
 	lastEditedBy: String,
 	lastEditedOn: String,
-	listTypeName: String,
+	commandGroup: String, // is the same as the chatName of the main command eg. quote - main command / quoteadd sub command
 	output: { type: Map, of: OutputSchema }, // not requried as text only commands don't have output or versions fields
 	versions: { type: Map, of: VersionSchema }, // "no argument", "numberArgument", "stringArgument"
 });
