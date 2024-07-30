@@ -4,7 +4,6 @@ const chatCommandConfigMap = () => {
 		["chatName", ""],
 		["displayName", ""],
 		["followLength", ""],
-		["gameName", ""],
 		["giftAmount", ""],
 		["giftTo", ""],
 		["points", ""],
