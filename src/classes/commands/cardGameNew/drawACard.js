@@ -16,7 +16,7 @@ const drawACard = async function (config) {
 			config.configMap
 		);
 
-	if (!config?.permitted) {
+	if (!config?.permitted || typeof config.permitted !== "boolean") {
 		return this.getProcessedOutputString(
 			this.getOutput("notPermitted"),
 			config.configMap
