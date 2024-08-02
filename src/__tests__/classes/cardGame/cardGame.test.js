@@ -34,12 +34,13 @@ describe("draw a card", () => {
 		mockChannel = new Channel();
 		mockCardGame = new CardGameCommand();
 		mockGame = new CardGame();
+		mockCardGame.channelId = "12345678";
 		action = drawACardAction.bind(mockCardGame);
 	});
 
-	test("when versionKey is not drawACard - should return undefined", async () => {
+	test("should return undefined if config does not have versionKey", async () => {
 		// Assemble
-		const config = { versionKey: "hydrate" };
+		const config = {};
 
 		// Act
 		const result = await action(config);
@@ -49,9 +50,34 @@ describe("draw a card", () => {
 		expect(getStreamByUserId).not.toHaveBeenCalled();
 	});
 
-	test("when versionKey is drawACard, and getStreamByUserId returns null - should return noStream string", async () => {
+	test("should return undefined if config.versionKey is undefined", async () => {
+		// Assemble
+		const config = { versionKey: undefined };
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(getStreamByUserId).not.toHaveBeenCalled();
+	});
+
+	test("should return undefined if config.versionKey is incorrect", async () => {
+		// Assemble
+		const config = { versionKey: "wrongKey" };
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(getStreamByUserId).not.toHaveBeenCalled();
+	});
+
+	test("should return noStream output if no stream found", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard" };
+
 		getStreamByUserId.mockResolvedValue(null);
 
 		jest
@@ -79,35 +105,7 @@ describe("draw a card", () => {
 		expect(getChannel).not.toHaveBeenCalled();
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, and config.permitted is false - should return notPermitted string", async () => {
-		// Assemble
-		const config = { versionKey: "drawACard", permitted: false };
-		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
-		jest
-			.spyOn(mockCardGame, "getOutput")
-			.mockImplementation(
-				() => "@{displayName} - You are not permitted to use this command"
-			);
-		jest
-			.spyOn(mockCardGame, "getProcessedOutputString")
-			.mockImplementation(
-				() => "@TaintByNumBot - You are not permitted to use this command"
-			);
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBe(
-			"@TaintByNumBot - You are not permitted to use this command"
-		);
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCardGame.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCardGame.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).not.toHaveBeenCalled();
-	});
-
-	test("when versionKey is drawACard, getStreamByUserId returns an object, and config does not have permitted property - should return notPermitted string", async () => {
+	test("should return notPermitted output if config does not have permitted", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard" };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
@@ -135,11 +133,67 @@ describe("draw a card", () => {
 		expect(getChannel).not.toHaveBeenCalled();
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, and getChannel does not return a Channel - should return undefined", async () => {
+	test("should return notPermitted output if config.permitted is not boolean", async () => {
+		// Assemble
+		const config = { versionKey: "drawACard", permitted: "card" };
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+
+		jest
+			.spyOn(mockCardGame, "getOutput")
+			.mockImplementation(
+				() => "@{displayName} - You are not permitted to use this command"
+			);
+		jest
+			.spyOn(mockCardGame, "getProcessedOutputString")
+			.mockImplementation(
+				() => "@TaintByNumBot - You are not permitted to use this command"
+			);
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TaintByNumBot - You are not permitted to use this command"
+		);
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCardGame.getOutput).toHaveBeenCalledTimes(1);
+		expect(mockCardGame.getProcessedOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).not.toHaveBeenCalled();
+	});
+
+	test("should return notPermitted output if config.permitted is false", async () => {
+		// Assemble
+		const config = { versionKey: "drawACard", permitted: false };
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+
+		jest
+			.spyOn(mockCardGame, "getOutput")
+			.mockImplementation(
+				() => "@{displayName} - You are not permitted to use this command"
+			);
+		jest
+			.spyOn(mockCardGame, "getProcessedOutputString")
+			.mockImplementation(
+				() => "@TaintByNumBot - You are not permitted to use this command"
+			);
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TaintByNumBot - You are not permitted to use this command"
+		);
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCardGame.getOutput).toHaveBeenCalledTimes(1);
+		expect(mockCardGame.getProcessedOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).not.toHaveBeenCalled();
+	});
+
+	test("should return undefined if channel is not an instance of Channel", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-		getChannel.mockReturnValue({});
+		getChannel.mockReturnValue(undefined);
 		// Act
 		const result = await action(config);
 
@@ -152,10 +206,13 @@ describe("draw a card", () => {
 		expect(mockChannel.getCardGame).not.toHaveBeenCalled();
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does not return an object  - should return noGame string", async () => {
+	test("should return noGame output if no card game found in channel and database", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		getChannel.mockReturnValue(mockChannel);
+		mockChannel.getCardGame.mockReturnValue({});
+		findOne.mockResolvedValue(undefined);
 
 		jest
 			.spyOn(mockCardGame, "getOutput")
@@ -163,10 +220,6 @@ describe("draw a card", () => {
 		jest
 			.spyOn(mockCardGame, "getProcessedOutputString")
 			.mockImplementation(() => "@TaintByNumBot - No game found");
-
-		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-		findOne.mockResolvedValue(undefined);
 
 		// Act
 		const result = await action(config);
@@ -183,24 +236,14 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).not.toHaveBeenCalled();
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, and CardGame.drawCard doesn't return an object - should return undefined", async () => {
+	test("should return undefined if card drawn is undefined", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
+
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
 		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
-
-		mockGame.drawCard.mockReturnValue();
-		CardGame.mockReturnValue(mockGame);
+		mockChannel.getCardGame.mockReturnValue(mockGame);
+		mockGame.drawCard.mockReturnValue(undefined);
 
 		// Act
 		const result = await action(config);
@@ -212,30 +255,19 @@ describe("draw a card", () => {
 		expect(mockCardGame.getProcessedOutputString).not.toHaveBeenCalled();
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, CardGame.drawCard returns an object, and object does not have card property - should return undefined", async () => {
+	test("should return undefined if drawn is does not have card property", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
+
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
 		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
-
+		mockChannel.getCardGame.mockReturnValue();
 		mockGame.drawCard.mockReturnValue({ bonus: false, reset: [] });
-		CardGame.mockReturnValue(mockGame);
 
 		// Act
 		const result = await action(config);
@@ -247,27 +279,17 @@ describe("draw a card", () => {
 		expect(mockCardGame.getProcessedOutputString).not.toHaveBeenCalled();
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, CardGame.drawCard returns an object, and object does not have reset property - should return undefined", async () => {
+	test("should return undefined if drawn is does not have reset property", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
+
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
 		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
+		mockChannel.getCardGame.mockReturnValue(mockGame);
 
 		card = {
 			suit: "Clubs",
@@ -277,7 +299,6 @@ describe("draw a card", () => {
 		};
 
 		mockGame.drawCard.mockReturnValue({ card, bonus: false });
-		CardGame.mockReturnValue(mockGame);
 
 		// Act
 		const result = await action(config);
@@ -289,27 +310,17 @@ describe("draw a card", () => {
 		expect(mockCardGame.getProcessedOutputString).not.toHaveBeenCalled();
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, CardGame.drawCard returns an object, and object does not have bonus property - should return undefined", async () => {
+	test("should return undefined if drawn is does not have bonus property", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
+
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
 		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
+		mockChannel.getCardGame.mockReturnValue(mockGame);
 
 		card = {
 			suit: "Clubs",
@@ -331,27 +342,17 @@ describe("draw a card", () => {
 		expect(mockCardGame.getProcessedOutputString).not.toHaveBeenCalled();
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 	});
 
-	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, CardGame.drawCard returns a valid object, and card does not have suit property - should return undefined", async () => {
+	test("should return undefined if drawn.card is does not have suit property", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		getChannel.mockReturnValue(mockChannel);
 		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
 
 		card = {
 			value: "Jack",
@@ -461,6 +462,47 @@ describe("draw a card", () => {
 	});
 
 	test("when versionKey is drawACard, getStreamByUserId returns an object, config.permitted is true, getChannel returns a Channel, Channel.getCardGame does not return a CardGame, and findOne does return an object, CardGame.drawCard returns a valid object, and card does not have explanation property - should return undefined", async () => {
+		// Assemble
+		const config = { versionKey: "drawACard", permitted: true };
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+
+		getChannel.mockReturnValue(mockChannel);
+		mockChannel.getCardGame.mockReturnValue({});
+
+		findOne.mockResolvedValue({
+			channelId: "123",
+			name: "Kings",
+			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
+			values: [1, 2, 3],
+			bonus: [{ 1: "jager", 2: "lastKing" }],
+		});
+
+		card = {
+			suit: "Clubs",
+			value: "Jack",
+			rule: "Hydrate",
+		};
+
+		mockGame.drawCard.mockReturnValue({ card, reset: false });
+		CardGame.mockReturnValue(mockGame);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCardGame.getOutput).not.toHaveBeenCalled();
+		expect(mockCardGame.getProcessedOutputString).not.toHaveBeenCalled();
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(1);
+		expect(CardGame).toHaveBeenCalledTimes(2);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+	});
+
+	test("USE FOR DATABASE CHECK", async () => {
 		// Assemble
 		const config = { versionKey: "drawACard", permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
