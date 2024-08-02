@@ -45,21 +45,9 @@ const drawACard = async function (config) {
 	}
 
 	const drawn = await game.drawCard(); // bonus = [{audioLink, selector}]
-	if (
-		typeof drawn !== "object" &&
-		(!drawn?.card || !drawn?.reset || !drawn?.bonus)
-	)
-		return;
+
+	if (this.validateCard(drawn)) return;
 	const { card, reset, bonus } = drawn;
-	if (
-		!card?.suit ||
-		!card?.value ||
-		!card?.rule ||
-		!card?.explanation ||
-		typeof reset !== "boolean" ||
-		!Array.isArray(bonus)
-	)
-		return;
 
 	config.configMap.set("suit", card.suit);
 	config.configMap.set("value", card.value);
