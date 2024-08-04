@@ -71,7 +71,8 @@ class CardGameBonus {
 			channelId: this.channelId,
 			name: this.audioName,
 		});
-		return dbAudioLink.url;
+
+		return dbAudioLink?.url;
 	}
 
 	resetBonus() {
