@@ -4,8 +4,10 @@ const { getStreamByUserId } = require("../../../services/twitch/streams");
 const { getChannel } = require("../../../controllers/channels");
 const Channel = require("../../../classes/channel");
 const CardGame = require("../../../classes/cardGame");
+const CardGameBonus = require("../../../classes/cardGameBonus");
 const commandActions = require("../../../config/commandActions");
 const loyaltyPoints = require("../../../queries/loyaltyPoints");
+const LoyaltyPoints = require("../../../models/loyaltypointnew");
 const { findOne } = require("../../../queries/cardGames");
 
 jest.mock("../../../services/twitch/streams", () => ({
@@ -21,11 +23,15 @@ jest.mock("../../../queries/loyaltyPoints");
 jest.mock("../../../config/commandActions"); // imported and mocked to prevent fail
 jest.mock("../../../classes/channel");
 jest.mock("../../../classes/cardGame");
+jest.mock("../../../classes/cardGameBonus");
 jest.mock("../../../classes/commands/cardGameNew/class");
+jest.mock("../../../models/loyaltypointnew");
 
 let mockChannel;
 let mockCommand;
 let mockGame;
+let mockGameBonus;
+let mockUser;
 let action;
 
 describe("draw a card", () => {
@@ -34,6 +40,8 @@ describe("draw a card", () => {
 		mockChannel = new Channel();
 		mockCommand = new CardGameCommand();
 		mockGame = new CardGame();
+		mockGameBonus = new CardGameBonus();
+		mockUser = new LoyaltyPoints();
 		mockCommand.channelId = "12345678";
 		action = drawACardAction.bind(mockCommand);
 	});
@@ -360,12 +368,12 @@ describe("draw a card", () => {
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getOutput).toHaveBeenCalledTimes(2);
 		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(2);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 	});
 
 	// test id 13
-	test("should return card, rule, and bonus output if valid drawn card has abonus", async () => {
+	test("should return card, rule, and bonus output if valid drawn card has a bonus", async () => {
 		// Assemble
 		const config = {
 			versionKey: "drawACard",
@@ -383,8 +391,14 @@ describe("draw a card", () => {
 			explanation: "Hydrate you fools",
 		};
 
-		mockGame.drawCard.mockReturnValue({ card, reset: false, bonus: [] });
-		loyaltyPoints.findOne.mockResolvedValue(undefined);
+		mockGame.drawCard.mockReturnValue({
+			card,
+			reset: false,
+			bonus: [{ id: 1, reward: 69, audioLink: undefined }],
+		});
+
+		mockUser.points = 1000;
+		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -396,6 +410,12 @@ describe("draw a card", () => {
 			.spyOn(mockCommand, "getOutput")
 			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
 		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(
+				() =>
+					"@{displayName} - You have won {prize} Tainty Points, you now have {newTotal}"
+			);
+		jest
 			.spyOn(mockCommand, "getProcessedOutputString")
 			.mockImplementationOnce(
 				() => "@TaintByNumBot You have drawn the Jack of Clubs"
@@ -404,6 +424,12 @@ describe("draw a card", () => {
 			.spyOn(mockCommand, "getProcessedOutputString")
 			.mockImplementationOnce(
 				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
+			);
+		jest
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(
+				() =>
+					"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
 			);
 
 		// Act
@@ -414,6 +440,9 @@ describe("draw a card", () => {
 		expect(result[1]).toBe(
 			"Rule: This card doesn't really have a rule || Hydrate you fools"
 		);
+		expect(result[2]).toBe(
+			"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
+		);
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
@@ -422,139 +451,166 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(2);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(2);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
-	test("should return undefined if drawn is does not have card property", async () => {
+	// test id 14
+	test("should return card, rule, and reset output if final card has been drawn", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
-
+		const config = {
+			versionKey: "drawACard",
+			permitted: true,
+			configMap: new Map(),
+		};
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue();
-		mockGame.drawCard.mockReturnValue({ bonus: false, reset: [] });
-
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBeUndefined();
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).not.toHaveBeenCalled();
-		expect(mockCommand.getProcessedOutputString).not.toHaveBeenCalled();
-		expect(getChannel).toHaveBeenCalledTimes(1);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
-	});
-
-	test.skip("USE FOR DATABASE CHECK", async () => {
-		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
-		getStreamByUserId.mockResolvedValue({ id: "100612361" });
-
-		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue({});
-
-		findOne.mockResolvedValue({
-			channelId: "123",
-			name: "Kings",
-			suits: ["Clubs", "Diamonds", "Hearts", "Spades"],
-			values: [1, 2, 3],
-			bonus: [{ 1: "jager", 2: "lastKing" }],
-		});
+		mockChannel.getCardGame.mockReturnValue(mockGame);
 
 		card = {
 			suit: "Clubs",
 			value: "Jack",
-			rule: "Hydrate",
-		};
-
-		mockGame.drawCard.mockReturnValue({ card, reset: false });
-		CardGame.mockReturnValue(mockGame);
-
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBeUndefined();
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).not.toHaveBeenCalled();
-		expect(mockCommand.getProcessedOutputString).not.toHaveBeenCalled();
-		expect(getChannel).toHaveBeenCalledTimes(1);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(1);
-		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
-		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
-	});
-
-	test.skip("test", async () => {
-		// Assemble
-		const config = {
-			channelId: "100612361",
-			userId: "100612361",
-			username: "thestarlessabstract",
-			chatName: "kings",
-			versionKey: "drawACard",
-			user: {
-				channelId: "100612361",
-				viewerId: "100612361",
-				points: 1200,
-				follower: false,
-				__v: 0,
-			},
-			permitted: true,
-			bypass: true,
-			userCanPayCost: true,
-			configMap: new Map([
-				["channelName", "thestarlessabstract"],
-				["displayName", "TheStarlessAbstract"],
-				["gameName", undefined],
-				["channelId", "100612361"],
-				["isBroadcaster", true],
-			]),
-		};
-
-		getStreamByUserId.mockResolvedValue({ stream: true });
-		getChannel.mockReturnValue(mockChannel);
-		mockChannel.getCardGame.mockReturnValue(mockGame);
-
-		const testCard = {
-			suit: 1,
-			value: 1,
-			rule: 1,
-			explanation: 1,
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
 		};
 
 		mockGame.drawCard.mockReturnValue({
-			card: testCard,
-			reset: false,
+			card,
+			reset: true,
 			bonus: [],
 		});
 
+		mockUser.points = 1000;
+		loyaltyPoints.findOne.mockResolvedValue(mockUser);
+
+		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
 			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "Queen of Hearts")
-			.mockImplementationOnce(() => "Ask a question");
+			.mockImplementationOnce(
+				() => "@{displayName} You have drawn the {value} of {suit}"
+			);
+		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
+		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(() => "New game has been dealt");
 		jest
 			.spyOn(mockCommand, "getProcessedOutputString")
-			.mockImplementationOnce(() => "Queen of Hearts")
-			.mockImplementationOnce(() => "Ask a question");
+			.mockImplementationOnce(
+				() => "@TaintByNumBot You have drawn the Jack of Clubs"
+			);
 		jest
-			.spyOn(mockCommand, "getAudioUrl")
-			.mockImplementation(() => "https://www.youtube.com/watch?v=ybGOT4d2Hs8");
-
-		loyaltyPoints.findOne.mockResolvedValue(undefined);
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(
+				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
+			);
+		jest
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(() => "New game has been dealt");
 
 		// Act
 		const result = await action(config);
 
 		// Assert
-		expect(result[0]).toBe("Queen of Hearts");
-		expect(result[1]).toBe("Ask a question");
+		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
+		expect(result[1]).toBe(
+			"Rule: This card doesn't really have a rule || Hydrate you fools"
+		);
+		expect(result[2]).toBe("New game has been dealt");
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(1);
+	});
+
+	// test id 15
+	test("should return card, rule, and reset output if final card has been drawn", async () => {
+		// Assemble
+		const config = {
+			versionKey: "drawACard",
+			permitted: true,
+			configMap: new Map(),
+		};
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		getChannel.mockReturnValue(mockChannel);
+		mockChannel.getCardGame.mockReturnValue(mockGame);
+
+		card = {
+			suit: "Clubs",
+			value: "Jack",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+		};
+
+		mockGame.drawCard.mockReturnValue({
+			card,
+			reset: true,
+			bonus: [],
+		});
+
+		mockUser.points = 1000;
+		loyaltyPoints.findOne.mockResolvedValue(mockUser);
+
+		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
+		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(
+				() => "@{displayName} You have drawn the {value} of {suit}"
+			);
+		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
+		jest
+			.spyOn(mockCommand, "getOutput")
+			.mockImplementationOnce(() => "New game has been dealt");
+		jest
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(
+				() => "@TaintByNumBot You have drawn the Jack of Clubs"
+			);
+		jest
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(
+				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
+			);
+		jest
+			.spyOn(mockCommand, "getProcessedOutputString")
+			.mockImplementationOnce(() => "New game has been dealt");
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
+		expect(result[1]).toBe(
+			"Rule: This card doesn't really have a rule || Hydrate you fools"
+		);
+		expect(result[2]).toBe("New game has been dealt");
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 });
