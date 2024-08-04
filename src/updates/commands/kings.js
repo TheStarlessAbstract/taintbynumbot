@@ -62,7 +62,8 @@ function template() {
 			[
 				"bonus1",
 				{
-					message: "Dazed Sucks",
+					message:
+						"@{displayName} - You have won {prize} Tainty Points, you now have {newTotal}",
 					active: true,
 				},
 			],
