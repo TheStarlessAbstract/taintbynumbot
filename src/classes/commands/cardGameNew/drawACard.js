@@ -60,7 +60,8 @@ const drawACard = async function (config) {
 	];
 
 	const audioLinkUrls = [];
-	let audioUrl = await this.getAudioUrl(card.audioName);
+	let audioUrl;
+	if (card.audioName) audioUrl = await this.getAudioUrl(card.audioName);
 	if (audioUrl) audioLinkUrls.push(audioUrl);
 
 	const dbUser = await loyaltyPoints.findOne(
