@@ -46,7 +46,7 @@ const drawACard = async function (config) {
 
 	const drawn = await game.drawCard(); // bonus = [{audioLink, selector}]
 
-	if (this.validateCard(drawn)) return;
+	if (!this.validateCard(drawn)) return;
 	const { card, reset, bonus } = drawn;
 
 	config.configMap.set("suit", card.suit);
