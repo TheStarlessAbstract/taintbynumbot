@@ -96,26 +96,6 @@ class CardGame {
 		}
 		return matchedBonus;
 	}
-
-	validateCard(drawn) {
-		if (
-			typeof drawn !== "object" &&
-			(!drawn?.card || !drawn?.reset || !drawn?.bonus)
-		)
-			false;
-		const { card, reset, bonus } = drawn;
-		if (
-			!card?.suit ||
-			!card?.value ||
-			!card?.rule ||
-			!card?.explanation ||
-			typeof reset !== "boolean" ||
-			!Array.isArray(bonus)
-		)
-			return false;
-
-		return true;
-	}
 }
 
 module.exports = CardGame;
