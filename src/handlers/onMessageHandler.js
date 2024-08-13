@@ -14,11 +14,12 @@ const handler = async (channelName, userName, message, msg) => {
 	const channelId = msg.channelId;
 
 	let channel = channelsService.getChannel(channelId);
-	// if (!channel) {
-	// 	const twitchChannel = await getChannelInfoById(channelId);
-	// 	channel = new Channel(channelId, twitchChannel.displayName);
-	// 	channelsService.addChannel(channelId, channel);
-	// }
+	if (!channel) {
+		console.log("No Channel");
+		// 	const twitchChannel = await getChannelInfoById(channelId);
+		// 	channel = new Channel(channelId, twitchChannel.displayName);
+		// 	channelsService.addChannel(channelId, channel);
+	}
 	channel.increaseMessageCount();
 
 	if (!hasCommandPrefix(message)) return;
