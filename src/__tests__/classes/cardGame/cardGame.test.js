@@ -9,6 +9,7 @@ const commandActions = require("../../../config/commandActions");
 const loyaltyPoints = require("../../../queries/loyaltyPoints");
 const LoyaltyPoints = require("../../../models/loyaltypointnew");
 const { findOne } = require("../../../queries/cardGames");
+const { play } = require("../../../services/audio");
 
 jest.mock("../../../services/twitch/streams", () => ({
 	getStreamByUserId: jest.fn(),
@@ -18,6 +19,9 @@ jest.mock("../../../controllers/channels", () => ({
 }));
 jest.mock("../../../queries/cardGames", () => ({
 	findOne: jest.fn(),
+}));
+jest.mock("../../../services/audio", () => ({
+	play: jest.fn(),
 }));
 jest.mock("../../../queries/loyaltyPoints");
 jest.mock("../../../config/commandActions"); // imported and mocked to prevent fail
@@ -42,7 +46,7 @@ describe("draw a card", () => {
 		mockGame = new CardGame();
 		mockGameBonus = new CardGameBonus();
 		mockUser = new LoyaltyPoints();
-		mockCommand.channelId = "12345678";
+		mockCommand.channelId = "100612361";
 		action = drawACardAction.bind(mockCommand);
 	});
 
@@ -56,10 +60,22 @@ describe("draw a card", () => {
 
 		// Assert
 		expect(result).toBeUndefined();
-		expect(getStreamByUserId).not.toHaveBeenCalled();
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 3
+	// test id 2
 	test("should return undefined if config.versionKey is undefined", async () => {
 		// Assemble
 		const config = { versionKey: undefined };
@@ -69,7 +85,19 @@ describe("draw a card", () => {
 
 		// Assert
 		expect(result).toBeUndefined();
-		expect(getStreamByUserId).not.toHaveBeenCalled();
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 3
@@ -82,7 +110,19 @@ describe("draw a card", () => {
 
 		// Assert
 		expect(result).toBeUndefined();
-		expect(getStreamByUserId).not.toHaveBeenCalled();
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 4
@@ -93,13 +133,7 @@ describe("draw a card", () => {
 		getStreamByUserId.mockResolvedValue(null);
 
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementation(
-				() =>
-					"@{displayName} - {channelName} doesn't seem to be streaming right now"
-			);
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TaintByNumBot - TheStarlessAbstract doesn't seem to be streaming right now"
@@ -108,13 +142,23 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
 		expect(result).toBe(
 			"@TaintByNumBot - TheStarlessAbstract doesn't seem to be streaming right now"
 		);
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).not.toHaveBeenCalled();
+
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 5
@@ -124,12 +168,7 @@ describe("draw a card", () => {
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementation(
-				() => "@{displayName} - You are not permitted to use this command"
-			);
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
@@ -140,10 +179,20 @@ describe("draw a card", () => {
 		expect(result).toBe(
 			"@TaintByNumBot - You are not permitted to use this command"
 		);
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).not.toHaveBeenCalled();
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 6
@@ -153,12 +202,7 @@ describe("draw a card", () => {
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementation(
-				() => "@{displayName} - You are not permitted to use this command"
-			);
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
@@ -169,10 +213,20 @@ describe("draw a card", () => {
 		expect(result).toBe(
 			"@TaintByNumBot - You are not permitted to use this command"
 		);
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).not.toHaveBeenCalled();
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 7
@@ -182,12 +236,7 @@ describe("draw a card", () => {
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementation(
-				() => "@{displayName} - You are not permitted to use this command"
-			);
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
@@ -198,10 +247,20 @@ describe("draw a card", () => {
 		expect(result).toBe(
 			"@TaintByNumBot - You are not permitted to use this command"
 		);
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).not.toHaveBeenCalled();
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 8
@@ -215,12 +274,21 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
-		expect(result).toBeUndefined();
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).not.toHaveBeenCalled();
-		expect(mockCommand.getProcessedOutputString).not.toHaveBeenCalled();
 		expect(getChannel).toHaveBeenCalledTimes(1);
-		expect(mockChannel.getCardGame).not.toHaveBeenCalled();
+		expect(result).toBeUndefined();
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 9
@@ -233,25 +301,28 @@ describe("draw a card", () => {
 		findOne.mockResolvedValue(undefined);
 
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementation(() => "@{displayName} - No game found");
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(() => "@TaintByNumBot - No game found");
 
 		// Act
 		const result = await action(config);
 
 		// Assert
-		expect(result).toBe("@TaintByNumBot - No game found");
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(1);
-		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(1);
 		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockChannel.addCardGame).not.toHaveBeenCalled();
+		expect(result).toBe("@TaintByNumBot - No game found");
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 10
@@ -269,13 +340,21 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(result).toBeUndefined();
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
-		expect(findOne).toHaveBeenCalledTimes(0);
 		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockChannel.addCardGame).not.toHaveBeenCalled();
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 11
@@ -292,20 +371,29 @@ describe("draw a card", () => {
 			values: [1, 2, 3],
 			bonus: [{ 1: "jager", 2: "lastKing" }],
 		});
-		mockGame.drawCard.mockReturnValue(undefined);
+		CardGame.mockReturnValue(mockGame);
+		mockGame.drawCard.mockResolvedValue(undefined);
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(false);
 
 		// Act
 		const result = await action(config);
 
 		// Assert
-		expect(result).toBeUndefined();
-		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
-		expect(getChannel).toHaveBeenCalledTimes(1);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(1);
 		expect(CardGame).toHaveBeenCalledTimes(2);
-		expect(mockChannel.addCardGame).toHaveBeenCalled();
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(1);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
+		expect(result).toBeUndefined();
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 12
@@ -332,20 +420,12 @@ describe("draw a card", () => {
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(
-				() => "@{displayName} You have drawn the {value} of {suit}"
-			);
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "@TaintByNumBot You have drawn the Jack of Clubs"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
 			);
@@ -354,11 +434,84 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
 		expect(result[1]).toBe(
 			"Rule: This card doesn't really have a rule || Hydrate you fools"
 		);
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(2);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 13
+	test("should call play() with an array of URLs, card has audiolink", async () => {
+		// Assemble
+		const config = {
+			versionKey: "drawACard",
+			permitted: true,
+			configMap: new Map(),
+		};
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		getChannel.mockReturnValue(mockChannel);
+		mockChannel.getCardGame.mockReturnValue(mockGame);
+
+		card = {
+			suit: "Clubs",
+			value: "Jack",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+			audioName: ["hydrate"],
+		};
+
+		mockGame.drawCard.mockReturnValue({
+			card,
+			reset: false,
+			bonus: [],
+		});
+
+		loyaltyPoints.findOne.mockResolvedValue(undefined);
+
+		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() => "@TaintByNumBot You have drawn the Jack of Clubs"
+			);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
+			);
+		jest
+			.spyOn(mockCommand, "getAudioUrl")
+			.mockResolvedValue("https://some.audio.link/hydrate.mp3");
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(play).toHaveBeenCalledWith("100612361", [
+			"https://some.audio.link/hydrate.mp3",
+		]);
+		expect(play).toHaveBeenCalledTimes(1);
+		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
+		expect(result[1]).toBe(
+			"Rule: This card doesn't really have a rule || Hydrate you fools"
+		);
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(2);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(0);
@@ -366,13 +519,12 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(2);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(2);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 13
+	// test id 14
 	test("should return card, rule, and bonus output if valid drawn card has a bonus", async () => {
 		// Assemble
 		const config = {
@@ -401,32 +553,19 @@ describe("draw a card", () => {
 		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
+
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(
-				() => "@{displayName} You have drawn the {value} of {suit}"
-			);
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(
-				() =>
-					"@{displayName} - You have won {prize} Tainty Points, you now have {newTotal}"
-			);
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "@TaintByNumBot You have drawn the Jack of Clubs"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() =>
 					"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
@@ -436,6 +575,8 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
+		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(1);
 		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
 		expect(result[1]).toBe(
 			"Rule: This card doesn't really have a rule || Hydrate you fools"
@@ -444,6 +585,7 @@ describe("draw a card", () => {
 			"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
 		);
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(3);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(0);
@@ -451,14 +593,90 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(play).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 15
+	test("should return card, rule, and bonus output if valid drawn card has a bonus has audiolink", async () => {
+		// Assemble
+		const config = {
+			versionKey: "drawACard",
+			permitted: true,
+			configMap: new Map(),
+		};
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		getChannel.mockReturnValue(mockChannel);
+		mockChannel.getCardGame.mockReturnValue(mockGame);
+
+		card = {
+			suit: "Clubs",
+			value: "Jack",
+			rule: "This card doesn't really have a rule",
+			explanation: "Hydrate you fools",
+			audioName: undefined,
+		};
+
+		mockGame.drawCard.mockReturnValue({
+			card,
+			reset: false,
+			bonus: [
+				{ id: 1, reward: 69, audioLink: "https://some.audio.link/chug.mp3" },
+			],
+		});
+
+		mockUser.points = 1000;
+		loyaltyPoints.findOne.mockResolvedValue(mockUser);
+
+		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() => "@TaintByNumBot You have drawn the Jack of Clubs"
+			);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
+			);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() =>
+					"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
+			);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(play).toHaveBeenCalledWith("100612361", [
+			"https://some.audio.link/chug.mp3",
+		]);
+		expect(play).toHaveBeenCalledTimes(1);
+		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
+		expect(result[1]).toBe(
+			"Rule: This card doesn't really have a rule || Hydrate you fools"
+		);
+		expect(result[2]).toBe(
+			"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
+		);
+
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(3);
+		expect(getChannel).toHaveBeenCalledTimes(1);
+		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
+		expect(findOne).toHaveBeenCalledTimes(0);
+		expect(CardGame).toHaveBeenCalledTimes(1);
+		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
+		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 14
+	// test id 16
 	test("should return card, rule, and reset output if final card has been drawn", async () => {
 		// Assemble
 		const config = {
@@ -488,28 +706,17 @@ describe("draw a card", () => {
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(
-				() => "@{displayName} You have drawn the {value} of {suit}"
-			);
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "New game has been dealt");
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "@TaintByNumBot You have drawn the Jack of Clubs"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(() => "New game has been dealt");
 
 		// Act
@@ -521,7 +728,9 @@ describe("draw a card", () => {
 			"Rule: This card doesn't really have a rule || Hydrate you fools"
 		);
 		expect(result[2]).toBe("New game has been dealt");
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(3);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(0);
@@ -529,15 +738,13 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
 	// test id 15
-	test("should return card, rule, and reset output if final card has been drawn", async () => {
+	test("should call play() with an array of two URLs, card and bonus have audiolink", async () => {
 		// Assemble
 		const config = {
 			versionKey: "drawACard",
@@ -553,12 +760,15 @@ describe("draw a card", () => {
 			value: "Jack",
 			rule: "This card doesn't really have a rule",
 			explanation: "Hydrate you fools",
+			audioName: ["hydrate"],
 		};
 
 		mockGame.drawCard.mockReturnValue({
 			card,
-			reset: true,
-			bonus: [],
+			reset: false,
+			bonus: [
+				{ id: 1, reward: 69, audioLink: "https://some.audio.link/chug.mp3" },
+			],
 		});
 
 		mockUser.points = 1000;
@@ -566,40 +776,44 @@ describe("draw a card", () => {
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(
-				() => "@{displayName} You have drawn the {value} of {suit}"
-			);
+			.spyOn(mockCommand, "getAudioUrl")
+			.mockResolvedValue("https://some.audio.link/hydrate.mp3");
 		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "Rule: {rule} || {explanation}");
-		jest
-			.spyOn(mockCommand, "getOutput")
-			.mockImplementationOnce(() => "New game has been dealt");
-		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "@TaintByNumBot You have drawn the Jack of Clubs"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
+			.spyOn(mockCommand, "getOutputString")
 			.mockImplementationOnce(
 				() => "Rule: This card doesn't really have a rule || Hydrate you fools"
 			);
 		jest
-			.spyOn(mockCommand, "getProcessedOutputString")
-			.mockImplementationOnce(() => "New game has been dealt");
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementationOnce(
+				() =>
+					"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
+			);
 
 		// Act
 		const result = await action(config);
 
 		// Assert
+		expect(play).toHaveBeenCalledWith("100612361", [
+			"https://some.audio.link/hydrate.mp3",
+			"https://some.audio.link/chug.mp3",
+		]);
+		expect(play).toHaveBeenCalledTimes(1);
 		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
 		expect(result[1]).toBe(
 			"Rule: This card doesn't really have a rule || Hydrate you fools"
 		);
-		expect(result[2]).toBe("New game has been dealt");
+		expect(result[2]).toBe(
+			"@{TaintByNumBot} - You have won 69 Tainty Points, you now have 1069"
+		);
+
 		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(3);
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(findOne).toHaveBeenCalledTimes(0);
@@ -607,9 +821,7 @@ describe("draw a card", () => {
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutput).toHaveBeenCalledTimes(3);
-		expect(mockCommand.getProcessedOutputString).toHaveBeenCalledTimes(3);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
 		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
