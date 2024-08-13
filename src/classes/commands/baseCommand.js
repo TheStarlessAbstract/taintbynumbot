@@ -29,7 +29,10 @@ class BaseCommand {
 	}
 
 	getOutput(key) {
-		return this.output.get(key);
+		const string = this.output.get(key);
+		if (!string || !string.active || typeof string.message !== "string")
+			return undefined;
+		return string.message;
 	}
 
 	setOutput(key, value) {
@@ -63,29 +66,19 @@ class BaseCommand {
 		this.actions[versionKey] = actionTypes[this.type][versionKey].bind(this);
 	}
 
-	getProcessedOutputString(output, variableMap) {
-		const message = output.message;
-		const processedMessage = this.processOutputString(message, variableMap);
-
-		return processedMessage;
+	getOutputString(outputKey, stringMap) {
+		const outputMessage = this.getOutput(outputKey);
+		if (!outputMessage) return undefined;
+		return this.processOutputString(outputMessage, stringMap);
 	}
 
-	processOutputString(outputString, map) {
-		if (
-			typeof outputString !== "string" ||
-			!(map instanceof Map) ||
-			!outputString
-		)
-			return;
-
+	processOutputString(message, map) {
 		const regex = /\{([^}]+)\}/g;
-		if (!regex.test(outputString)) return outputString;
-
-		const updatedString = outputString.replace(regex, (match) =>
+		if (!regex.test(message)) return message;
+		const updatedMessage = message.replace(regex, (match) =>
 			map.has(match.slice(1, -1)) ? map.get(match.slice(1, -1)) : match
 		);
-
-		return updatedString;
+		return updatedMessage;
 	}
 
 	getCommandVersion(config) {
