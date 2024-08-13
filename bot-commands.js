@@ -6,9 +6,6 @@ const User = require("./models/user");
 
 const defaultCommands = {};
 
-// const audioTimeout = require("./commands/audiotimeout");
-// const kings = require("./commands/kings");
-
 let chugLastUseTime = "";
 
 const userCommands = {
@@ -23,7 +20,6 @@ const userCommands = {
 };
 
 const commands = {
-	// audiotimeout: audioTimeout.command,
 	// // chug: {
 	// // 	response: async (config) => {
 	// // 		let result = [];
@@ -59,7 +55,6 @@ const commands = {
 	// // 		return result;
 	// // 	},
 	// // },
-	// kings: kings.command,
 };
 
 async function setup() {
