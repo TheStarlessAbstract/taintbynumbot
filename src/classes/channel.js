@@ -1,4 +1,4 @@
-const { getRandomBetweenInclusiveMax } = require("../utils");
+const getRandomBetweenInclusiveMax = require("../utils/getRandomBetweenInclusiveMax");
 const { say } = require("../services/twitch/chatClient");
 const { commandTypes } = require("../config");
 const types = commandTypes();
