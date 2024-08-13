@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const db = require("../bot-mongoose.js");
 const twitchRepo = require("./repos/twitch");
-// const chatClient = require("./bot-chatclient");
 // const pubSubClient = require("./bot-pubsubclient");
 // const discord = require("./bot-discord");
 
@@ -13,7 +12,6 @@ async function init() {
 
 	await db.connectToMongoDB();
 	if (!(await twitchRepo.init())) db.disconnectFromMongoDB();
-	// await chatClient.init();
 	// await pubSubClient.init();
 	// await discord.setup();
 }
