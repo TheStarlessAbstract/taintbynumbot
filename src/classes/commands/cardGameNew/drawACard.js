@@ -10,20 +10,14 @@ const drawACard = async function (config) {
 	if (config.versionKey !== "drawACard") return;
 
 	const stream = await getStreamByUserId(this.channelId);
-	if (!stream)
-		return this.getProcessedOutputString(
-			this.getOutput("noStream"),
-			config.configMap
-		);
+	if (!stream) return this.getOutputString("noStream", config.configMap);
 
 	if (!config?.permitted || typeof config.permitted !== "boolean") {
-		return this.getProcessedOutputString(
-			this.getOutput("notPermitted"),
-			config.configMap
-		);
+		return this.getOutputString("notPermitted", config.configMap);
 	}
 
 	const channel = getChannel(this.channelId);
+
 	if (!(channel instanceof Channel)) return;
 
 	let game = channel.getCardGame(this.name);
@@ -33,11 +27,7 @@ const drawACard = async function (config) {
 			channelId: this.channelId,
 			name: this.name,
 		});
-		if (!dbCardGame)
-			return this.getProcessedOutputString(
-				this.getOutput("noGame"),
-				config.configMap
-			);
+		if (!dbCardGame) return this.getOutputString("noGame", config.configMap);
 
 		const { suits, values, bonus } = dbCardGame;
 		game = new CardGame(this.channelId, suits, values, bonus);
@@ -55,8 +45,8 @@ const drawACard = async function (config) {
 	config.configMap.set("explanation", card.explanation);
 
 	const output = [
-		this.getProcessedOutputString(this.getOutput("card"), config.configMap),
-		this.getProcessedOutputString(this.getOutput("rule"), config.configMap),
+		this.getOutputString("card", config.configMap),
+		this.getOutputString("rule", config.configMap),
 	];
 
 	const audioLinkUrls = [];
@@ -81,10 +71,7 @@ const drawACard = async function (config) {
 			dbUser.points += bonus[i].reward;
 			config.configMap.set("newTotal", dbUser.points);
 			output.push(
-				this.getProcessedOutputString(
-					this.getOutput(`bonus${bonus[i].id}`),
-					config.configMap
-				)
+				this.getOutputString(`bonus${bonus[i].id}`, config.configMap)
 			);
 		}
 	}
@@ -92,12 +79,10 @@ const drawACard = async function (config) {
 	if (dbUser) await dbUser.save();
 
 	if (reset) {
-		output.push(
-			this.getProcessedOutputString(this.getOutput("newGame"), config.configMap)
-		);
+		output.push(this.getOutputString("newGame", config.configMap));
 	}
 
-	// play(this.channelId, audioLinkUrls); // update function for array of URLs
+	if (audioLinkUrls.length > 0) play(this.channelId, audioLinkUrls); // update function for array of URLs
 
 	return output;
 };
