@@ -91,6 +91,7 @@ const handler = async (channelName, userName, message, msg) => {
 
 	commandConfig.configMap = getChatCommandConfigMap(messageDetails);
 	const action = commandA.getVersionAction(versionKey);
+	if (!action) return;
 	const result = await action(commandConfig);
 	if (!result) return;
 	const chatClient = twitchRepo.getChatClient();
