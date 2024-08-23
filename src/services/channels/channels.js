@@ -30,10 +30,18 @@ function getChannelMessageCount(id) {
 	return channel.getMessageCount();
 }
 
+function getAllChannelIds() {
+	const channels = channelsController.getAllChannels();
+	const ids = [...channels.keys()];
+
+	return ids;
+}
+
 module.exports = {
 	getChannel,
 	getAllChannels,
 	addChannel,
 	removeChannel,
 	getChannelMessageCount,
+	getAllChannelIds,
 };
