@@ -11,10 +11,8 @@ function init() {
 	chatClient.onAuthenticationSuccess(async () => {
 		console.log("***Connnected to Twitch***");
 
-		//check if channels are live or not live
-
-		// start loyalty here
-		start();
+		// check if channels are live or not live
+		checkLiveChannels();
 	});
 
 	chatClient.onMessage(async (channel, user, message, msg) => {
