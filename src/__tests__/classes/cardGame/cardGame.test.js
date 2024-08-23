@@ -51,84 +51,9 @@ describe("draw a card", () => {
 	});
 
 	// test id 1
-	test("should return undefined if config does not have versionKey", async () => {
-		// Assemble
-		const config = {};
-
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBeUndefined();
-
-		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
-		expect(getChannel).toHaveBeenCalledTimes(0);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
-		expect(findOne).toHaveBeenCalledTimes(0);
-		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
-		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
-		expect(mockUser.save).toHaveBeenCalledTimes(0);
-		expect(play).toHaveBeenCalledTimes(0);
-	});
-
-	// test id 2
-	test("should return undefined if config.versionKey is undefined", async () => {
-		// Assemble
-		const config = { versionKey: undefined };
-
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBeUndefined();
-
-		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
-		expect(getChannel).toHaveBeenCalledTimes(0);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
-		expect(findOne).toHaveBeenCalledTimes(0);
-		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
-		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
-		expect(mockUser.save).toHaveBeenCalledTimes(0);
-		expect(play).toHaveBeenCalledTimes(0);
-	});
-
-	// test id 3
-	test("should return undefined if config.versionKey is incorrect", async () => {
-		// Assemble
-		const config = { versionKey: "wrongKey" };
-
-		// Act
-		const result = await action(config);
-
-		// Assert
-		expect(result).toBeUndefined();
-
-		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
-		expect(getChannel).toHaveBeenCalledTimes(0);
-		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(0);
-		expect(findOne).toHaveBeenCalledTimes(0);
-		expect(CardGame).toHaveBeenCalledTimes(1);
-		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
-		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
-		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
-		expect(mockUser.save).toHaveBeenCalledTimes(0);
-		expect(play).toHaveBeenCalledTimes(0);
-	});
-
-	// test id 4
 	test("should return noStream output if no stream found", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard" };
+		const config = {};
 
 		getStreamByUserId.mockResolvedValue(null);
 
@@ -161,10 +86,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 5
+	// test id 2
 	test("should return notPermitted output if config does not have permitted", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard" };
+		const config = {};
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
@@ -195,10 +120,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 6
+	// test id 3
 	test("should return notPermitted output if config.permitted is not boolean", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: "card" };
+		const config = { permitted: "card" };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
@@ -229,10 +154,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 7
+	// test id 4
 	test("should return notPermitted output if config.permitted is false", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: false };
+		const config = { permitted: false };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest
@@ -263,10 +188,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 8
+	// test id 5
 	test("should return undefined if channel is not an instance of Channel", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
+		const config = { permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(undefined);
 
@@ -291,10 +216,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 9
+	// test id 6
 	test("should return noGame output if no card game found in channel and database", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
+		const config = { permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
 		mockChannel.getCardGame.mockReturnValue({});
@@ -325,10 +250,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 10
+	// test id 7
 	test("should return undefined if drawn card is invalid - card game from channel", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
+		const config = { permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
 		mockChannel.getCardGame.mockReturnValue(mockGame);
@@ -357,10 +282,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 11
+	// test id 8
 	test("should return undefined if drawn card is invalid - card game from database", async () => {
 		// Assemble
-		const config = { versionKey: "drawACard", permitted: true };
+		const config = { permitted: true };
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
 		mockChannel.getCardGame.mockReturnValue({});
@@ -396,11 +321,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 12
+	// test id 9
 	test("should return card and rule output if drawn card is valid", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
@@ -454,11 +378,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 13
+	// test id 10
 	test("should call play() with an array of URLs, card has audiolink", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
@@ -524,11 +447,10 @@ describe("draw a card", () => {
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 14
+	// test id 11
 	test("should return card, rule, and bonus output if valid drawn card has a bonus", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
@@ -597,11 +519,10 @@ describe("draw a card", () => {
 		expect(play).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 15
+	// test id 12
 	test("should return card, rule, and bonus output if valid drawn card has a bonus has audiolink", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
@@ -676,11 +597,10 @@ describe("draw a card", () => {
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 16
+	// test id 13
 	test("should return card, rule, and reset output if final card has been drawn", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
@@ -743,11 +663,10 @@ describe("draw a card", () => {
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 15
-	test("should call play() with an array of two URLs, card and bonus have audiolink", async () => {
+	// test id 14
+	test("should all play() with an array of two URLs, card and bonus have audiolink", async () => {
 		// Assemble
 		const config = {
-			versionKey: "drawACard",
 			permitted: true,
 			configMap: new Map(),
 		};
