@@ -1,3 +1,4 @@
-const shoutoutUser = require("./shoutoutUser.js");
+const shoutoutUser = require("./shoutoutUser");
+const getChattersPaginated = require("./getChattersPaginated");
 
-module.exports = { shoutoutUser };
+module.exports = { shoutoutUser, getChattersPaginated };
