@@ -1,10 +1,10 @@
+const CardGame = require("./../../cardGame");
+const Channel = require("../../channel");
 const { findOne } = require("./../../../queries/cardGames");
 const loyaltyPoints = require("../../../queries/loyaltyPoints");
 const { getChannel } = require("./../../../controllers/channels");
 const { getStreamByUserId } = require("../../../services/twitch/streams");
 const { play } = require("../../../services/audio");
-const CardGame = require("./../../cardGame");
-const Channel = require("../../channel");
 
 const drawACard = async function (config) {
 	// config properties used { configMap, permitted, userId }
@@ -20,6 +20,7 @@ const drawACard = async function (config) {
 
 	const channel = getChannel(this.channelId);
 	// check if channel valid instance
+	console.log(Channel);
 	if (!(channel instanceof Channel)) return;
 	let game = channel.getCardGame(this.name);
 
