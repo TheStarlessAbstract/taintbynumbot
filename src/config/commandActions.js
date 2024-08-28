@@ -1,32 +1,35 @@
-const commandActions = () => {
-	return {
-		commandadd: require("../classes/commands/commandAdd"),
-		commanddelete: require("../classes/commands/commandDelete"),
-		commandedit: require("../classes/commands/commandEdit"),
-		counter: require("../classes/commands/counter"),
-		counterdecrease: require("../classes/commands/counterDecrease"),
-		counterincrease: require("../classes/commands/counterIncrease"),
-		counterset: require("../classes/commands/counterSet"),
-		followage: require("../classes/commands/followage"),
-		game: require("../classes/commands/game"),
-		hydrate: require("../classes/commands/hydrate"),
-		list: require("../classes/commands/list"),
-		listadd: require("../classes/commands/listAdd"),
-		listdelete: require("../classes/commands/listDelete"),
-		listedit: require("../classes/commands/listEdit"),
-		messageadd: require("../classes/commands/messageAdd"),
-		messagedelete: require("../classes/commands/messageDelete"),
-		messageedit: require("../classes/commands/messageEdit"),
-		points: require("../classes/commands/points"),
-		shoutout: require("../classes/commands/shoutout"),
-		song: require("../classes/commands/song"),
-		steam: require("../classes/commands/steam"),
-		text: require("../classes/commands/text"),
-		title: require("../classes/commands/title"),
-		cardgame: require("../classes/commands/cardGameNew"),
-		cardgamereset: require("../classes/commands/cardGameReset"),
-		cardgameremain: require("../classes/commands/cardGameRemain"),
-	};
+const commandActions = {
+	commandadd: "../classes/commands/commandAdd",
+	commanddelete: "../classes/commands/commandDelete",
+	commandedit: "../classes/commands/commandEdit",
+	counter: "../classes/commands/counter",
+	counterdecrease: "../classes/commands/counterDecrease",
+	counterincrease: "../classes/commands/counterIncrease",
+	counterset: "../classes/commands/counterSet",
+	followage: "../classes/commands/followage",
+	game: "../classes/commands/game",
+	hydrate: "../classes/commands/hydrate",
+	list: "../classes/commands/list",
+	listadd: "../classes/commands/listAdd",
+	listdelete: "../classes/commands/listDelete",
+	listedit: "../classes/commands/listEdit",
+	messageadd: "../classes/commands/messageAdd",
+	messagedelete: "../classes/commands/messageDelete",
+	messageedit: "../classes/commands/messageEdit",
+	points: "../classes/commands/points",
+	shoutout: "../classes/commands/shoutout",
+	song: "../classes/commands/song",
+	steam: "../classes/commands/steam",
+	text: "../classes/commands/text",
+	title: "../classes/commands/title",
+	cardgame: "../classes/commands/cardGameNew",
+	cardgamereset: "../classes/commands/cardGameReset",
+	cardgameremain: "../classes/commands/cardGameRemain",
 };
 
-module.exports = commandActions;
+function getCommandAction(name) {
+	const action = require(commandActions[name]);
+	return action;
+}
+
+module.exports = { getCommandAction };
