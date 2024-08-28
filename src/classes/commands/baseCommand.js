@@ -1,6 +1,5 @@
 const { isValueNumber, isNonEmptyString } = require("../../utils/valueChecks");
-const commandActions = require("../../config/commandActions");
-const actionTypes = commandActions();
+const { getCommandAction } = require("../../config/commandActions");
 
 class BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
@@ -63,7 +62,9 @@ class BaseCommand {
 	}
 
 	addVersionAction(versionKey) {
-		this.actions[versionKey] = actionTypes[this.type][versionKey].bind(this);
+		const actionType = getCommandAction(this.type);
+		if (actionType)
+			this.actions[versionKey] = actionType[versionKey].bind(this);
 	}
 
 	getOutputString(outputKey, stringMap) {
