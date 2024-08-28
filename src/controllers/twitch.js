@@ -12,7 +12,7 @@ function init() {
 		console.log("***Connnected to Twitch***");
 
 		// check if channels are live or not live
-		checkLiveChannels();
+		// checkLiveChannels();
 	});
 
 	chatClient.onMessage(async (channel, user, message, msg) => {
