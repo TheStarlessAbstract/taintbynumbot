@@ -1,12 +1,10 @@
-const Channel = require("../classes/channel");
 const twitchRepo = require("../repos/twitch");
 const commands = require("../queries/commands");
 const points = require("../queries/loyaltyPoints");
 const { isValueNumber, isNonEmptyString } = require("../utils/valueChecks");
-const { getCommandType } = require("../utils/messageHandler");
+const { getCommandType } = require("../config");
 const { firstLetterToUpperCase, splitArgs } = require("../utils/modify");
 const { getUserRolesAsStrings, getChatCommandConfigMap } = require("../utils");
-const { getChannelInfoById } = require("../services/twitch/channels");
 const channelsService = require("../services/channels/channels");
 
 const handler = async (channelName, userName, message, msg) => {
@@ -16,9 +14,6 @@ const handler = async (channelName, userName, message, msg) => {
 	let channel = channelsService.getChannel(channelId);
 	if (!channel) {
 		console.log("No Channel");
-		// 	const twitchChannel = await getChannelInfoById(channelId);
-		// 	channel = new Channel(channelId, twitchChannel.displayName);
-		// 	channelsService.addChannel(channelId, channel);
 	}
 	channel.increaseMessageCount();
 
@@ -79,8 +74,7 @@ const handler = async (channelName, userName, message, msg) => {
 
 		if (!canPay && version?.luck?.active && !bypass) {
 			commandConfig.diceRoll = diceRoll(version.luck?.odds);
-		}
-		if (canPay && !bypass) {
+		} else if (canPay && !bypass) {
 			user.points -= version.cost?.points;
 			user.save();
 		}
