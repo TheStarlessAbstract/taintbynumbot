@@ -1,8 +1,6 @@
 const getRandomBetweenInclusiveMax = require("../utils/getRandomBetweenInclusiveMax");
 const { say } = require("../services/twitch/chatClient");
-const { commandTypes } = require("../config");
-const types = commandTypes();
-const Text = require("./commands/text/class");
+const { getCommandType } = require("../config");
 
 class Channel {
 	constructor(
@@ -84,7 +82,11 @@ class Channel {
 	}
 
 	addTextCommand(name, type, output, versions) {
-		const command = new Text(this.id, name, { type, output, versions });
+		const command = new getCommandType("text")(this.id, name, {
+			type,
+			output,
+			versions,
+		});
 		this.commands[name] = command;
 	}
 
@@ -102,7 +104,7 @@ class Channel {
 	}
 
 	getCommandReference(type) {
-		return types[type];
+		return getCommandType[type];
 	}
 
 	// bot messages sent to chat after interval
