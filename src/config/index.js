@@ -1,9 +1,9 @@
-const chatCommandConfigMap = require("./chatCommandConfigMap.js");
-const commandTypes = require("./commandTypes.js");
-const commandActions = require("./commandActions.js");
+const { chatCommandConfigMap } = require("./chatCommandConfigMap.js");
+const { getCommandType } = require("./commandTypes");
+const { getCommandAction } = require("./commandActions");
 
 module.exports = {
 	chatCommandConfigMap,
-	commandTypes,
-	commandActions,
+	getCommandType,
+	getCommandAction,
 };
