@@ -13,4 +13,4 @@ const chatCommandConfigMap = () => {
 	]);
 };
 
-module.exports = chatCommandConfigMap;
+module.exports = { chatCommandConfigMap };
