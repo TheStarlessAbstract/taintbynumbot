@@ -27,4 +27,4 @@ function init() {
 	}, 5 * 60 * 1000);
 }
 
-exports.init = init;
+exports.init = { init };
