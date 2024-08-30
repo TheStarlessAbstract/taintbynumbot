@@ -1,13 +1,12 @@
 const CardGame = require("./../../cardGame");
 const Channel = require("../../channel");
 const { findOne } = require("./../../../queries/cardGames");
-const loyaltyPoints = require("../../../queries/loyaltyPoints");
 const { getChannel } = require("./../../../controllers/channels");
 const { getStreamByUserId } = require("../../../services/twitch/streams");
 const { play } = require("../../../services/audio");
 
 const drawACard = async function (config) {
-	// config properties used { configMap, permitted, userId }
+	// config properties used { configMap, permitted, userId, user }
 
 	const stream = await getStreamByUserId(this.channelId);
 	// check if stream live
@@ -20,7 +19,7 @@ const drawACard = async function (config) {
 
 	const channel = getChannel(this.channelId);
 	// check if channel valid instance
-	console.log(Channel);
+
 	if (!(channel instanceof Channel)) return;
 	let game = channel.getCardGame(this.name);
 
@@ -60,14 +59,7 @@ const drawACard = async function (config) {
 	// check if audio alert found add us array
 	if (audioUrl) audioLinkUrls.push(audioUrl);
 
-	// query database for loyatlyPoints for user
-	const dbUser = await loyaltyPoints.findOne(
-		{
-			channelId: this.chanelId,
-			viewerId: config.userId,
-		},
-		{ points: 1 }
-	);
+	const loyaltyUser = config.user;
 
 	// if card has at least 1 bonus
 	for (let i = 0; i < bonus.length; i++) {
@@ -75,21 +67,20 @@ const drawACard = async function (config) {
 		if (bonus[i]?.audioLink) audioLinkUrls.push(bonus[i].audioLink);
 
 		// check if bonus has a reward
-		if (bonus[i]?.reward && dbUser) {
+		if (bonus[i]?.reward && loyaltyUser) {
 			config.configMap.set("prize", bonus[i].reward);
-			config.configMap.set("total", dbUser.points);
-			dbUser.points += bonus[i].reward;
-			config.configMap.set("newTotal", dbUser.points);
+			config.configMap.set("total", loyaltyUser.points);
+			loyaltyUser.points += bonus[i].reward;
+			config.configMap.set("newTotal", loyaltyUser.points);
 			output.push(
 				this.getOutputString(`bonus${bonus[i].id}`, config.configMap)
 			);
 		}
+
+		if (i === bonus.length - 1) await loyaltyUser.save();
 	}
 
-	if (dbUser) await dbUser.save();
-	if (reset) {
-		output.push(this.getOutputString("newGame", config.configMap));
-	}
+	if (reset) output.push(this.getOutputString("newGame", config.configMap));
 	if (audioLinkUrls.length > 0) play(this.channelId, audioLinkUrls); // update function for array of URLs
 
 	return output;
