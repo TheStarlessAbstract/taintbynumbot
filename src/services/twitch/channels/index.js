@@ -1,5 +1,11 @@
-const getChannelFollowers = require("./getChannelFollowers.js");
-const getChannelInfoById = require("./getChannelInfoById.js");
-const updateChannelInfo = require("./updateChannelInfo.js");
+const getChannelFollowers = require("./getChannelFollowers");
+const getChannelInfoById = require("./getChannelInfoById");
+const updateChannelInfo = require("./updateChannelInfo");
+const getChannelFollowersPaginated = require("./getChannelFollowersPaginated");
 
-module.exports = { getChannelFollowers, getChannelInfoById, updateChannelInfo };
+module.exports = {
+	getChannelFollowers,
+	getChannelInfoById,
+	updateChannelInfo,
+	getChannelFollowersPaginated,
+};
