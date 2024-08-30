@@ -1,6 +1,7 @@
 const twitchRepo = require("../repos/twitch");
 const onMessage = require("../handlers/onMessageHandler");
 const { start } = require("./loyalty");
+const streamStatus = require("./streamStatus");
 
 let chatClient;
 
@@ -11,8 +12,7 @@ function init() {
 	chatClient.onAuthenticationSuccess(async () => {
 		console.log("***Connnected to Twitch***");
 
-		// check if channels are live or not live
-		// checkLiveChannels();
+		streamStatus.init();
 	});
 
 	chatClient.onMessage(async (channel, user, message, msg) => {
