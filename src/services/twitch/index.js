@@ -5,5 +5,14 @@ const streams = require("./streams");
 const search = require("./search");
 const chatClient = require("./search");
 const clips = require("./clips");
+const subscriptions = require("./subscriptions");
 
-module.exports = { channels, users, chat, streams, search, chatClient };
+module.exports = {
+	channels,
+	users,
+	chat,
+	streams,
+	search,
+	chatClient,
+	subscriptions,
+};
