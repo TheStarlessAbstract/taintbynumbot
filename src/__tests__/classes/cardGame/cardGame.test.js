@@ -4,9 +4,6 @@ const { getStreamByUserId } = require("../../../services/twitch/streams");
 const { getChannel } = require("../../../controllers/channels");
 const Channel = require("../../../classes/channel");
 const CardGame = require("../../../classes/cardGame");
-const CardGameBonus = require("../../../classes/cardGameBonus");
-const commandActions = require("../../../config/commandActions");
-const loyaltyPoints = require("../../../queries/loyaltyPoints");
 const LoyaltyPoints = require("../../../models/loyaltypointnew");
 const { findOne } = require("../../../queries/cardGames");
 const { play } = require("../../../services/audio");
@@ -24,17 +21,14 @@ jest.mock("../../../services/audio", () => ({
 	play: jest.fn(),
 }));
 jest.mock("../../../queries/loyaltyPoints");
-jest.mock("../../../config/commandActions"); // imported and mocked to prevent fail
 jest.mock("../../../classes/channel");
 jest.mock("../../../classes/cardGame");
-jest.mock("../../../classes/cardGameBonus");
 jest.mock("../../../classes/commands/cardGameNew/class");
 jest.mock("../../../models/loyaltypointnew");
 
 let mockChannel;
 let mockCommand;
 let mockGame;
-let mockGameBonus;
 let mockUser;
 let action;
 
@@ -44,7 +38,6 @@ describe("draw a card", () => {
 		mockChannel = new Channel();
 		mockCommand = new CardGameCommand();
 		mockGame = new CardGame();
-		mockGameBonus = new CardGameBonus();
 		mockUser = new LoyaltyPoints();
 		mockCommand.channelId = "100612361";
 		action = drawACardAction.bind(mockCommand);
@@ -81,7 +74,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -115,7 +107,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -149,7 +140,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -183,7 +173,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -211,7 +200,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -245,7 +233,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -277,7 +264,6 @@ describe("draw a card", () => {
 		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -316,7 +302,6 @@ describe("draw a card", () => {
 		expect(getChannel).toHaveBeenCalledTimes(1);
 		expect(mockChannel.getCardGame).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(0);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -340,7 +325,6 @@ describe("draw a card", () => {
 		};
 
 		mockGame.drawCard.mockReturnValue({ card, reset: false, bonus: [] });
-		loyaltyPoints.findOne.mockResolvedValue(undefined);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -373,7 +357,6 @@ describe("draw a card", () => {
 		expect(CardGame).toHaveBeenCalledTimes(1);
 		expect(mockChannel.addCardGame).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 		expect(play).toHaveBeenCalledTimes(0);
 	});
@@ -402,8 +385,6 @@ describe("draw a card", () => {
 			reset: false,
 			bonus: [],
 		});
-
-		loyaltyPoints.findOne.mockResolvedValue(undefined);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -443,16 +424,18 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 11
 	test("should return card, rule, and bonus output if valid drawn card has a bonus", async () => {
 		// Assemble
+		mockUser.points = 1000;
+
 		const config = {
 			permitted: true,
 			configMap: new Map(),
+			user: mockUser,
 		};
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
@@ -470,9 +453,6 @@ describe("draw a card", () => {
 			reset: false,
 			bonus: [{ id: 1, reward: 69, audioLink: undefined }],
 		});
-
-		mockUser.points = 1000;
-		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 
@@ -497,7 +477,6 @@ describe("draw a card", () => {
 		const result = await action(config);
 
 		// Assert
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 		expect(result[0]).toBe("@TaintByNumBot You have drawn the Jack of Clubs");
 		expect(result[1]).toBe(
@@ -522,9 +501,12 @@ describe("draw a card", () => {
 	// test id 12
 	test("should return card, rule, and bonus output if valid drawn card has a bonus has audiolink", async () => {
 		// Assemble
+		mockUser.points = 1000;
+
 		const config = {
 			permitted: true,
 			configMap: new Map(),
+			user: mockUser,
 		};
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
@@ -545,9 +527,6 @@ describe("draw a card", () => {
 				{ id: 1, reward: 69, audioLink: "https://some.audio.link/chug.mp3" },
 			],
 		});
-
-		mockUser.points = 1000;
-		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -593,7 +572,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 
@@ -620,9 +598,6 @@ describe("draw a card", () => {
 			reset: true,
 			bonus: [],
 		});
-
-		mockUser.points = 1000;
-		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -659,16 +634,17 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(0);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
-		expect(mockUser.save).toHaveBeenCalledTimes(1);
+		expect(mockUser.save).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 14
 	test("should all play() with an array of two URLs, card and bonus have audiolink", async () => {
 		// Assemble
+		mockUser.points = 1000;
 		const config = {
 			permitted: true,
 			configMap: new Map(),
+			user: mockUser,
 		};
 		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 		getChannel.mockReturnValue(mockChannel);
@@ -689,9 +665,6 @@ describe("draw a card", () => {
 				{ id: 1, reward: 69, audioLink: "https://some.audio.link/chug.mp3" },
 			],
 		});
-
-		mockUser.points = 1000;
-		loyaltyPoints.findOne.mockResolvedValue(mockUser);
 
 		jest.spyOn(mockCommand, "validateCard").mockReturnValue(true);
 		jest
@@ -741,7 +714,6 @@ describe("draw a card", () => {
 		expect(mockGame.drawCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.validateCard).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getAudioUrl).toHaveBeenCalledTimes(1);
-		expect(loyaltyPoints.findOne).toHaveBeenCalledTimes(1);
 		expect(mockUser.save).toHaveBeenCalledTimes(1);
 	});
 });
