@@ -4,7 +4,7 @@ const { start, stop } = require("./loyalty");
 
 function init() {
 	setInterval(async () => {
-		const channels = channelsService.getAllChannel();
+		const channels = channelsService.getAllChannels();
 		if (channels.length === 0) {
 			// stop interval, start again in 30-60 minutes
 		}
@@ -27,4 +27,4 @@ function init() {
 	}, 5 * 60 * 1000);
 }
 
-exports.init = { init };
+exports.init = init;
