@@ -1,3 +1,3 @@
-const getUserByName = require("./getSubscriptionsForUsers");
+const getSubscriptionsForUsers = require("./getSubscriptionsForUsers");
 
-module.exports = { getUserByName };
+module.exports = { getSubscriptionsForUsers };
