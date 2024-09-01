@@ -15,7 +15,7 @@ const getChannelFollowersPaginated = async (broadcaster) => {
 
 	let followsPage = await follows.getNext();
 	if (followsPage.length == 0) return undefined;
-	const followers = [];
+	let followers = [];
 
 	while (followsPage.length > 0) {
 		followers = followers.concat(followsPage);
