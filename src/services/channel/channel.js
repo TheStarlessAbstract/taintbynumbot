@@ -5,7 +5,8 @@ function createChannel(
 	displayName,
 	dbMessages,
 	messageCountTrigger,
-	messageIntervalLength
+	messageIntervalLength,
+	customBot
 ) {
 	const messages = [];
 
@@ -23,7 +24,8 @@ function createChannel(
 		displayName,
 		messages,
 		messageCountTrigger,
-		messageIntervalLength
+		messageIntervalLength,
+		customBot
 	);
 }
 
