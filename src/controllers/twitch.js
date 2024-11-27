@@ -1,7 +1,7 @@
 const twitchRepo = require("../repos/twitch");
 const onMessage = require("../handlers/onMessageHandler");
-const { start } = require("./loyalty");
 const streamStatus = require("./streamStatus");
+const pubSub = require("./pubSub");
 
 let chatClient;
 
@@ -18,6 +18,8 @@ function init() {
 	chatClient.onMessage(async (channel, user, message, msg) => {
 		onMessage.handler(channel, user, message, msg);
 	});
+
+	pubSub.init();
 }
 
 exports.init = init;
