@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Socket.IO chat</title>
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <style>
+            body {
+                background-color: #333;
+                color: #fff;
+            }
+            #login-with-twitch {
+                background-color: #8c1aff;
+                border: none;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="login-with-twitch">Login with Twitch</button>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            var x = document.getElementById("login-with-twitch"); 
+
+            var twitchAuthUrl;
+
+            socket.on("setDetailsV2Admin", details => {
+                clientId = details.clientId;
+                redirectUri = details.redirectUri;
+                scope = details.scope;
+
+                twitchAuthUrl = "https://id.twitch.tv/oauth2/authorize" +
+                "?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
+                "&response_type=code" +
+                "&scope=" + scope;
+            });
+
+            $(document).ready(function() {
+            $("#login-with-twitch").click(function() {
+                window.location = twitchAuthUrl;
+            });
+        });
+        </script>
+    </body>
+</html>
