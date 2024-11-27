@@ -6,6 +6,7 @@ const search = require("./search");
 const chatClient = require("./search");
 const clips = require("./clips");
 const subscriptions = require("./subscriptions");
+const predictions = require("./predictions");
 
 module.exports = {
 	channels,
@@ -15,4 +16,5 @@ module.exports = {
 	search,
 	chatClient,
 	subscriptions,
+	predictions,
 };

@@ -37,10 +37,16 @@ const MessageSchema = new Schema({
 	addedBy: { type: String, required: true },
 });
 
+const CustomBotSchema = new Schema({
+	id: { type: String, required: true },
+	name: { type: String, required: true },
+});
+
 const UserNewSchema = new Schema({
 	channelId: { type: String, unique: true, required: true },
 	displayName: { type: String, unique: true, required: true },
 	role: { type: String, required: true, enum: ["admin", "bot", "user"] },
+	customBot: CustomBotSchema,
 	joinDate: {
 		type: Date,
 		required: true,

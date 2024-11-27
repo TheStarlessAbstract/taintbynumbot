@@ -59,6 +59,8 @@ async function init() {
 			user.messages = messages;
 			user.messageCountTrigger = 1;
 			user.messageIntervalLength = 0.5;
+
+			user.customBot = { id: process.env.TWITCH_BOT_ID, name: "TaintByNumBot" };
 		}
 
 		list.push(user);

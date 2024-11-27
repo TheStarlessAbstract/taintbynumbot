@@ -2,16 +2,26 @@ const twitchRepo = require("../../../repos/twitch.js");
 
 const getClipsForBroadcaster = async (broadcaster, filter) => {
 	const apiClient = twitchRepo.getApiClient();
-	let success = true;
+	let firstPass = true;
+	let clipList = [];
+	let clips;
 
 	try {
-		await apiClient.clips.getClipsForBroadcaster(broadcaster, filter);
+		while (firstPass) {
+			clips = await apiClient.clips.getClipsForBroadcaster(broadcaster, filter);
+			console.log(clips.data.length);
+
+			if (clips.data.length === 0) {
+				return { list: clipList, cursor: clips.cursor };
+			}
+
+			filter.after = clips.cursor;
+			clipList = clipList.concat(clips.data);
+		}
 	} catch (err) {
 		console.error(err);
-		success = false;
+		return;
 	}
-
-	return success;
 };
 
 module.exports = getClipsForBroadcaster;

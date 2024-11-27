@@ -22,7 +22,49 @@ let ssl = process.env.PORT ? https : http;
 async function setup(newIo) {
 	io = newIo;
 	io.on("connection", async (socket) => {
-		if (socket.handshake.headers.referer.includes("channelpointoverlay")) {
+		if (socket.handshake.headers.referer.includes("/v2/auth")) {
+			console.log("/v2/auth connected");
+
+			let redirectUri = botDomain + "/v2/test";
+
+			let scope =
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
+
+			io.emit("setDetails v2Admin", { clientId, redirectUri, scope });
+		} else if (socket.handshake.headers.referer.includes("auth")) {
+			console.log("/auth connected");
+
+			let redirectUri = botDomain + "/test";
+
+			let scope =
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
+
+			io.emit("setDetails", { clientId, redirectUri, scope });
+		} else if (
+			socket.handshake.headers.referer.includes("/v2/botAuthorisation")
+		) {
+			console.log("/v2/botAuthorisation connected");
+
+			let redirectUri = botDomain + "/v2/test";
+
+			let scope = "openid chat:edit+chat:read+moderator:manage:announcements";
+
+			io.emit("setDetails botAuthorisation v2", {
+				clientId,
+				redirectUri,
+				scope,
+			});
+		} else if (socket.handshake.headers.referer.includes("botAuthorisation")) {
+			console.log("/botAuthorisation connected");
+
+			let redirectUri = botDomain + "/test";
+
+			let scope = "openid chat:edit+chat:read+moderator:manage:announcements";
+
+			io.emit("setDetails botAuthorisation", { clientId, redirectUri, scope });
+		} else if (
+			socket.handshake.headers.referer.includes("channelpointoverlay")
+		) {
 			console.log("/channelpointoverlay connected");
 			isLive = true;
 
@@ -35,9 +77,9 @@ async function setup(newIo) {
 				isLive = false;
 				clearInterval(interval);
 			});
-		}
-
-		if (socket.handshake.headers.referer.includes("deathcounteroverlay")) {
+		} else if (
+			socket.handshake.headers.referer.includes("deathcounteroverlay")
+		) {
 			console.log("/deathcounteroverlay connected");
 
 			let saveState = await DeathSaveState.findOne({}).exec();
@@ -97,30 +139,7 @@ async function setup(newIo) {
 				console.log("/deathcounteroverlay disconnected");
 				clearInterval(deathCounterInterval);
 			});
-		}
-
-		if (socket.handshake.headers.referer.includes("auth")) {
-			console.log("/auth connected");
-
-			let redirectUri = botDomain + "/test";
-
-			let scope =
-				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
-
-			io.emit("setDetails", { clientId, redirectUri, scope });
-		}
-
-		if (socket.handshake.headers.referer.includes("botAuthorisation")) {
-			console.log("/botAuthorisation connected");
-
-			let redirectUri = botDomain + "/test";
-
-			let scope = "openid chat:edit+chat:read";
-
-			io.emit("botAuthorisation setDetails", { clientId, redirectUri, scope });
-		}
-
-		if (socket.handshake.headers.referer.includes("spotify")) {
+		} else if (socket.handshake.headers.referer.includes("spotify")) {
 			console.log("/spotify connected");
 			const scope = "user-read-currently-playing user-read-playback-state";
 			redirectUri = botDomain + "/oauth/spotify";

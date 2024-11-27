@@ -6,6 +6,7 @@ const getChatCommandConfigMap = require("./getChatCommandConfigMap.js");
 const startsWithCaseInsensitive = require("./startsWithCaseInsensitive.js");
 const getRandomBetweenInclusiveMax = require("./getRandomBetweenInclusiveMax.js");
 const getRandomBetweenExclusiveMax = require("./getRandomBetweenExclusiveMax.js");
+const sleep = require("./sleep");
 const modify = require("./modify");
 const valueChecks = require("./valueChecks");
 const messageHandler = require("./messageHandler");
@@ -22,4 +23,5 @@ module.exports = {
 	startsWithCaseInsensitive,
 	getRandomBetweenInclusiveMax,
 	getRandomBetweenExclusiveMax,
+	sleep,
 };

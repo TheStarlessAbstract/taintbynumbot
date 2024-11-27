@@ -11,9 +11,9 @@ async function init() {
 	}
 
 	// await loyaltyPoints();
-	// await users();
+	await users();
 	// await counter();
-	await cardGame();
+	// await cardGame();
 
 	if (dbStatus === "Mongoose disconnected") {
 		await db.disconnectFromMongoDB();

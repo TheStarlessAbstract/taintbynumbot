@@ -8,7 +8,8 @@ class Channel {
 		channelName,
 		messages,
 		messageCountTrigger,
-		messageIntervalLength
+		messageIntervalLength,
+		customBot
 	) {
 		this.id = channelId;
 		this.name = channelName;
@@ -19,8 +20,10 @@ class Channel {
 		this.messageCountTrigger = messageCountTrigger;
 		this.messageIntervalLength = messageIntervalLength; // in minutes
 		this.messsageInterval = this.startMessageInterval();
+		this.customBot = this.validateCustomBot(customBot);
 
 		this.commands = {}; // maybe a map instead
+		this.redemptions = {};
 		this.cardGames = {}; // name propery == commandname
 	}
 
@@ -189,6 +192,53 @@ class Channel {
 
 	getCardGame(name) {
 		return this.cardGames[name];
+	}
+
+	addRedemption(name, redemption) {
+		this.redemptions[name] = redemption;
+	}
+
+	deleteRedemption(name) {
+		delete this.redemptions[name];
+	}
+
+	getRedemption(name) {
+		return this.redemptions[name];
+	}
+
+	getAllRedemptions() {
+		return this.redemptions;
+	}
+
+	getCustomBotId() {
+		return this.customBot.id;
+	}
+
+	getCustomBotName() {
+		return this.customBot.name;
+	}
+
+	setCustomBotId(id) {
+		this.customBot.id = id;
+	}
+
+	setCustomBotName(name) {
+		this.customBot.name = name;
+	}
+
+	getCustomBot() {
+		return this.customBot;
+	}
+
+	hasCustomBot() {
+		if (!this.customBot) return false;
+		return true;
+	}
+
+	validateCustomBot(customBot) {
+		const { id, name } = customBot;
+		if (!id || !name) return undefined;
+		return { id, name };
 	}
 }
 
