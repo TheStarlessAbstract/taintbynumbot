@@ -18,7 +18,7 @@ let pubSubClient;
 async function init() {
 	const users = await find(
 		{ "tokens.twitch": { $exists: true } },
-		"channelId displayName messages messageCountTrigger messageIntervalLength role tokens.twitch"
+		"channelId displayName messages messageCountTrigger messageIntervalLength customBot role tokens.twitch"
 	);
 
 	if (users.length === 0) return;
@@ -36,7 +36,8 @@ async function init() {
 				users[i].displayName,
 				users[i].messages,
 				users[i].messageCountTrigger,
-				users[i].messageIntervalLength
+				users[i].messageIntervalLength,
+				users[i].customBot
 			);
 
 			const res = await channelsService.addChannel(channel.id, channel);
@@ -94,7 +95,12 @@ function tokenFormat(token) {
 }
 
 function createApiClient(authProvider) {
-	return new ApiClient({ authProvider });
+	return new ApiClient({
+		authProvider,
+		// logger: {
+		// 	minLevel: "debug",
+		// },
+	});
 }
 
 async function createChatClient(authProvider) {
