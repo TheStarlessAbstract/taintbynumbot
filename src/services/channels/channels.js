@@ -5,6 +5,11 @@ function getChannel(id) {
 	return channel;
 }
 
+function getChannelName(id) {
+	const channel = channelsController.getChannel(id);
+	return channel.name;
+}
+
 function getAllChannels() {
 	const channels = channelsController.getAllChannels();
 	return channels;
@@ -37,11 +42,56 @@ function getAllChannelIds() {
 	return ids;
 }
 
+function getChannelRedemption(id, name) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	return channel.getRedemption(name);
+}
+
+function getAllChannelRedemptions(id) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	return channel.getAllRedemptions();
+}
+
+function addChannelRedemption(id, name, redemption) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	channel.addRedemption(name, redemption);
+	return true;
+}
+
+function removeChannelRedemption(id, name) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	channel.deleteRedemption(name);
+	return true;
+}
+
+function hasChannelCustomBot(id) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	return channel.hasCustomBot();
+}
+
+function getChannelCustomBot(id) {
+	const channel = getChannel(id);
+	if (!channel) return undefined;
+	return channel.getCustomBot();
+}
+
 module.exports = {
 	getChannel,
+	getChannelName,
+	getChannelRedemption,
 	getAllChannels,
+	getAllChannelRedemptions,
 	addChannel,
+	addChannelRedemption,
 	removeChannel,
+	removeChannelRedemption,
 	getChannelMessageCount,
 	getAllChannelIds,
+	hasChannelCustomBot,
+	getChannelCustomBot,
 };
