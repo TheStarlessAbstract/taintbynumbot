@@ -1,3 +1,3 @@
-const play = require("./play.js");
+const play = require("./play");
 
 module.exports = { play };
