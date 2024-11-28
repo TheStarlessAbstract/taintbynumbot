@@ -32,75 +32,9 @@ async function setup(pubSubClient, userId) {
 			);
 			if (audioLink) {
 				audio.play(audioLink.url);
-			} else if (message.rewardTitle.includes("Higher or Lower")) {
-				let latestPredictions = await apiClient.predictions
-					.getPredictionsPaginated(twitchId)
-					.getNext();
-				if (
-					latestPredictions[0].status != "LOCKED" &&
-					latestPredictions[0].status != "ACTIVE"
-				) {
-					let prediction = await apiClient.predictions.createPrediction(
-						twitchId,
-						{
-							autoLockAfter: 30,
-							outcomes: ["Higher", "Lower"],
-							title: "Higher or Lower than " + higherLower,
-						}
-					);
-					setTimeout(async () => {
-						let newRoll = getRandom();
-						while (newRoll == higherLower) {
-							newRoll = getRandom();
-						}
-						if (newRoll > higherLower) {
-							predictionWinner = prediction.outcomes.find(
-								(outcome) => outcome.title == "Higher"
-							);
-						} else if (newRoll < higherLower) {
-							predictionWinner = prediction.outcomes.find(
-								(outcome) => outcome.title == "Lower"
-							);
-						}
-						higherLower = newRoll;
-						await apiClient.predictions.resolvePrediction(
-							twitchId,
-							prediction.id,
-							predictionWinner.id
-						);
-						chatClient.say(
-							twitchUsername,
-							" The result is in, we rolled a " + higherLower
-						);
-						await apiClient.channelPoints.updateCustomReward(
-							twitchId,
-							message.rewardId,
-							{ title: "Higher or Lower: " + higherLower }
-						);
-					}, 32000);
-				} else {
-					await apiClient.channelPoints.updateRedemptionStatusByIds(
-						twitchId,
-						message.rewardId,
-						[message.id],
-						"CANCELED"
-					);
-					chatClient.say(
-						twitchUsername,
-						"@" +
-							message.userDisplayName +
-							" there is already a prediction ongoing, try again later"
-					);
-				}
 			}
 		});
 	}
-
-	let rewards = await apiClient.channelPoints.getCustomRewards(twitchId);
-	let reward = rewards.find((r) => r.title.includes("Higher or Lower"));
-	await apiClient.channelPoints.updateCustomReward(twitchId, reward.id, {
-		title: "Higher or Lower: " + higherLower,
-	});
 
 	return listener;
 }
