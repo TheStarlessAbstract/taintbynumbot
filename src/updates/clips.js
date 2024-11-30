@@ -1,9 +1,6 @@
-// const Redemption = require("../../models/redemptions");
 const getClipsForBroadcasterPaginated = require("../services/twitch/clips/getClipsForBroadcasterPaginated");
 const getGamesByIds = require("../services/twitch/game/getGamesByIds");
 const twitchRepo = require("../repos/twitch");
-// const csv = require("csv-parser");
-// const fs = require("fs");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 
 let channelId = "100612361";
@@ -12,9 +9,7 @@ async function getClips() {
 	await twitchRepo.init();
 
 	let filter = { limit: 100 };
-
 	const clips = await getClipsForBroadcasterPaginated(channelId, filter);
-
 	const gameIds = [...new Set(clips.map((item) => item.gameId))];
 	const games = await getGamesByIds(gameIds);
 
@@ -27,7 +22,6 @@ async function getClips() {
 		clips[i].extraClip1 = "";
 		clips[i].extraClip2 = "";
 		clips[i].updatedCaptions = "";
-
 		clips[i].length = Math.floor(clips[i].duration);
 
 		const monthNames = [
@@ -53,13 +47,13 @@ async function getClips() {
 
 		clips[i].date = `${month} ${day}, ${year}`;
 
-		const game = games.find((game) => {
-			game.id === clips[i].gameId;
-		});
+		const game = games.find((game) => game.id === clips[i].gameId);
 
 		if (game) clips[i].category = game.name;
 		else clips[i].category = "undefined";
 	}
+
+	clips.sort((a, b) => new Date(a.date) - new Date(b.date));
 
 	const csvWriter = createCsvWriter({
 		path: "output.csv",
