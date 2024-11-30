@@ -1,9 +1,9 @@
-const db = require("../../bot-mongoose.js");
+const db = require("../../bot-mongoose");
 const commands = require("./commands");
 const models = require("./models");
-const quote = require("./quoteToList.js");
-const tinder = require("./tinderToList.js");
-const audio = require("./audiolinks.js");
+const quote = require("./quoteToList");
+const tinder = require("./tinderToList");
+const audio = require("./audiolinks");
 const redemptions = require("./redemptions");
 const clips = require("./clips");
 
