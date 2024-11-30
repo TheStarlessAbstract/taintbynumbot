@@ -10,7 +10,7 @@ const getClipsForBroadcasterPaginated = async (broadcaster, filter) => {
 			filter
 		);
 	} catch (err) {
-		console.error(err);
+		console.error("ERR");
 		return undefined;
 	}
 
