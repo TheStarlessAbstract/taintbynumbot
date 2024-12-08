@@ -1,7 +1,7 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const pubSubClient = require("../bot-pubsubclient");
+const twitchRepo = require("./../repos/twitch");
 
 const helper = new Helper();
 
@@ -30,7 +30,7 @@ let commandResponse = () => {
 					helper.isVersionActive(versions, 0) &&
 					!helper.isValuePresentAndString(config.argument)
 				) {
-					apiClient = await pubSubClient.getApiClient();
+					apiClient = twitchRepo.getApiClient();
 					channel = await apiClient.channels.getChannelInfoById(twitchId);
 
 					if (channel == null) {
@@ -54,7 +54,7 @@ let commandResponse = () => {
 					helper.isVersionActive(versions, 1) &&
 					helper.isValidModeratorOrStreamer(config.userInfo)
 				) {
-					apiClient = await pubSubClient.getApiClient();
+					apiClient = twitchRepo.getApiClient();
 
 					let gamesPaginated = await apiClient.search.searchCategoriesPaginated(
 						config.argument

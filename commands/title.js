@@ -1,7 +1,7 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const pubSubClient = require("../bot-pubsubclient");
+const twitchRepo = require("./../repos/twitch");
 
 let twitchId = process.env.TWITCH_USER_ID;
 
@@ -31,7 +31,7 @@ let commandResponse = () => {
 					helper.isVersionActive(versions, 0) &&
 					!helper.isValuePresentAndString(config.argument)
 				) {
-					apiClient = await pubSubClient.getApiClient();
+					apiClient = twitchRepo.getApiClient();
 					channel = await apiClient.channels.getChannelInfoById(twitchId);
 
 					if (channel == null) {
@@ -47,7 +47,7 @@ let commandResponse = () => {
 					helper.isValuePresentAndString(config.argument) &&
 					helper.isValidModeratorOrStreamer(config.userInfo)
 				) {
-					apiClient = await pubSubClient.getApiClient();
+					apiClient = twitchRepo.getApiClient();
 
 					try {
 						await apiClient.channels.updateChannelInfo(twitchId, {

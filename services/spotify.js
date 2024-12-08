@@ -1,7 +1,7 @@
 const axios = require("axios");
 const querystring = require("querystring");
 
-const spotifyRepo = require("../repos/spotifyRepo");
+const spotifyRepo = require("../repos/spotify");
 
 const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;

@@ -6,6 +6,7 @@ const Helper = require("../classes/helper");
 
 const AudioLink = require("../models/audiolink");
 const LoyaltyPoint = require("../models/loyaltypoint");
+const KingsSaveState = require("../models/kingssavestate");
 
 const helper = new Helper();
 
@@ -13,6 +14,7 @@ let cardsToDraw;
 let cooldown = 5000;
 let cost = 100;
 let kingsCount;
+let jagerPrizeCounter = 0;
 let currentTime;
 
 let commandResponse = () => {
@@ -33,8 +35,10 @@ let commandResponse = () => {
 				let redeemUser = config.userInfo.displayName;
 				let canDraw = false;
 
+				let user;
+
 				if (!helper.isStreamer(config.userInfo)) {
-					let user = await LoyaltyPoint.findOne({
+					user = await LoyaltyPoint.findOne({
 						userId: config.userInfo.userId,
 					});
 
@@ -107,10 +111,19 @@ let commandResponse = () => {
 						}
 
 						if (cardDrawn.bonusJager) {
+							let prizeTotal = "";
+							let jagerMessage = `A wild Jagerbomb appears, Starless uses self-control. Was it effective?`;
 							playAudio("jager");
-							result.push(
-								"A wild Jagerbomb appears, Starless uses self-control. Was it effective?"
-							);
+
+							if (!helper.isStreamer(config.userInfo)) {
+								prizeTotal = jagerPrizeDraw(jagerPrizeCounter, user);
+								jagerPrizeCounter = 0;
+								jagerMessage += ` @${redeemUser}, you have earned ${prizeTotal} pity Tainty points.`;
+							}
+
+							result.push(jagerMessage);
+						} else {
+							jagerPrizeCounter++;
 						}
 					} else {
 						kingsCount = 0;
@@ -166,9 +179,34 @@ async function playAudio(audioName) {
 function restoreGameState(gameState) {
 	cardsToDraw = gameState.cardsToDraw;
 	kingsCount = gameState.kingsCount;
+	jagerPrizeCounter = gameState.jagerPrizeCounter;
+}
+
+async function saveKingsState() {
+	let saveState = new KingsSaveState({
+		cardsToDraw: cardsToDraw,
+		kingsCount: kingsCount,
+		jagerPrizeCounter: jagerPrizeCounter,
+	});
+
+	await saveState.save();
+}
+
+function jagerPrizeDraw(jagerPrizeCounter, user) {
+	let prize = 0;
+	let prizeModifier = 0.75;
+
+	prize = cost * jagerPrizeCounter * prizeModifier;
+
+	user.points += prize;
+	user.save();
+	// give user some pity points
+
+	return prize;
 }
 
 exports.command = kings;
 exports.resetKings = resetKings;
+exports.saveKingsState = saveKingsState;
 exports.getCardsToDraw = getCardsToDraw;
 exports.getCardsToDrawLength = getCardsToDrawLength;

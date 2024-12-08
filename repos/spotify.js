@@ -1,4 +1,4 @@
-const spotifyServices = require("../services/spotifyServices");
+const spotifyServices = require("../services/spotify");
 
 const User = require("../models/user");
 

@@ -20,6 +20,41 @@ describe("kings", () => {
 		await db.disconnectFromMongoDB();
 	});
 
+	test("jager", async () => {
+		//Assemble
+		let userInfo = {
+			isBroadcaster: false,
+			userId: 56815563,
+			displayName: "intelrush",
+		};
+		commandLink.setTimer(currentDateTime - 6000);
+
+		user = await LoyaltyPoint.findOne({
+			userId: userInfo.userId,
+		});
+
+		user.points = 69000;
+		await user.save();
+
+		//Act
+		let result = [];
+
+		for (let i = 0; i < 52; i++) {
+			commandLink.setTimer(currentDateTime - 6000);
+			result = await response({
+				userInfo,
+			});
+
+			if (result.length > 2) {
+				break;
+			}
+		}
+
+		//Assert
+		// expect(result.length).toBe(3);
+		expect(result[2]).toMatch(/ Jagerbomb /);
+	});
+
 	test("IsBroadcasterIsFalse_AndCoolDownIsNotElapsed_ShouldReturnUndefined", async () => {
 		//Assemble
 		userInfo = { isBroadcaster: false };

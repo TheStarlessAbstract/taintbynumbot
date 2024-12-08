@@ -1,7 +1,7 @@
 const TimerCommand = require("../classes/timer-command");
 const Helper = require("../classes/helper");
 
-const spotify = require("../services/spotifyServices");
+const spotify = require("../services/spotify");
 
 const helper = new Helper();
 

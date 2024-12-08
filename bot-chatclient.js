@@ -8,7 +8,6 @@ const Token = require("./models/token");
 const commands = require("./bot-commands");
 const deathCounter = require("./bot-deathcounter");
 const messages = require("./bot-messages");
-const redemptions = require("./bot-redemptions");
 const loyalty = require("./bot-loyalty");
 
 const kings = require("./commands/kings");
@@ -22,6 +21,7 @@ let username = process.env.TWITCH_USERNAME;
 const helper = new Helper();
 
 let apiClient;
+let chatClient;
 let isLive = false;
 let intervalMessages;
 let messageCount = 0;
@@ -35,7 +35,7 @@ async function setup() {
 	if (token) {
 		const tokenData = initializeTokenData(token);
 		const authProvider = await createAuthProvider(tokenData);
-		const chatClient = createChatClient(authProvider);
+		chatClient = createChatClient(authProvider);
 		const apiClient = new ApiClient({ authProvider });
 
 		setApiClient(apiClient);
@@ -61,7 +61,6 @@ async function setupChatClientListeners(apiClient, chatClient) {
 
 		if (!helper.isTest()) {
 			kings.resetKings();
-			redemptions.setChatClient(chatClient);
 			await commands.setup();
 			await deathCounter.setup(apiClient);
 		}
@@ -294,6 +293,11 @@ function confirmMaps(item) {
 	}
 }
 
+function getChatClient() {
+	return chatClient;
+}
+
 exports.setup = setup;
 exports.messageUpdate = messageUpdate;
 exports.getApiClient = getApiClient;
+exports.getChatClient = getChatClient;
