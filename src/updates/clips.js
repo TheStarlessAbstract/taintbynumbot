@@ -14,15 +14,17 @@ async function getClips() {
 	const games = await getGamesByIds(gameIds);
 
 	for (let i = 0; i < clips.length; i++) {
-		clips[i].edited = "";
+		if (clips[i].title.startsWith("="))
+			clips[i].title = `=CHAR(61)&"${clips[i].title}"`;
+		clips[i].edited = "No";
 		clips[i].filename = "";
 		clips[i].theme = "";
-		clips[i].portrait = "";
+		clips[i].mobile = "No";
 		clips[i].editedTime = "";
-		clips[i].extraClip1 = "";
-		clips[i].extraClip2 = "";
-		clips[i].updatedCaptions = "";
+		clips[i].afkReel = "No";
+		clips[i].updatedCaptions = "No";
 		clips[i].length = Math.floor(clips[i].duration);
+		clips[i].usedIn = "";
 
 		const monthNames = [
 			"Jan",
@@ -50,7 +52,7 @@ async function getClips() {
 		const game = games.find((game) => game.id === clips[i].gameId);
 
 		if (game) clips[i].category = game.name;
-		else clips[i].category = "undefined";
+		else clips[i].category = "";
 	}
 
 	clips.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -61,17 +63,18 @@ async function getClips() {
 			{ id: "category", title: "Category" }, // query from gameId
 			{ id: "title", title: "Clip Name" },
 			{ id: "url", title: "Clip Url" },
-			{ id: "edited", title: "Edited" },
 			{ id: "filename", title: "Filename" },
 			{ id: "theme", title: "Theme" },
-			{ id: "portrait", title: "Portrait Version" },
 			{ id: "length", title: "Original Time in Seconds" },
 			{ id: "editedTime", title: "Edited Time in Seconds" },
-			{ id: "extraClip1", title: "Extra Clip 1" },
-			{ id: "extraClip2", title: "Extra Clip 2" },
+			{ id: "edited", title: "Edited" },
+			{ id: "mobile", title: "Mobile Version" },
 			{ id: "updatedCaptions", title: "Updated Captions" },
+			{ id: "afkReel", title: "In AFK Reel" },
 			{ id: "creatorDisplayName", title: "Created By" },
 			{ id: "date", title: "Created Date" },
+			{ id: "usedIn", title: "Used In" },
+			,
 		],
 	});
 
