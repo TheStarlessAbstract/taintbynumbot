@@ -40,7 +40,7 @@ async function listPrediction(redeemDetails, variableMap) {
 			{
 				$match: {
 					channelId,
-					listCategory: this.listCategory,
+					name: this.listCategory,
 				},
 			},
 			{ $sample: { size: 1 } },
