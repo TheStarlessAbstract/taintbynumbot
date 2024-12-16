@@ -16,14 +16,18 @@ async function getClips() {
 	for (let i = 0; i < clips.length; i++) {
 		if (clips[i].title.startsWith("="))
 			clips[i].title = `=CHAR(61)&"${clips[i].title}"`;
-		clips[i].edited = "No";
 		clips[i].filename = "";
 		clips[i].theme = "";
-		clips[i].mobile = "No";
-		clips[i].editedTime = "";
-		clips[i].afkReel = "No";
-		clips[i].updatedCaptions = "No";
 		clips[i].length = Math.floor(clips[i].duration);
+		clips[i].editedTime = "";
+		clips[i].edited = "No";
+		clips[i].mobile = "No";
+		clips[i].updatedCaptions = "";
+		clips[i].afkReel = "No";
+		clips[i].gifs = "";
+		clips[i].soundboard = "";
+		clips[i].deletion = "";
+		clips[i].uses = "";
 		clips[i].usedIn = "";
 
 		const monthNames = [
@@ -71,9 +75,14 @@ async function getClips() {
 			{ id: "mobile", title: "Mobile Version" },
 			{ id: "updatedCaptions", title: "Updated Captions" },
 			{ id: "afkReel", title: "In AFK Reel" },
+			{ id: "gifs", title: "GIFs" },
+			{ id: "soundboard", title: "Soundboard" },
+			{ id: "deletion", title: "Deletion" },
+			{ id: "uses", title: "Uses" },
+			{ id: "usedIn", title: "Used In" },
 			{ id: "creatorDisplayName", title: "Created By" },
 			{ id: "date", title: "Created Date" },
-			{ id: "usedIn", title: "Used In" },
+
 			,
 		],
 	});
