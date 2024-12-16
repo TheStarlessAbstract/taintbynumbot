@@ -10,7 +10,6 @@ const helper = new Helper();
 
 async function index(channelId, redemptionId, rewardId, displayName) {
 	let chatClient = twitchRepo.getChatClient();
-
 	let predictions = await twitch.getPredictions(channelId);
 	let channel = await twitch.getChannelInfoById(channelId);
 
