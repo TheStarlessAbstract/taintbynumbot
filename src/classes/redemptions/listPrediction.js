@@ -37,8 +37,8 @@ class ListPrediction extends Redemption {
 		this.predictionTitle = predictionTitle;
 		this.listCategory = listCategory;
 	}
-	aggregate(pipline) {
-		return aggregate(pipline);
+	async aggregate(pipeline) {
+		return await aggregate(pipeline);
 	}
 
 	updateRedemptionStatusByIds(rewardId, redemptionIds, status) {
