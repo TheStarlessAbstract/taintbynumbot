@@ -1,4 +1,3 @@
-const db = require("../../../bot-mongoose");
 const taintySprinkles = require("./taintySprinkles");
 const quoteMeDirty = require("./quoteMeDirty");
 const hydrate = require("./hydrate");
@@ -11,11 +10,6 @@ const irlVoiceBan = require("./irlVoiceBan");
 const irlWordBan = require("./irlWordBan");
 
 async function init() {
-	const dbStatus = await db.getReadyState();
-	if (dbStatus === "Mongoose disconnected") {
-		await db.connectToMongoDB();
-	}
-
 	await taintySprinkles();
 	await quoteMeDirty();
 	await hydrate();
@@ -26,10 +20,6 @@ async function init() {
 	await murder();
 	await irlVoiceBan();
 	await irlWordBan();
-
-	if (dbStatus === "Mongoose disconnected") {
-		await db.disconnectFromMongoDB();
-	}
 }
 
 module.exports = init;
