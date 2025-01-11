@@ -14,6 +14,7 @@ const handler = async (channelName, userName, message, msg) => {
 	let channel = channelsService.getChannel(channelId);
 	if (!channel) {
 		console.log("No Channel");
+		return;
 	}
 	channel.increaseMessageCount();
 
