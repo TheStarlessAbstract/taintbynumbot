@@ -6,7 +6,7 @@ function getChannel(id) {
 }
 
 function getChannelName(id) {
-	const channel = channelsController.getChannel(id);
+	const channel = getChannel(id);
 	return channel.name;
 }
 
@@ -30,7 +30,7 @@ function removeChannel(id) {
 }
 
 function getChannelMessageCount(id) {
-	const channel = channelsController.getChannel(id);
+	const channel = getChannel(id);
 	if (!channel) return false;
 	return channel.getMessageCount();
 }
@@ -80,6 +80,16 @@ function getChannelCustomBot(id) {
 	return channel.getCustomBot();
 }
 
+function getChannelsWithProperty(property) {
+	const channels = getAllChannels();
+	const discordChannels = [];
+	for (let [key, value] of channels) {
+		if (value?.[property]) discordChannels.push(value);
+	}
+
+	return discordChannels;
+}
+
 module.exports = {
 	getChannel,
 	getChannelName,
@@ -94,4 +104,5 @@ module.exports = {
 	getAllChannelIds,
 	hasChannelCustomBot,
 	getChannelCustomBot,
+	getChannelsWithProperty,
 };
