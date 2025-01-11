@@ -1,14 +1,9 @@
 const { aggregate } = require("../../../queries/list");
 
 const getRandomByString = async function (config) {
-	if (config.versionKey !== "getRandomByString") return;
-	let output;
-
-	if (!config?.permitted) {
-		return this.getProcessedOutputString(
-			this.getOutput("notPermitted"),
-			config.configMap
-		);
+	// check if permitted
+	if (!config?.permitted || typeof config.permitted !== "boolean") {
+		return this.getOutputString("notPermitted", config.configMap);
 	}
 
 	const pipeline = [
@@ -25,21 +20,13 @@ const getRandomByString = async function (config) {
 	const listItems = await aggregate(pipeline);
 
 	if (listItems.length === 0) {
-		return this.getProcessedOutputString(
-			this.getOutput("stringNotFound"),
-			config.configMap
-		);
+		return this.getProcessedOutputString("stringNotFound", config.configMap);
 	}
 
 	config.configMap.set("index", listItems[0].index);
 	config.configMap.set("text", listItems[0].text);
 
-	output = this.getProcessedOutputString(
-		this.getOutput("found"),
-		config.configMap
-	);
-
-	return output;
+	return this.getProcessedOutputString("found", config.configMap);
 };
 
 module.exports = getRandomByString;
