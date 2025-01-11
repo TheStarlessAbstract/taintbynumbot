@@ -6,7 +6,8 @@ function createChannel(
 	dbMessages,
 	messageCountTrigger,
 	messageIntervalLength,
-	customBot
+	customBot,
+	discordCommandsChannelId
 ) {
 	const messages = [];
 
@@ -25,7 +26,8 @@ function createChannel(
 		messages,
 		messageCountTrigger,
 		messageIntervalLength,
-		customBot
+		customBot,
+		discordCommandsChannelId
 	);
 }
 
