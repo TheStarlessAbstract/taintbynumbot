@@ -2,17 +2,11 @@ async function sayToChat(config) {
 	if (config.versionKey !== "sayToChat") return;
 
 	if (!config?.permitted) {
-		output = this.getProcessedOutputString(
-			this.getOutput("notPermitted"),
-			config.configMap
-		);
+		output = this.getOutputString("notPermitted", config.configMap);
 		return output;
 	}
 
-	const output = this.getProcessedOutputString(
-		this.getOutput("text"),
-		config.configMap
-	);
+	const output = this.getOutputString("text", config.configMap);
 
 	return output;
 }
