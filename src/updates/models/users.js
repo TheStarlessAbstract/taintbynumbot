@@ -1,17 +1,9 @@
-require("dotenv").config();
-
-const db = require("../../../bot-mongoose.js");
-
 const User = require("../../../models/user.js");
 const Messages = require("../../../models/message.js");
 const UserNew = require("../../models/usernew.js");
 
 async function init() {
 	let list = [];
-	const dbStatus = await db.getReadyState();
-	if (dbStatus === "Mongoose disconnected") {
-		await db.connectToMongoDB();
-	}
 
 	const users = await User.find({});
 	for (let i = 0; i < users.length; i++) {
@@ -67,10 +59,6 @@ async function init() {
 	}
 
 	await UserNew.insertMany(list);
-
-	if (dbStatus === "Mongoose disconnected") {
-		await db.disconnectFromMongoDB();
-	}
 }
 
 module.exports = init;
