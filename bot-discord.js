@@ -31,9 +31,7 @@ function init() {
 
 async function setup() {
 	const channel = client.channels.cache.get(discordChannelId);
-
 	let twitchCommands = [];
-
 	let messages = await channel.messages.fetch();
 
 	if (messages.size > 0) {
