@@ -1,17 +1,9 @@
-require("dotenv").config();
-
-const db = require("../../../bot-mongoose.js");
-
 const User = require("../../../models/user.js");
 const LoyaltyPoints = require("../../../models/loyaltypoint.js");
 const LoyaltyPointsNew = require("../../models/loyaltypointnew.js");
 
 async function init() {
 	let list = [];
-	const dbStatus = await db.getReadyState();
-	if (dbStatus === "Mongoose disconnected") {
-		await db.connectToMongoDB();
-	}
 
 	const users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
 	const userIds = getUserIds(users);
@@ -31,10 +23,6 @@ async function init() {
 	}
 
 	await LoyaltyPointsNew.insertMany(list);
-
-	if (dbStatus === "Mongoose disconnected") {
-		await db.disconnectFromMongoDB();
-	}
 }
 
 function getUserIds(users) {
