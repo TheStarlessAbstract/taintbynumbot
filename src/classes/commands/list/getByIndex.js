@@ -1,14 +1,9 @@
 const { findOne } = require("../../../queries/list");
 
 const getByIndex = async function (config) {
-	if (config.versionKey !== "getByIndex") return;
-	let output;
-
-	if (!config?.permitted) {
-		return this.getProcessedOutputString(
-			this.getOutput("notPermitted"),
-			config.configMap
-		);
+	// check if permitted
+	if (!config?.permitted || typeof config.permitted !== "boolean") {
+		return this.getOutputString("notPermitted", config.configMap);
 	}
 
 	const item = await findOne({
@@ -20,20 +15,12 @@ const getByIndex = async function (config) {
 	config.configMap.set("index", config.argument);
 
 	if (!item) {
-		return this.getProcessedOutputString(
-			this.getOutput("idNotFound"),
-			config.configMap
-		);
+		return this.getProcessedOutputString("idNotFound", config.configMap);
 	}
 
 	config.configMap.set("text", item.text);
 
-	output = this.getProcessedOutputString(
-		this.getOutput("found"),
-		config.configMap
-	);
-
-	return output;
+	return this.getProcessedOutputString("found", config.configMap);
 };
 
 module.exports = getByIndex;
