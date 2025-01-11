@@ -1,4 +1,3 @@
-const db = require("../../../bot-mongoose");
 const buhhs = require("./buhhs");
 const deaths = require("./deaths");
 const setdeaths = require("./deathsSet");
@@ -33,11 +32,6 @@ const kingsReset = require("./kingsReset");
 const kingsRemain = require("./kingsRemain");
 
 async function init() {
-	const dbStatus = await db.getReadyState();
-	if (dbStatus === "Mongoose disconnected") {
-		await db.connectToMongoDB();
-	}
-
 	await buhhs();
 	await deaths();
 	await setdeaths();
@@ -70,10 +64,6 @@ async function init() {
 	await kings();
 	await kingsReset();
 	await kingsRemain();
-
-	if (dbStatus === "Mongoose disconnected") {
-		await db.disconnectFromMongoDB();
-	}
 }
 
 module.exports = init;
