@@ -9,7 +9,8 @@ class Channel {
 		messages,
 		messageCountTrigger,
 		messageIntervalLength,
-		customBot
+		customBot,
+		discordCommandsChannelId
 	) {
 		this.id = channelId;
 		this.name = channelName;
@@ -21,6 +22,7 @@ class Channel {
 		this.messageIntervalLength = messageIntervalLength; // in minutes
 		this.messsageInterval = this.startMessageInterval();
 		this.customBot = this.validateCustomBot(customBot);
+		this.discordCommandsChannelId = discordCommandsChannelId;
 
 		this.commands = {}; // maybe a map instead
 		this.redemptions = {};
@@ -85,7 +87,8 @@ class Channel {
 	}
 
 	addTextCommand(name, type, output, versions) {
-		const command = new getCommandType("text")(this.id, name, {
+		const commandClass = getCommandType("text");
+		const command = new commandClass(this.id, name, {
 			type,
 			output,
 			versions,
