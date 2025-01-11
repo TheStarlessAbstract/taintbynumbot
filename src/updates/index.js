@@ -1,4 +1,5 @@
-const db = require("../../bot-mongoose");
+require("dotenv").config();
+const db = require("../services/db");
 const commands = require("./commands");
 const models = require("./models");
 const quote = require("./quoteToList");
@@ -10,13 +11,13 @@ const clips = require("./clips");
 init();
 
 async function init() {
-	await db.connectToMongoDB();
+	await db.connect();
 	// await commands();
 	// await audio();
 	// await quote();
 	// await tinder();
-	// await models();
+	await models();
 	// await redemptions();
-	await clips();
-	// await db.disconnectFromMongoDB();
+	// await clips();
+	await db.disconnect();
 }
