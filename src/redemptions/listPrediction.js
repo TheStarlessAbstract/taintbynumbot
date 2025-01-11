@@ -69,7 +69,7 @@ async function listPrediction(redeemDetails, variableMap) {
 
 	await this.sleep(this.getDuration());
 	const moderator = process.env.TWITCH_BOT_ID;
-	await this.sendAnnouncement(moderator, list[0].text);
+	await this.sendAnnouncement(moderator, { message: list[0].text });
 
 	this.playAudio();
 
