@@ -1,19 +1,18 @@
 require("dotenv").config();
 
-const db = require("../bot-mongoose.js");
+const db = require("./services/db");
 const twitchRepo = require("./repos/twitch");
-// const pubSubClient = require("./bot-pubsubclient");
-// const discord = require("./bot-discord");
+const discord = require("./services/discord");
+// const discord = require("../bot-discord");
 
 init();
 
 async function init() {
 	setupSignalHandlers();
 
-	await db.connectToMongoDB();
-	if (!(await twitchRepo.init())) db.disconnectFromMongoDB();
-	// await pubSubClient.init();
-	// await discord.setup();
+	await db.connect();
+	if (!(await twitchRepo.init())) await db.disconnect();
+	await discord.init();
 }
 
 function setupSignalHandlers() {
