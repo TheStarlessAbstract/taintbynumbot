@@ -5,37 +5,24 @@ const { getChannel } = require("./../../../controllers/channels");
 const addCommand = async function (config) {
 	if (config.versionKey !== "addCommand") return;
 	if (!config?.permitted) {
-		return this.getProcessedOutputString(
-			this.getOutput("notPermitted"),
-			config.configMap
-		);
+		return this.getOutputString("notPermitted", config.configMap);
 	}
 
 	if (!config.argument.startsWith("!"))
-		return this.getProcessedOutputString(
-			this.getOutput("noPrefix"),
-			config.configMap
-		);
+		return this.getOutputString("noPrefix", config.configMap);
 
 	const { first: commandName, second: text } = splitArgs(config.argument, 1);
 	const name = commandName.toLowerCase();
 
 	if (typeof text !== "string" || text.length === 0)
-		return this.getProcessedOutputString(
-			this.getOutput("noText"),
-			config.configMap
-		);
+		return this.getOutputString("noText", config.configMap);
 
 	const dbCommand = await findOne({
 		channelId: this.channelId,
 		chatName: name,
 	});
 
-	if (dbCommand)
-		return this.getProcessedOutputString(
-			this.getOutput("alreadyExists"),
-			config.configMap
-		);
+	if (dbCommand) return this.getOutputString("alreadyExists", config.configMap);
 	const type = "text";
 	const output = new Map([
 		[
@@ -92,10 +79,7 @@ const addCommand = async function (config) {
 	const channel = getChannel(this.channelId);
 	channel.addTextCommand(name, type, output, versions);
 
-	return this.getProcessedOutputString(
-		this.getOutput("created"),
-		config.configMap
-	);
+	return this.getOutputString("created", config.configMap);
 };
 
 module.exports = addCommand;
