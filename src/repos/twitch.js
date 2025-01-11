@@ -18,7 +18,7 @@ let pubSubClient;
 async function init() {
 	const users = await find(
 		{ "tokens.twitch": { $exists: true } },
-		"channelId displayName messages messageCountTrigger messageIntervalLength customBot role tokens.twitch"
+		"channelId displayName messages messageCountTrigger messageIntervalLength customBot role tokens.twitch discordCommandsChannelId"
 	);
 
 	if (users.length === 0) return;
@@ -37,7 +37,8 @@ async function init() {
 				users[i].messages,
 				users[i].messageCountTrigger,
 				users[i].messageIntervalLength,
-				users[i].customBot
+				users[i].customBot,
+				users[i].discordCommandsChannelId
 			);
 
 			const res = await channelsService.addChannel(channel.id, channel);
