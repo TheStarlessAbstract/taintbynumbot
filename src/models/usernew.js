@@ -28,11 +28,10 @@ const TokenSchema = new Schema({
 });
 
 const MessageSchema = new Schema({
-	index: { type: Number, required: true, unique: true },
+	index: { type: Number, required: true },
 	text: {
 		type: String,
 		required: true,
-		unique: true,
 	},
 	addedBy: { type: String, required: true },
 });
@@ -55,6 +54,7 @@ const UserNewSchema = new Schema({
 	messages: [MessageSchema],
 	messageCountTrigger: Number,
 	messageIntervalLength: Number,
+	discordCommandsChannelId: String,
 });
 
 module.exports = mongoose.model("UserNew", UserNewSchema);
