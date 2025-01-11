@@ -140,17 +140,9 @@ router.get("/v2/test", async (req, res) => {
 			obtainmentTimestamp: 0,
 		};
 	} else {
-		let role = "user";
-		if (channelId == process.env.TWITCH_USER_ID) {
-			role = "admin";
-		} else if (channelId == process.env.TWITCH_BOT_ID) {
-			role = "bot";
-		}
-
 		user = new UserNew({
 			channelId,
 			displayName: users.data.data[0].display_name,
-			role,
 			joinDate: new Date(),
 			tokens: new Map([
 				[
@@ -166,6 +158,12 @@ router.get("/v2/test", async (req, res) => {
 				],
 			]),
 		});
+
+		let role = "user";
+		if (channelId == process.env.TWITCH_USER_ID) role = "admin";
+		else if (channelId == process.env.TWITCH_BOT_ID) role = "bot";
+
+		user.role = role;
 	}
 
 	user.save();
