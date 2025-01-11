@@ -14,12 +14,6 @@ class BaseCommand {
 		this.channels = {}; // currently channelId: { versions, output }
 	}
 
-	/**
-	 * Adds a new channel to the `channels` object in the `BaseCommand` class.
-	 * @param {string} channelId - The ID of the channel to be added.
-	 * @param {object} channel - The channel object containing the versions and output maps.
-	 * @returns {boolean} - True if the channel was successfully added, false otherwise.
-	 */
 	addChannel(channelId, channel) {
 		if (
 			typeof channelId !== "string" ||
@@ -47,13 +41,6 @@ class BaseCommand {
 		return this.channels[channelId] || null;
 	}
 
-	/**
-	 * Retrieves a specific channel from the `channels` object. If the channel does not exist, it queries the database to find the channel and adds it to the `channels` object.
-	 * @param {Object} options - The options object.
-	 * @param {string} options.channelId - The ID of the channel to retrieve.
-	 * @param {string} options.chatName - The name of the chat command.
-	 * @returns {Object|null} - The channel object corresponding to the provided `channelId`, if it exists. Otherwise, `null`.
-	 */
 	async checkChannel({ channelId, chatName }) {
 		if (!isNonEmptyString(channelId) || !isNonEmptyString(chatName)) return;
 
