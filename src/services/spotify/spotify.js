@@ -1,0 +1,57 @@
+const axios = require("axios");
+
+const spotifyRepo = require("../../repos/spotify");
+
+async function getCurrentPlaying(channelId) {
+	const token = await spotifyRepo.getToken(channelId);
+	console.log(0);
+	if (token === null) return "no token";
+
+	console.log(token);
+	const response = await axios.get("https://api.spotify.com/v1/me/player/", {
+		headers: {
+			Authorization: "Bearer " + token.accessToken,
+		},
+	});
+
+	let result = "";
+
+	switch (response.statusCode) {
+		case 401:
+			result = `Can't access Spotify account, due to bad or expired token. Please re-authenticate`;
+			break;
+		case 403:
+			result = `Can't access Spotify account, due to a bad OAuth request. Starless, fix it`;
+			break;
+		case 429:
+			result = `Can't access Spotify account, as the application has exceeded rate limits, try again...much later`;
+			break;
+		default:
+			//if other statusCode
+			if (response?.statusCode) {
+				result = `Can't access Spotify account, no idea really, error code is: ${response.statusCode}`;
+			} else if (!response.data.is_playing) {
+				result = "";
+			} else if (response.data.is_playing) {
+				result = `The song playing is: ${response.data.item.name} by ${response.data.item.artists[0].name}.
+				Link: ${response.data.item.external_urls.spotify}`;
+			}
+	}
+	console.log(2);
+	if (response.statusCode) {
+		return { playing: false, error: response.statusCode };
+	}
+	console.log(3);
+	if (response.data.is_playing) {
+		return {
+			playing: true,
+			title: response.data.item.name,
+			artist: response.data.item.artists[0].name,
+			url: response.data.item.external_urls.spotify,
+		};
+	} else {
+		return { playing: false };
+	}
+}
+
+exports.getCurrentPlaying = getCurrentPlaying;
