@@ -6,7 +6,7 @@ const { getStreamByUserId } = require("../../../services/twitch/streams");
 const { play } = require("../../../services/audio");
 
 const drawACard = async function (config) {
-	// config properties used { configMap, permitted, userId, user }
+	// config used { configMap, permitted, userId, user }
 
 	const stream = await getStreamByUserId(this.channelId);
 	// check if stream live
