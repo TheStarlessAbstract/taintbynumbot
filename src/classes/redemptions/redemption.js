@@ -15,7 +15,7 @@ class Redemption {
 		this.name = name;
 		this.type = type;
 		this.action = {};
-		this.output = output;
+		this.output = output || new Map();
 		this.audio = audio;
 		this.announcementColour = announcementColour;
 	}
