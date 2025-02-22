@@ -24,17 +24,10 @@ function template() {
 				},
 			],
 			[
-				"noStream",
-				{
-					message: "Stream is currently offline",
-					active: true,
-				},
-			],
-			[
 				"idError",
 				{
 					message:
-						"@{userName} - Steam couldn't find your name, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL",
+						"@{displayName} - Steam couldn't find your name, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL",
 					active: true,
 				},
 			],
@@ -42,7 +35,7 @@ function template() {
 				"privateError",
 				{
 					message:
-						"@{userName} - Your games are private, so I can't suggest a game. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public",
+						"@{displayName} - Your games are private, so I can't suggest a game. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public",
 					active: true,
 				},
 			],
@@ -50,7 +43,7 @@ function template() {
 				"timePlayed",
 				{
 					message:
-						"@{userName} - you haven't played more than {hours} hour(s) in {game}, why not play it next",
+						"@{displayName} - you haven't played more than {hours} hour(s) in {game}, why not play it next",
 					active: true,
 				},
 			],
@@ -58,7 +51,7 @@ function template() {
 				"achievements%",
 				{
 					message:
-						"@{userName} - you haven't unlocked more than {percent} in {game}, go get that 100%",
+						"@{displayName} - you haven't unlocked more than {percent} in {game}, go get that 100%",
 					active: true,
 				},
 			],
@@ -66,24 +59,24 @@ function template() {
 				"randomGame",
 				{
 					message:
-						"@{userName} - Can't choose what to play? Why not try {game}",
-					active: false,
+						"@{displayName} - Can't choose what to play? Why not try {game}",
+					active: true,
 				},
 			],
 			[
 				"noGames",
 				{
 					message:
-						"@{userName} - I couldn't find any games in your Steam library",
-					active: false,
+						"@{displayName} - I couldn't find any games in your Steam library",
+					active: true,
 				},
 			],
 			[
 				"noMatch",
 				{
 					message:
-						"@{userName} - I couldn't find any games that match your request",
-					active: false,
+						"@{displayName} - I couldn't find any games that match your request",
+					active: true,
 				},
 			],
 		]),
