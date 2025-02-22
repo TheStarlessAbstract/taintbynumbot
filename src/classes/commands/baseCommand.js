@@ -131,6 +131,11 @@ class BaseCommand {
 		}
 		return "";
 	}
+
+	isPermitted(permitted) {
+		if (!permitted || typeof permitted !== "boolean") return false;
+		return true;
+	}
 }
 
 module.exports = BaseCommand;
