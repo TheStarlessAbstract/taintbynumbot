@@ -33,15 +33,13 @@ async function commandsChannelInit(twitchChannel, discordChannel) {
 		discordChannel.messages.fetch(),
 		commandsFind({ channelId: twitchChannel.id }),
 	]);
-
 	if (commands.length === 0) return;
 
 	const content = generateCommandComments(commands);
+	if (messages.size > 0) return;
 
-	if (messages.size === 0) {
-		for (let i = 0; i < content.length; i++) {
-			discordChannel.send({ content: content[i] });
-		}
+	for (let i = 0; i < content.length; i++) {
+		discordChannel.send({ content: content[i] });
 	}
 }
 
