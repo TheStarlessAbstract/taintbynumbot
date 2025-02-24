@@ -21,7 +21,9 @@ let ssl = process.env.PORT ? https : http;
 
 async function setup(newIo) {
 	io = newIo;
+
 	io.on("connection", async (socket) => {
+		const referer = socket.handshake.headers.referer;
 		if (socket.handshake.headers.referer.includes("/v2/auth")) {
 			console.log("/v2/auth connected");
 
@@ -139,16 +141,34 @@ async function setup(newIo) {
 				console.log("/deathcounteroverlay disconnected");
 				clearInterval(deathCounterInterval);
 			});
-		} else if (socket.handshake.headers.referer.includes("spotify")) {
+		}
+		//  else if (socket.handshake.headers.referer.includes("spotify")) {
+		// 	console.log("/spotify connected");
+		// 	const scope = "user-read-currently-playing user-read-playback-state";
+		// 	redirectUri = botDomain + "/oauth/spotify";
+
+		// 	io.emit("setSpotifyDetails", {
+		// 		spotifyClientId,
+		// 		redirectUri,
+		// 		scope,
+		// 	});
+		// }
+		else if (referer === `${botDomain}/`) {
+			console.log("/ connected");
+
+			const redirectUri = botDomain + "/v2/test";
+			const scope =
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
+
+			io.emit("setDetails /", { clientId, redirectUri, scope });
+		} else if (referer === `${botDomain}/spotify`) {
 			console.log("/spotify connected");
+
 			const scope = "user-read-currently-playing user-read-playback-state";
 			redirectUri = botDomain + "/oauth/spotify";
 
-			io.emit("setSpotifyDetails", {
-				spotifyClientId,
-				redirectUri,
-				scope,
-			});
+			const emitDetails = { clientId: spotifyClientId, redirectUri, scope };
+			io.emit("setDetails /spotify", emitDetails);
 		}
 	});
 }
