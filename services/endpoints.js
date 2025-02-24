@@ -15,7 +15,7 @@ const spotifyRepo = require("../src/repos/spotify");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-	res.send("Hello Twitch!");
+	res.sendFile(path.join(__dirname, "..", "public", "home.html"));
 });
 
 router.get("/test", async (req, res) => {
@@ -96,11 +96,10 @@ router.get("/test", async (req, res) => {
 
 router.get("/v2/test", async (req, res) => {
 	const code = req.query.code;
-
-	let botDomain = process.env.BOT_DOMAIN;
-	let clientId = process.env.TWITCH_CLIENT_ID;
-	let clientSecret = process.env.TWITCH_CLIENT_SECRET;
-	let redirectUri = botDomain + "/v2/test";
+	const botDomain = process.env.BOT_DOMAIN;
+	const clientId = process.env.TWITCH_CLIENT_ID;
+	const clientSecret = process.env.TWITCH_CLIENT_SECRET;
+	const redirectUri = botDomain + "/v2/test";
 
 	const response = await axios.post(
 		"https://id.twitch.tv/oauth2/token",
@@ -168,8 +167,7 @@ router.get("/v2/test", async (req, res) => {
 	}
 
 	user.save();
-
-	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
+	res.redirect("/spotify");
 });
 
 router.get("/auth", (req, res) => {
@@ -189,14 +187,15 @@ router.get("/v2/botAuthorisation", (req, res) => {
 });
 
 router.get("/spotify", (req, res) => {
-	res.sendFile(path.join(__dirname, "..", "public", "bot-spotify-auth.html"));
+	res.sendFile(path.join(__dirname, "..", "public", "profile.html"));
 });
 
 router.get("/oauth/spotify", async (req, res) => {
 	const code = req.query.code;
 	// returns empty string
 	// await spotifyRepo.setToken({ type: "code", code: code });
-	await spotifyRepo.updateToken({ type: "code", code });
+	console.log(code);
+	// await spotifyRepo.updateToken({ type: "code", code });
 
 	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
 });
