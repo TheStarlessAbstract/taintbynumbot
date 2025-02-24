@@ -39,15 +39,16 @@ async function updateToken(tokenInput) {
 		});
 		if (!tokenInput.user) return;
 	}
-	const queryStringInput = generateQueryStringInput(tokenInput);
-	const tokenData = await requestToken(queryStringInput);
+	const formInput = generateFormInput(tokenInput);
+	const tokenData = await requestToken(formInput);
+	console.log(tokenData);
 	// const token = tokenProcessing(tokenInput, tokenData);
 	// user.tokens.set("spotify", token);
 }
 
 async function setToken(tokenInput) {
 	console.log("nothing here");
-	// 	const queryStringInput = generateQueryStringInput(tokenInput);
+	// 	const queryStringInput = generateFormInput(tokenInput);
 	// 	// const response = await requestToken(queryStringInput);
 	// 	// let user = await tokenProcessing(tokenInput, response.data);
 
@@ -55,44 +56,64 @@ async function setToken(tokenInput) {
 	// 	else if (tokenInput.type == "refresh") return user;
 }
 
-function generateQueryStringInput(tokenInput) {
-	let queryStringInput;
+function generateFormInput(tokenInput) {
+	let formInput;
 
 	if (tokenInput.type == "code") {
-		queryStringInput = {
+		formInput = {
 			grant_type: "authorization_code",
 			code: tokenInput.code,
 			redirect_uri: redirectUri,
 		};
 	} else if (tokenInput.type == "refresh") {
 		let refreshToken = tokenInput.user.tokens.get("spotify").refreshToken;
-		queryStringInput = {
+		formInput = {
 			grant_type: "refresh_token",
 			refresh_token: refreshToken,
 			redirect_uri: redirectUri,
 		};
 	}
 
-	return queryStringInput;
+	return formInput;
 }
 
-async function requestToken(queryStringInput) {
-	console.log(querystring.stringify(queryStringInput));
+async function requestToken(formInput) {
+	let code = formInput.code;
+	let uri = formInput.redirectUri;
+	console.log(uri);
+	var authOptions = {
+		url: "https://accounts.spotify.com/api/token",
+		form: {
+			code: code,
+			redirect_uri: "http://localhost:5000/oauth/spotify",
+			grant_type: "authorization_code",
+		},
+		headers: {
+			"content-type": "application/x-www-form-urlencoded",
+			Authorization:
+				"Basic " +
+				new Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+		},
+		json: true,
+	};
+	// const authOptions = {
+	// 	url: "https://accounts.spotify.com/api/token",
+	// 	form: {
+	// 		code: code,
+	// 		redirect_uri: "http://localhost:5000/oauth/spotify",
+	// 		grant_type: "authorization_code",
+	// 	},
+	// 	headers: {
+	// 		"content-type": "application/x-www-form-urlencoded",
+	// 		Authorization:
+	// 			"Basic " +
+	// 			new Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
+	// 	},
+	// 	json: true,
+	// };
 	try {
-		const response = await axios.post(
-			"https://accounts.spotify.com/api/token",
-			querystring.stringify(queryStringInput),
-			{
-				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
-					Authorization:
-						"Basic" +
-						Buffer.from(`${clientId}:${clientSecret}`, "utf-8").toString(
-							"base64"
-						),
-				},
-			}
-		);
+		const response = await axios.post(authOptions);
+
 		return response.data;
 	} catch (error) {
 		console.error(
@@ -103,7 +124,7 @@ async function requestToken(queryStringInput) {
 			// console.error("Status Code:", error.response.status);
 			// console.error("Headers:", error.response.headers);
 		}
-		// throw error; // Re-throw the error for handling elsewhere
+		throw error; // Re-throw the error for handling elsewhere
 	}
 }
 
