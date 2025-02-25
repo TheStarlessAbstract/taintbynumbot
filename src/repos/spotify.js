@@ -78,41 +78,19 @@ function generateFormInput(tokenInput) {
 }
 
 async function requestToken(formInput) {
-	let code = formInput.code;
-	let uri = formInput.redirectUri;
-	console.log(uri);
-	var authOptions = {
-		url: "https://accounts.spotify.com/api/token",
-		form: {
-			code: code,
-			redirect_uri: "http://localhost:5000/oauth/spotify",
-			grant_type: "authorization_code",
-		},
-		headers: {
-			"content-type": "application/x-www-form-urlencoded",
-			Authorization:
-				"Basic " +
-				new Buffer.from(clientId + ":" + clientSecret).toString("base64"),
-		},
-		json: true,
-	};
-	// const authOptions = {
-	// 	url: "https://accounts.spotify.com/api/token",
-	// 	form: {
-	// 		code: code,
-	// 		redirect_uri: "http://localhost:5000/oauth/spotify",
-	// 		grant_type: "authorization_code",
-	// 	},
-	// 	headers: {
-	// 		"content-type": "application/x-www-form-urlencoded",
-	// 		Authorization:
-	// 			"Basic " +
-	// 			new Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
-	// 	},
-	// 	json: true,
-	// };
 	try {
-		const response = await axios.post(authOptions);
+		const response = await axios.post(
+			"https://accounts.spotify.com/api/token",
+			querystring.stringify(formInput),
+			{
+				headers: {
+					"content-type": "application/x-www-form-urlencoded",
+					Authorization:
+						"Basic " +
+						new Buffer.from(clientId + ":" + clientSecret).toString("base64"),
+				},
+			}
+		);
 
 		return response.data;
 	} catch (error) {
