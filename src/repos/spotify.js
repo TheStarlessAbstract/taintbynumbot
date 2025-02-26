@@ -2,7 +2,6 @@ const axios = require("axios");
 const querystring = require("querystring");
 
 const { findOne } = require("./../queries/users");
-const token = require("../../models/token");
 
 const botDomain = process.env.BOT_DOMAIN;
 const redirectUri = botDomain + "/oauth/spotify";
@@ -11,7 +10,7 @@ const clientId = process.env.SPOTIFY_CLIENT_ID;
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
 async function getToken(channelId) {
-	const user = await findOne(
+	let user = await findOne(
 		{
 			channelId,
 		},
@@ -20,13 +19,11 @@ async function getToken(channelId) {
 
 	if (!user) return null;
 
-	const currentTime = new Date();
+	const currentTime = Date.now();
 	const expiresIn = user.tokens.get("spotify").expiresIn;
 
-	if (expiresIn < currentTime) {
-		// user = await setToken({ type: "refresh", user });
-		user = await updateToken(user);
-	}
+	if (expiresIn < currentTime)
+		user = await updateToken({ type: "refresh", user });
 
 	return user.tokens.get("spotify");
 }
@@ -39,11 +36,10 @@ async function updateToken(tokenInput) {
 		});
 		if (!tokenInput.user) return;
 	}
-	const formInput = generateFormInput(tokenInput);
-	const tokenData = await requestToken(formInput);
-	console.log(tokenData);
-	// const token = tokenProcessing(tokenInput, tokenData);
-	// user.tokens.set("spotify", token);
+	const querystringInput = generateQuerystringInput(tokenInput);
+	const tokenData = await requestToken(querystringInput);
+
+	return await tokenProcessing(tokenInput, tokenData);
 }
 
 async function setToken(tokenInput) {
@@ -56,7 +52,7 @@ async function setToken(tokenInput) {
 	// 	else if (tokenInput.type == "refresh") return user;
 }
 
-function generateFormInput(tokenInput) {
+function generateQuerystringInput(tokenInput) {
 	let formInput;
 
 	if (tokenInput.type == "code") {
@@ -77,11 +73,11 @@ function generateFormInput(tokenInput) {
 	return formInput;
 }
 
-async function requestToken(formInput) {
+async function requestToken(querystringInput) {
 	try {
 		const response = await axios.post(
 			"https://accounts.spotify.com/api/token",
-			querystring.stringify(formInput),
+			querystring.stringify(querystringInput),
 			{
 				headers: {
 					"content-type": "application/x-www-form-urlencoded",
@@ -100,51 +96,35 @@ async function requestToken(formInput) {
 		);
 		if (error.response) {
 			// console.error("Status Code:", error.response.status);
-			// console.error("Headers:", error.response.headers);
 		}
 		throw error; // Re-throw the error for handling elsewhere
 	}
 }
 
 async function tokenProcessing(tokenInput, data) {
-	let user;
+	const user = tokenInput.user;
+	let token;
 	let expiresIn = Date.now() + data.expires_in * 1000;
-	expiresIn = new Date(expiresIn);
 
 	if (tokenInput.type == "code") {
-		const channelId = process.env.TWITCH_USER_ID;
-		user = await User.findOne({ channelId });
+		token = {
+			tokenType: "spotify",
+			accessToken: data.access_token,
+			refreshToken: data.refresh_token,
+			scope: data.scope,
+			expiresIn: expiresIn,
+			obtainmentTimestamp: 0,
+		};
 
-		if (user) {
-			user.spotifyToken = {
-				scope: data.scope,
-				accessToken: data.access_token,
-				refreshToken: data.refresh_token,
-				expiresIn: expiresIn,
-			};
-		} else {
-			user = new User({
-				twitchId: twitchUserId,
-				joinDate: new Date(),
-				spotifyToken: {
-					accessToken: data.access_token,
-					tokenType: data.token_type,
-					scope: data.scope,
-					expiresIn: expiresIn,
-					refreshToken: data.refresh_token,
-				},
-			});
-		}
+		user.tokens.set("spotify", token);
 	} else if (tokenInput.type == "refresh") {
-		user = tokenInput.user;
-
-		user.spotifyToken.scope = data.scope;
-		user.spotifyToken.accessToken = data.access_token;
-		user.spotifyToken.expiresIn = expiresIn;
+		token = user.tokens.get("spotify");
+		token.accessToken = data.access_token;
+		token.scope = data.scope;
+		token.expiresIn = expiresIn;
 	}
 
 	await user.save();
-
 	return user;
 }
 
