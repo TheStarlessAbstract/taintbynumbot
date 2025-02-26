@@ -4,10 +4,8 @@ const spotifyRepo = require("../../repos/spotify");
 
 async function getCurrentPlaying(channelId) {
 	const token = await spotifyRepo.getToken(channelId);
-	console.log(0);
 	if (token === null) return "no token";
 
-	console.log(token);
 	const response = await axios.get("https://api.spotify.com/v1/me/player/", {
 		headers: {
 			Authorization: "Bearer " + token.accessToken,
@@ -37,21 +35,16 @@ async function getCurrentPlaying(channelId) {
 				Link: ${response.data.item.external_urls.spotify}`;
 			}
 	}
-	console.log(2);
-	if (response.statusCode) {
+
+	if (response.statusCode)
 		return { playing: false, error: response.statusCode };
-	}
-	console.log(3);
-	if (response.data.is_playing) {
-		return {
-			playing: true,
-			title: response.data.item.name,
-			artist: response.data.item.artists[0].name,
-			url: response.data.item.external_urls.spotify,
-		};
-	} else {
-		return { playing: false };
-	}
+	if (!response.data.is_playing) return { playing: false };
+	return {
+		playing: true,
+		title: response.data.item.name,
+		artist: response.data.item.artists[0].name,
+		url: response.data.item.external_urls.spotify,
+	};
 }
 
 exports.getCurrentPlaying = getCurrentPlaying;
