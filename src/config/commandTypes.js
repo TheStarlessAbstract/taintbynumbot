@@ -13,18 +13,20 @@ const commandTypes = {
 	listadd: "../classes/commands/listAdd/class",
 	listdelete: "../classes/commands/listDelete/class",
 	listedit: "../classes/commands/listEdit/class",
-	messageadd: "../classes/commands/messageAdd/class",
-	messagedelete: "../classes/commands/messageDelete/class",
-	messageedit: "../classes/commands/messageEdit/class",
-	points: "../classes/commands/points/class",
-	shoutout: "../classes/commands/shoutout/class",
+
+	cardgame: "../classes/commands/cardGameNew/class",
+	cardgamereset: "../classes/commands/cardGameReset/class",
+	cardgameremain: "../classes/commands/cardGameRemain/class",
+
+	messageadd: "../classes/commands/messageAdd",
+	messagedelete: "../classes/commands/messageDelete",
+	messageedit: "../classes/commands/messageEdit",
+	points: "../classes/commands/points",
+	shoutout: "../classes/commands/shoutout",
 	song: "../classes/commands/song",
 	steam: "../classes/commands/steam",
 	text: "../classes/commands/text",
 	title: "../classes/commands/title",
-	cardgame: "../classes/commands/cardGameNew/class",
-	cardgamereset: "../classes/commands/cardGameReset/class",
-	cardgameremain: "../classes/commands/cardGameRemain/class",
 };
 
 function getCommandType(name) {
