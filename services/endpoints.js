@@ -192,9 +192,6 @@ router.get("/spotify", (req, res) => {
 
 router.get("/oauth/spotify", async (req, res) => {
 	const code = req.query.code;
-	// returns empty string
-	// await spotifyRepo.setToken({ type: "code", code: code });
-	// console.log(code);
 	await spotifyRepo.updateToken({ type: "code", code });
 
 	res.sendFile(path.join(__dirname, "..", "public", "bot-loggedIn.html"));
