@@ -12,12 +12,12 @@ const commandActions = {
 	list: "../classes/commands/list",
 	listadd: "../classes/commands/listAdd",
 	listdelete: "../classes/commands/listDelete",
-	listedit: "../classes/commands/listEdit",
 
 	cardgame: "../classes/commands/cardGameNew",
 	cardgamereset: "../classes/commands/cardGameReset",
 	cardgameremain: "../classes/commands/cardGameRemain",
 
+	listedit: "../commandActions/listEdit",
 	messageadd: "../commandActions/messageAdd",
 	messagedelete: "../commandActions/messageDelete",
 	messageedit: "../commandActions/messageEdit",
