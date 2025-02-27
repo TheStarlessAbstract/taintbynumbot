@@ -13,18 +13,20 @@ const commandActions = {
 	listadd: "../classes/commands/listAdd",
 	listdelete: "../classes/commands/listDelete",
 	listedit: "../classes/commands/listEdit",
-	messageadd: "../classes/commands/messageAdd",
-	messagedelete: "../classes/commands/messageDelete",
-	messageedit: "../classes/commands/messageEdit",
-	points: "../classes/commands/points",
-	shoutout: "../classes/commands/shoutout",
+
+	cardgame: "../classes/commands/cardGameNew",
+	cardgamereset: "../classes/commands/cardGameReset",
+	cardgameremain: "../classes/commands/cardGameRemain",
+
+	messageadd: "../commandActions/messageAdd",
+	messagedelete: "../commandActions/messageDelete",
+	messageedit: "../commandActions/messageEdit",
+	points: "../commandActions/points",
+	shoutout: "../commandActions/shoutout",
 	song: "../commandActions/song",
 	steam: "../commandActions/steam",
 	text: "../commandActions/text",
 	title: "../commandActions/title",
-	cardgame: "../classes/commands/cardGameNew",
-	cardgamereset: "../classes/commands/cardGameReset",
-	cardgameremain: "../classes/commands/cardGameRemain",
 };
 
 function getCommandAction(name) {
