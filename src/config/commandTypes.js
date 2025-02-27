@@ -12,12 +12,12 @@ const commandTypes = {
 	list: "../classes/commands/list/class",
 	listadd: "../classes/commands/listAdd/class",
 	listdelete: "../classes/commands/listDelete/class",
-	listedit: "../classes/commands/listEdit/class",
 
 	cardgame: "../classes/commands/cardGameNew/class",
 	cardgamereset: "../classes/commands/cardGameReset/class",
 	cardgameremain: "../classes/commands/cardGameRemain/class",
 
+	listedit: "../classes/commands/listEdit",
 	messageadd: "../classes/commands/messageAdd",
 	messagedelete: "../classes/commands/messageDelete",
 	messageedit: "../classes/commands/messageEdit",
