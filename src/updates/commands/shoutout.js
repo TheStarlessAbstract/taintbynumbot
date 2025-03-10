@@ -27,7 +27,7 @@ function template() {
 				"shoutoutAndStreams",
 				{
 					message:
-						"@{shoutee} last streamed ${gameName}. I hear they love the Taint!",
+						"@{shoutee} last streamed {gameName}. I hear they love the Taint!",
 					active: true,
 				},
 			],
