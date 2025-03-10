@@ -1,0 +1,86 @@
+const CardGame = require("../../classes/cardGame");
+const Channel = require("../../classes/channel");
+const { findOne } = require("../../queries/cardGames");
+const { getChannel } = require("../../controllers/channels");
+const { getStreamByUserId } = require("../../services/twitch/streams");
+const { play } = require("../../services/audio");
+
+const drawACard = async function (config) {
+	// config used { configMap, permitted, userId, user }
+	if (!config?.permitted)
+		return this.getOutputString("notPermitted", config.configMap);
+
+	const stream = await getStreamByUserId(this.channelId);
+	// check if stream live
+	if (!stream) return this.getOutputString("noStream", config.configMap);
+
+	const channel = getChannel(this.channelId);
+	// check if channel valid instance
+
+	if (!(channel instanceof Channel)) return;
+	let game = channel.getCardGame(this.name);
+
+	//check if game valid instance
+	if (!(game instanceof CardGame)) {
+		dbCardGame = await findOne({
+			channelId: this.channelId,
+			name: this.name,
+		});
+		// check if cardGame in database
+		if (!dbCardGame) return this.getOutputString("noGame", config.configMap);
+
+		const { suits, values, bonus } = dbCardGame;
+		game = new CardGame(this.channelId, suits, values, bonus);
+		channel.addCardGame(this.name, game);
+	}
+
+	// drawn.bonus = [ { audioLink, selector } ]
+	const drawn = await game.drawCard();
+	if (!this.validateCard(drawn)) return;
+	const { card, reset, bonus } = drawn;
+
+	config.configMap.set("suit", card.suit);
+	config.configMap.set("value", card.value);
+	config.configMap.set("rule", card.rule);
+	config.configMap.set("explanation", card.explanation);
+
+	const output = [
+		this.getOutputString("card", config.configMap),
+		this.getOutputString("rule", config.configMap),
+	];
+
+	const audioLinkUrls = [];
+	let audioUrl;
+	// check if card has audio alert
+	if (card.audioName) audioUrl = await this.getAudioUrl(card.audioName);
+	// check if audio alert found add us array
+	if (audioUrl) audioLinkUrls.push(audioUrl);
+
+	const loyaltyUser = config.user;
+
+	// if card has at least 1 bonus
+	for (let i = 0; i < bonus.length; i++) {
+		// check if bonus has audio alert, add to array if so
+		if (bonus[i]?.audioLink) audioLinkUrls.push(bonus[i].audioLink);
+
+		// check if bonus has a reward
+		if (bonus[i]?.reward && loyaltyUser) {
+			config.configMap.set("prize", bonus[i].reward);
+			config.configMap.set("total", loyaltyUser.points);
+			loyaltyUser.points += bonus[i].reward;
+			config.configMap.set("newTotal", loyaltyUser.points);
+			output.push(
+				this.getOutputString(`bonus${bonus[i].id}`, config.configMap)
+			);
+		}
+
+		if (i === bonus.length - 1) await loyaltyUser.save();
+	}
+
+	if (reset) output.push(this.getOutputString("newGame", config.configMap));
+	if (audioLinkUrls.length > 0) play(this.channelId, audioLinkUrls); // update function for array of URLs
+
+	return output;
+};
+
+module.exports = drawACard;
