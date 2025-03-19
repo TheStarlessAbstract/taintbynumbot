@@ -7,9 +7,10 @@ const setStreamTitle = async function (config) {
 
 	let outputType;
 	const stream = await getStreamByUserId(config.channelId);
-	if (!stream) outputType = "noStream";
-	if (stream.title === config.argument) outputType = "existingTitle";
-	if (outputType) return this.getOutputString(outputType, config.configMap);
+	if (!stream || !stream?.title)
+		return this.getOutputString("noStream", config.configMap);
+	if (stream.title === config.argument)
+		return this.getOutputString("existingTitle", config.configMap);
 
 	outputType = "updateTitle";
 	config.configMap.set("newTitle", config.argument);
