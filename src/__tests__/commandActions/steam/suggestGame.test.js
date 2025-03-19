@@ -187,7 +187,7 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 5
+	// test id 6
 	test("should return randomGame output if no option set by user", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
