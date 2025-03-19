@@ -56,7 +56,7 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockResolvedValue({ first: "TheStarlessAbstract" });
+		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockRejectedValue(new Error("Username not found"));
 
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
@@ -86,7 +86,7 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockResolvedValue({ first: "TheStarlessAbstract" });
+		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockRejectedValue(
 			new Error("Your games are private")
@@ -119,7 +119,7 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockResolvedValue({ first: "TheStarlessAbstract" });
+		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([]);
 
@@ -150,7 +150,7 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockResolvedValue({ first: "TheStarlessAbstract", second: null });
+		splitArgs.mockReturnValue({ first: "TheStarlessAbstract", second: null });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([
 			{ name: "Deadlock" },
@@ -188,43 +188,87 @@ describe("suggest a game from users steam library", () => {
 	});
 
 	// test id 6
-	test("should return randomGame output if no option set by user", async () => {
+	test("should return noMatch output if option to a number, no games match the filter", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockResolvedValue({ first: "TheStarlessAbstract", second: null });
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+			second: "2",
+		});
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([
-			{ name: "Deadlock" },
-			{ name: "Overwatch" },
-			{ name: "Metro" },
+			{ name: "Overwatch", playTime: "1250" },
+			{ name: "Deadlock", playTime: "1300" },
+			{ name: "Metro", playTime: "1300" },
 		]);
+		isValueNumber.mockReturnValue(true);
 
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
-		jest
-			.spyOn(mockCommand, "shuffle")
-			.mockImplementation(() => [
-				{ name: "Overwatch" },
-				{ name: "Metro" },
-				{ name: "Deadlock" },
-			]);
+		jest.spyOn(mockCommand, "shuffle").mockImplementation(() => []);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
-					"@TheStarlessAbstract - Can't choose what to play? Why not try Overwatch"
+					"@TheStarlessAbstract - I couldn't find any games that match your request"
 			);
 		// Act
 		const result = await action(config);
 
 		// Assert
 		expect(result).toBe(
-			"@TheStarlessAbstract - Can't choose what to play? Why not try Overwatch"
+			"@TheStarlessAbstract - I couldn't find any games that match your request"
 		);
 		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
 		expect(splitArgs).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
+		expect(isValueNumber).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+	});
+
+	// test id 7
+	test("should return timePlayed output if no option set by user", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+			second: "20",
+		});
+		mockSteamApi.resolve.mockReturnValue(12345678);
+		mockSteamApi.getUserOwnedGames.mockReturnValue([
+			{ name: "Overwatch", playTime: "1300" },
+			{ name: "Deadlock", playTime: "1500" },
+			{ name: "Metro", playTime: "1100" },
+		]);
+		isValueNumber.mockReturnValue(true);
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		jest.spyOn(mockCommand, "shuffle").mockImplementation(() => [
+			{ name: "Metro", playTime: "1100" },
+			{ name: "Overwatch", playTime: "1300" },
+			{ name: "Deadlock", playTime: "1500" },
+		]);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TheStarlessAbstract - you haven't played more than 20 hour(s) in Metro, why not play it next"
+			);
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TheStarlessAbstract - you haven't played more than 20 hour(s) in Metro, why not play it next"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
+		expect(isValueNumber).toHaveBeenCalledTimes(1);
 		expect(mockCommand.shuffle).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
