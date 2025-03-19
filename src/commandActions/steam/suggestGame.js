@@ -10,6 +10,17 @@ const suggestGame = async function (config) {
 		config.argument,
 		0
 	);
+
+	if (
+		option &&
+		!(
+			isValueNumber(option) ||
+			(option.endsWith("%") && !isNaN(parseFloat(option.slice(0, -1))))
+		)
+	) {
+		return this.getOutputString("invalidOption", config.configMap);
+	}
+
 	let steamId;
 
 	try {
@@ -36,8 +47,12 @@ const suggestGame = async function (config) {
 	let outputType;
 	if (isValueNumber(option)) {
 		// minutes played
-		const minutes = option * 60;
-		steamGames = steamGames.filter((game) => game.playTime <= minutes);
+		const minutes = parseInt(option) * 60;
+		let test = steamGames.filter((game) => game.playTime <= minutes);
+
+		if (test.length === 0)
+			return this.getOutputString("noMatch", config.configMap);
+
 		config.configMap.set("hours", option);
 		outputType = "timePlayed";
 	} else if (option) {
