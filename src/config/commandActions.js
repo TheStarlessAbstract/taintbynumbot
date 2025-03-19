@@ -23,8 +23,8 @@ const commandActions = {
 	shoutout: "../commandActions/shoutout", // working
 	song: "../commandActions/song", // working
 	steam: "../commandActions/steam", // working
-	text: "../commandActions/text", // working
-	title: "../commandActions/title", // working
+	text: "../commandActions/text", // working // tested
+	title: "../commandActions/title", // working // tested
 };
 
 function getCommandAction(name) {
