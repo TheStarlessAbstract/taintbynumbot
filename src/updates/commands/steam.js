@@ -79,6 +79,13 @@ function template() {
 					active: true,
 				},
 			],
+			[
+				"invalidOption",
+				{
+					message: "@{displayName} - Invalid option, please try again",
+					active: true,
+				},
+			],
 		]),
 		versions: new Map([
 			[
