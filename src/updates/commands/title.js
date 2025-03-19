@@ -34,8 +34,8 @@ function template() {
 			[
 				"existingTitle",
 				{
-					message: "",
-					active: false,
+					message: "@{displayName} - This is already the stream title",
+					active: true,
 				},
 			],
 			[
