@@ -24,6 +24,14 @@ function template() {
 				},
 			],
 			[
+				"noUsername",
+				{
+					message:
+						"@{displayName} - You need to provide a username to suggest a game from your Steam library - !steam TheStarlessAbstract",
+					active: true,
+				},
+			],
+			[
 				"idError",
 				{
 					message:
@@ -82,7 +90,8 @@ function template() {
 			[
 				"invalidOption",
 				{
-					message: "@{displayName} - Invalid option, please try again",
+					message:
+						"@{displayName} - Invalid option, please try again - !steam {user} 10 for games played less than 10 hours or !steam {user} 10% for games with less than 10% achievements",
 					active: true,
 				},
 			],
