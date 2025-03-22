@@ -42,6 +42,17 @@ class Steam extends BaseCommand {
 
 		return percentMatchedGames;
 	}
+
+	validOption(option) {
+		if (
+			option &&
+			(this.isValueNumber(option) ||
+				(option.endsWith("%") && this.isValueNumber(option.slice(0, -1))))
+		)
+			return true;
+
+		return false;
+	}
 }
 
 module.exports = Steam;
