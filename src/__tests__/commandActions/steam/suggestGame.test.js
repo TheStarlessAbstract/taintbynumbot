@@ -52,7 +52,38 @@ describe("suggest a game from users steam library", () => {
 	});
 
 	// test id 2
-	test("should return idError output steam id returns an error", async () => {
+	test("should return noUsername output if splitArgs doesn't return a steamUsername", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		splitArgs.mockReturnValue({ first: null });
+		mockSteamApi.resolve.mockRejectedValue(new Error("Username not found"));
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TheStarlessAbstract - You need to provide a username to suggest a game from your Steam library - !steam TheStarlessAbstract"
+			);
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TheStarlessAbstract - You need to provide a username to suggest a game from your Steam library - !steam TheStarlessAbstract"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+
+		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(0);
+		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(0);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 3
+	test("should return idError output if steam id returns an error", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
@@ -81,7 +112,7 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 3
+	// test id 4
 	test("should return privateError output steam library is private", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
@@ -114,7 +145,7 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 4
+	// test id 5
 	test("should return noGames output if steam library is empty", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
@@ -145,7 +176,7 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 5
+	// test id 6
 	test("should return randomGame output if no option set by user", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
