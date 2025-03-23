@@ -25,10 +25,9 @@ describe("set stream title", () => {
 	});
 
 	// test id 1
-	test("should return notPermitted output if config.permitted false", async () => {
+	test("should return undefined if no config.configMap", async () => {
 		// Assemble
 		const config = { permitted: false };
-		getStreamByUserId.mockResolvedValue({ id: "100612361" });
 
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => false);
 		jest
@@ -36,6 +35,38 @@ describe("set stream title", () => {
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		updateChannelInfo.mockResolvedValue({
+			success: "Should not be here",
+		});
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(0);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
+		expect(getStreamByUserId).toHaveBeenCalledTimes(0);
+		expect(updateChannelInfo).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 2
+	test("should return notPermitted output if config.permitted false", async () => {
+		// Assemble
+		const config = { permitted: false, configMap: new Map() };
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => false);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() => "@TaintByNumBot - You are not permitted to use this command"
+			);
+		getStreamByUserId.mockResolvedValue({ id: "100612361" });
+		updateChannelInfo.mockResolvedValue({
+			success: "Should not be here",
+		});
+
 		// Act
 		const result = await action(config);
 
@@ -49,20 +80,23 @@ describe("set stream title", () => {
 		expect(updateChannelInfo).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 2
+	// test id 3
 	test("should return noStream output if no stream found", async () => {
 		// Assemble
-		const config = { permitted: true };
-
-		getStreamByUserId.mockResolvedValue(null);
+		const config = { permitted: true, configMap: new Map() };
 
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		getStreamByUserId.mockResolvedValue(null);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TaintByNumBot - TheStarlessAbstract doesn't seem to be streaming right now"
 			);
+		updateChannelInfo.mockResolvedValue({
+			success: "Should not be here",
+		});
+
 		// Act
 		const result = await action(config);
 
@@ -76,7 +110,37 @@ describe("set stream title", () => {
 		expect(updateChannelInfo).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 3
+	// test id 4
+	test("should return noStream output if no stream has no title", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		getStreamByUserId.mockResolvedValue({});
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TaintByNumBot - TheStarlessAbstract doesn't seem to be streaming right now"
+			);
+		updateChannelInfo.mockResolvedValue({
+			success: "Should not be here",
+		});
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TaintByNumBot - TheStarlessAbstract doesn't seem to be streaming right now"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(getStreamByUserId).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(updateChannelInfo).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 5
 	test("should return existingTitle output if input already title", async () => {
 		// Assemble
 		const config = {
@@ -85,16 +149,19 @@ describe("set stream title", () => {
 			argument: "ChatGPT said this was a good idea",
 		};
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		getStreamByUserId.mockResolvedValue({
 			title: "ChatGPT said this was a good idea",
 		});
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() => "@TaintByNumBot - This is already the stream title"
 			);
+		updateChannelInfo.mockResolvedValue({
+			success: "Should not be here",
+		});
+
 		// Act
 		const result = await action(config);
 
@@ -106,7 +173,7 @@ describe("set stream title", () => {
 		expect(updateChannelInfo).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 4
+	// test id 6
 	test("should return updateTitle output if title updated", async () => {
 		// Assemble
 		const config = {
@@ -115,20 +182,20 @@ describe("set stream title", () => {
 			argument: "ChatGPT said this was a good idea",
 		};
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		getStreamByUserId.mockResolvedValue({
 			title: "ChatGPT made a bunch of mistakes",
 		});
 		updateChannelInfo.mockResolvedValue({
 			success: "ChatGPT made a bunch of mistakes",
 		});
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TaintByNumBot - Title has been set to: ChatGPT made a bunch of mistakes"
 			);
+
 		// Act
 		const result = await action(config);
 
