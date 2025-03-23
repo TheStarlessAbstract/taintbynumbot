@@ -1,4 +1,9 @@
 async function sayToChat(config) {
+	if (!config.configMap) {
+		console.error("no configMap for sayToChat");
+		return;
+	}
+
 	if (!this.isPermitted(config.permitted))
 		return this.getOutputString("notPermitted", config.configMap);
 
