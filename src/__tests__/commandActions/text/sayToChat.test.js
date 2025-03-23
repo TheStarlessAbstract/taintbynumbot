@@ -25,6 +25,7 @@ describe("send message to chat", () => {
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -45,6 +46,7 @@ describe("send message to chat", () => {
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(() => "I'm streaming here");
+
 		// Act
 		const result = await action(config);
 
