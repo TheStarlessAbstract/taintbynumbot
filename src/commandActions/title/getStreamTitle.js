@@ -1,6 +1,11 @@
 const { getStreamByUserId } = require("../../services/twitch/streams");
 
 const getStreamTitle = async function (config) {
+	if (!config.configMap) {
+		console.error("no configMap for getStreamTitle");
+		return;
+	}
+
 	if (!this.isPermitted(config.permitted))
 		return this.getOutputString("notPermitted", config.configMap);
 
