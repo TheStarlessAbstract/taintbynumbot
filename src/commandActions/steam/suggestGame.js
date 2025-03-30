@@ -1,4 +1,5 @@
 const { splitArgs } = require("../../utils/modify");
+const { isValueNumber } = require("../../utils/valueChecks");
 
 const suggestGame = async function (config) {
 	// config used { permitted, channelId, configMap, argument }
@@ -10,7 +11,8 @@ const suggestGame = async function (config) {
 		0
 	);
 
-	if (!steamUsername) return this.getOutputString("idError", config.configMap);
+	if (!steamUsername)
+		return this.getOutputString("noUsername", config.configMap);
 
 	if (option && !this.validOption(option)) {
 		return this.getOutputString("invalidOption", config.configMap);
@@ -40,12 +42,12 @@ const suggestGame = async function (config) {
 		return this.getOutputString("noGames", config.configMap);
 
 	let outputType;
-	if (this.isValueNumber(option)) {
+	if (option && !option.endsWith("%") && isValueNumber(option)) {
 		// minutes played
 		const minutes = parseInt(option) * 60;
-		let test = steamGames.filter((game) => game.playTime <= minutes);
+		steamGames = steamGames.filter((game) => game.playTime <= minutes);
 
-		if (test.length === 0)
+		if (steamGames.length === 0)
 			return this.getOutputString("noMatch", config.configMap);
 
 		config.configMap.set("hours", option);
