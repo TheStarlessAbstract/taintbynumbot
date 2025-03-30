@@ -44,10 +44,10 @@ class Steam extends BaseCommand {
 	}
 
 	validOption(option) {
+		if (!option) return false;
 		if (
-			option &&
-			(this.isValueNumber(option) ||
-				(option.endsWith("%") && this.isValueNumber(option.slice(0, -1))))
+			this.isValueNumber(option) ||
+			(option.endsWith("%") && this.isValueNumber(option.slice(0, -1)))
 		)
 			return true;
 
