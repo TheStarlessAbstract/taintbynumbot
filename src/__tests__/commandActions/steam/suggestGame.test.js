@@ -36,6 +36,7 @@ describe("suggest a game from users steam library", () => {
 			.mockImplementation(
 				() => "@TaintByNumBot - You are not permitted to use this command"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -56,10 +57,8 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockReturnValue({ first: null });
-		mockSteamApi.resolve.mockRejectedValue(new Error("Username not found"));
-
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({ first: null });
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
@@ -76,27 +75,28 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
 		expect(splitArgs).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
-
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(0);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(0);
 		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 3
-	test("should return idError output if steam id returns an error", async () => {
+	test("should return idError output if steamApi.resolve returns an error", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
-		mockSteamApi.resolve.mockRejectedValue(new Error("Username not found"));
-
 		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+		});
+		mockSteamApi.resolve.mockRejectedValue(new Error("Username not found"));
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TheStarlessAbstract - Steam couldn't find your name, please check your Steam profile custom URL via Steam Profile > Edit Profile > Custom URL"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -117,19 +117,19 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockRejectedValue(
 			new Error("Your games are private")
 		);
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TheStarlessAbstract - Your games are private, so I can't suggest a game. Go to Steam profile > Edit Profile > Privacy Settings. Set My Profile, and Game Details to Public"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -141,26 +141,26 @@ describe("suggest a game from users steam library", () => {
 		expect(splitArgs).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
-		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 5
-	test("should return noGames output if steam library is empty", async () => {
+	test("should return noGames output if steamApi.getUserOwnedGames does not return any games", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([]);
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TheStarlessAbstract - I couldn't find any games in your Steam library"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -172,8 +172,8 @@ describe("suggest a game from users steam library", () => {
 		expect(splitArgs).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
-		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 	});
 
 	// test id 6
@@ -181,15 +181,15 @@ describe("suggest a game from users steam library", () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
-		splitArgs.mockReturnValue({ first: "TheStarlessAbstract", second: null });
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({ first: "TheStarlessAbstract" });
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([
 			{ name: "Deadlock" },
 			{ name: "Overwatch" },
 			{ name: "Metro" },
 		]);
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => false);
 		jest
 			.spyOn(mockCommand, "shuffle")
 			.mockImplementation(() => [
@@ -203,6 +203,7 @@ describe("suggest a game from users steam library", () => {
 				() =>
 					"@TheStarlessAbstract - Can't choose what to play? Why not try Overwatch"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -218,15 +219,51 @@ describe("suggest a game from users steam library", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 
-	// test id 6
-	test("should return noMatch output if option to a number, no games match the filter", async () => {
+	// test id 7
+	test("should return invalidOption output if option exists and is not a valid option", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+			second: "invalid",
+		});
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => false);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TheStarlessAbstract - You need to provide a valid option to suggest a game from your Steam library - !steam TheStarlessAbstract 10% or !steam TheStarlessAbstract 10"
+			);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TheStarlessAbstract - You need to provide a valid option to suggest a game from your Steam library - !steam TheStarlessAbstract 10% or !steam TheStarlessAbstract 10"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validOption).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(0);
+		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(0);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 8
+	test("should return noMatch output if option is a number, and no games are under that play time", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		splitArgs.mockReturnValue({
 			first: "TheStarlessAbstract",
 			second: "2",
 		});
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => true);
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([
 			{ name: "Overwatch", playTime: "1250" },
@@ -234,15 +271,13 @@ describe("suggest a game from users steam library", () => {
 			{ name: "Metro", playTime: "1300" },
 		]);
 		isValueNumber.mockReturnValue(true);
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
-		jest.spyOn(mockCommand, "shuffle").mockImplementation(() => []);
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(
 				() =>
 					"@TheStarlessAbstract - I couldn't find any games that match your request"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -252,34 +287,35 @@ describe("suggest a game from users steam library", () => {
 		);
 		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
 		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validOption).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
 		expect(isValueNumber).toHaveBeenCalledTimes(1);
-		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 7
-	test("should return timePlayed output if no option set by user", async () => {
+	// test id 9
+	test("should return timePlayed output if option is a number, and some games under the play time", async () => {
 		// Assemble
 		const config = { permitted: true, configMap: new Map() };
 
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		splitArgs.mockReturnValue({
 			first: "TheStarlessAbstract",
 			second: "20",
 		});
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => true);
 		mockSteamApi.resolve.mockReturnValue(12345678);
 		mockSteamApi.getUserOwnedGames.mockReturnValue([
-			{ name: "Overwatch", playTime: "1300" },
+			{ name: "Overwatch", playTime: "950" },
 			{ name: "Deadlock", playTime: "1500" },
 			{ name: "Metro", playTime: "1100" },
 		]);
 		isValueNumber.mockReturnValue(true);
-
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
 		jest.spyOn(mockCommand, "shuffle").mockImplementation(() => [
 			{ name: "Metro", playTime: "1100" },
-			{ name: "Overwatch", playTime: "1300" },
+			{ name: "Overwatch", playTime: "950" },
 			{ name: "Deadlock", playTime: "1500" },
 		]);
 		jest
@@ -288,6 +324,7 @@ describe("suggest a game from users steam library", () => {
 				() =>
 					"@TheStarlessAbstract - you haven't played more than 20 hour(s) in Metro, why not play it next"
 			);
+
 		// Act
 		const result = await action(config);
 
@@ -297,10 +334,117 @@ describe("suggest a game from users steam library", () => {
 		);
 		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
 		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validOption).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
 		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
 		expect(isValueNumber).toHaveBeenCalledTimes(1);
 		expect(mockCommand.shuffle).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+	});
+
+	// test id 10
+	test("should return noMatch output if option is a percentage, and no games under that achievement percentage", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+			second: "20%",
+		});
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => true);
+		mockSteamApi.resolve.mockReturnValue(12345678);
+		mockSteamApi.getUserOwnedGames.mockReturnValue([
+			{ name: "Overwatch" },
+			{ name: "Deadlock" },
+			{ name: "Metro" },
+			{ name: "Metal Gear Solid" },
+		]);
+		isValueNumber.mockReturnValue(true);
+		jest
+			.spyOn(mockCommand, "achievementsCompleted")
+			.mockImplementation(() => []);
+		jest
+			.spyOn(mockCommand, "shuffle")
+			.mockImplementation(() => [{ name: "Metal Gear Solid" }]);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TheStarlessAbstract - you haven't played more than 20 hour(s) in Metro, why not play it next"
+			);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TheStarlessAbstract - you haven't played more than 20 hour(s) in Metro, why not play it next"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validOption).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
+		expect(isValueNumber).toHaveBeenCalledTimes(0);
+		expect(mockCommand.achievementsCompleted).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 11
+	test("should return noMatch output if option is a percentage, and some games under that achievement percentage", async () => {
+		// Assemble
+		const config = { permitted: true, configMap: new Map() };
+
+		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		splitArgs.mockReturnValue({
+			first: "TheStarlessAbstract",
+			second: "20%",
+		});
+		jest.spyOn(mockCommand, "validOption").mockImplementation(() => true);
+		mockSteamApi.resolve.mockReturnValue(12345678);
+		mockSteamApi.getUserOwnedGames.mockReturnValue([
+			{ name: "Overwatch" },
+			{ name: "Deadlock" },
+			{ name: "Metro" },
+			{ name: "Metal Gear Solid" },
+		]);
+		isValueNumber.mockReturnValue(true);
+		jest
+			.spyOn(mockCommand, "achievementsCompleted")
+			.mockImplementation(() => [
+				{ name: "Deadlock" },
+				{ name: "Metal Gear Solid" },
+			]);
+		jest
+			.spyOn(mockCommand, "shuffle")
+			.mockImplementation(() => [
+				{ name: "Metal Gear Solid" },
+				{ name: "Deadlock" },
+			]);
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(
+				() =>
+					"@TheStarlessAbstract - you haven't unlocked more than 20% of the achievements in Metal Gear Solid, go get that 100%"
+			);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBe(
+			"@TheStarlessAbstract - you haven't unlocked more than 20% of the achievements in Metal Gear Solid, go get that 100%"
+		);
+		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(splitArgs).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validOption).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.resolve).toHaveBeenCalledTimes(1);
+		expect(mockSteamApi.getUserOwnedGames).toHaveBeenCalledTimes(1);
+		expect(isValueNumber).toHaveBeenCalledTimes(0);
+		expect(mockCommand.achievementsCompleted).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.shuffle).toHaveBeenCalledTimes(1);
 	});
 });
