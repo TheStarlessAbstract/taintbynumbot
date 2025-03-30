@@ -59,7 +59,7 @@ function template() {
 				"achievements%",
 				{
 					message:
-						"@{displayName} - you haven't unlocked more than {percent} in {game}, go get that 100%",
+						"@{displayName} - you haven't unlocked more than {percent} of the achievements in {game}, go get that 100%",
 					active: true,
 				},
 			],
