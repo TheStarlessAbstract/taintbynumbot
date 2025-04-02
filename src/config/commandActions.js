@@ -22,7 +22,7 @@ const commandActions = {
 	points: "../commandActions/points", // working
 	shoutout: "../commandActions/shoutout", // working
 	song: "../commandActions/song", // working
-	steam: "../commandActions/steam", // working
+	steam: "../commandActions/steam", // working // tested
 	text: "../commandActions/text", // working // tested
 	title: "../commandActions/title", // working // tested
 };
