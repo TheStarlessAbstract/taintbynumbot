@@ -1,11 +1,12 @@
 async function sayToChat(config) {
-	if (!config.configMap) {
-		console.error("no configMap for sayToChat");
-		return;
+	const validation = this.validateConfig(config);
+	if (validation?.error) {
+		console.error(validation.error);
+		return undefined;
 	}
-
-	if (!this.isPermitted(config.permitted))
-		return this.getOutputString("notPermitted", config.configMap);
+	if (!validation.valid) {
+		return validation.output;
+	}
 
 	return this.getOutputString("text", config.configMap);
 }
