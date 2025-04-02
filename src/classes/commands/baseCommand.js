@@ -132,6 +132,25 @@ class BaseCommand {
 		return "";
 	}
 
+	validateConfig(config) {
+		if (!config)
+			return {
+				error: "config is not valid",
+			};
+		if (!config.configMap)
+			return {
+				error: "configMap is not valid",
+			};
+
+		if (!this.isPermitted(config.permitted))
+			return {
+				valid: false,
+				output: this.getOutputString("notPermitted", config.configMap),
+			};
+
+		return { valid: true };
+	}
+
 	isPermitted(permitted) {
 		if (!permitted || typeof permitted !== "boolean") return false;
 		return true;
