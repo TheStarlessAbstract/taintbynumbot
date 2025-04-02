@@ -15,6 +15,27 @@ describe("send message to chat", () => {
 	});
 
 	// test id 1
+	test("should return undefined if validateConfig throws an error", async () => {
+		// Assemble
+		const config = {};
+
+		jest.spyOn(mockCommand, "validateConfig").mockReturnValue({
+			error: "config is not valid",
+		});
+		jest
+			.spyOn(mockCommand, "getOutputString")
+			.mockImplementation(() => "This should not return anything");
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(mockCommand.validateConfig).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 1
 	test("should return notPermitted output if config.permitted false", async () => {
 		// Assemble
 		const config = { permitted: false };
