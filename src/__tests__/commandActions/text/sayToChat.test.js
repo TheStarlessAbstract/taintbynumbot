@@ -15,16 +15,11 @@ describe("send message to chat", () => {
 	});
 
 	// test id 1
-	test("should return undefined if validateConfig throws an error", async () => {
+	test("should return undefined if configValidation is undefined", async () => {
 		// Assemble
 		const config = {};
 
-		jest.spyOn(mockCommand, "validateConfig").mockReturnValue({
-			error: "config is not valid",
-		});
-		jest
-			.spyOn(mockCommand, "getOutputString")
-			.mockImplementation(() => "This should not return anything");
+		jest.spyOn(mockCommand, "validateConfig").mockReturnValue(undefined);
 
 		// Act
 		const result = await action(config);
@@ -35,35 +30,36 @@ describe("send message to chat", () => {
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 1
-	test("should return notPermitted output if config.permitted false", async () => {
+	// test id 2
+	test("should return validation.output if configValidation.valid is false", async () => {
 		// Assemble
-		const config = { permitted: false };
+		const config = {};
 
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => false);
-		jest
-			.spyOn(mockCommand, "getOutputString")
-			.mockImplementation(
-				() => "@TaintByNumBot - You are not permitted to use this command"
-			);
+		jest.spyOn(mockCommand, "validateConfig").mockReturnValue({
+			valid: false,
+			output:
+				"@TheStarlessAbstract - You are not permitted to use this command",
+		});
 
 		// Act
 		const result = await action(config);
 
 		// Assert
 		expect(result).toBe(
-			"@TaintByNumBot - You are not permitted to use this command"
+			"@TheStarlessAbstract - You are not permitted to use this command"
 		);
-		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
-		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateConfig).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
 	});
 
-	// test id 2
-	test("should return text output if config.permitted true", async () => {
+	// test id 3
+	test("should return text output if configValidation.valid is true", async () => {
 		// Assemble
-		const config = { permitted: true, configMap: new Map() };
+		const config = {};
 
-		jest.spyOn(mockCommand, "isPermitted").mockImplementation(() => true);
+		jest.spyOn(mockCommand, "validateConfig").mockReturnValue({
+			valid: true,
+		});
 		jest
 			.spyOn(mockCommand, "getOutputString")
 			.mockImplementation(() => "I'm streaming here");
@@ -73,7 +69,7 @@ describe("send message to chat", () => {
 
 		// Assert
 		expect(result).toBe("I'm streaming here");
-		expect(mockCommand.isPermitted).toHaveBeenCalledTimes(1);
+		expect(mockCommand.validateConfig).toHaveBeenCalledTimes(1);
 		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(1);
 	});
 });
