@@ -133,15 +133,14 @@ class BaseCommand {
 	}
 
 	validateConfig(config) {
-		if (!config)
-			return {
-				error: "config is not valid",
-			};
-		if (!config.configMap)
-			return {
-				error: "configMap is not valid",
-			};
-
+		if (!config) {
+			console.error("config is not valid");
+			return;
+		}
+		if (!config.configMap) {
+			console.error("configMap is not valid");
+			return;
+		}
 		if (!this.isPermitted(config.permitted))
 			return {
 				valid: false,
