@@ -1,12 +1,7 @@
 async function sayToChat(config) {
-	const validation = this.validateConfig(config);
-	if (validation?.error) {
-		console.error(validation.error);
-		return undefined;
-	}
-	if (!validation.valid) {
-		return validation.output;
-	}
+	const configValidation = this.validateConfig(config);
+	if (!configValidation) return;
+	if (!configValidation.valid) return configValidation.output;
 
 	return this.getOutputString("text", config.configMap);
 }
