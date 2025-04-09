@@ -21,6 +21,22 @@ describe("get stream title", () => {
 	});
 
 	// test id 1
+	test("should return undefined if configValidation is undefined", async () => {
+		// Assemble
+		const config = {};
+
+		jest.spyOn(mockCommand, "validateConfig").mockReturnValue(undefined);
+
+		// Act
+		const result = await action(config);
+
+		// Assert
+		expect(result).toBeUndefined();
+		expect(mockCommand.validateConfig).toHaveBeenCalledTimes(1);
+		expect(mockCommand.getOutputString).toHaveBeenCalledTimes(0);
+	});
+
+	// test id 1
 	test("should return undefined if no config.configMap", async () => {
 		// Assemble
 		const config = { permitted: false };
