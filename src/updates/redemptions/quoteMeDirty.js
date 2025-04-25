@@ -19,7 +19,7 @@ function template() {
 				"existing",
 				{
 					message:
-						"@{displayName}, there is a prediction waiting to be resolved, your channel points have been refunded",
+						"@{user}, there is a prediction waiting to be resolved, your channel points have been refunded",
 					active: true,
 				},
 			],
@@ -27,7 +27,7 @@ function template() {
 				"errorCreatingPrediction",
 				{
 					message:
-						"@{displayName}, something went wrong setting up the prediction, your channel points have been refunded",
+						"@{user}, something went wrong setting up the prediction, your channel points have been refunded",
 					active: true,
 				},
 			],
@@ -35,7 +35,7 @@ function template() {
 				"noListItemFound",
 				{
 					message:
-						"@{displayName}, no quotes found, your channel points have been refunded",
+						"@{user}, no quotes found, your channel points have been refunded",
 					active: true,
 				},
 			],
