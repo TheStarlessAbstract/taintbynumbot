@@ -55,8 +55,14 @@ async function init() {
 			if (!action) return;
 			action(redeemDetails, variableMap);
 
-			console.log(`${redeemName}, redeemed by ${e.userDisplayName}`);
+			// console.log(`${redeemName}, redeemed by ${e.userDisplayName}`);
 			// io.emit("streamOnline", e); // Emit to socket.io clients
+		});
+
+		eventSubListener.onChannelBan(channelId, async (e) => {
+			console.log(
+				`${e.moderatorDisplayName} has dropped the banhammer on ${e.userDisplayName}!`
+			);
 		});
 
 		// // Example: Subscribe to channel update events
