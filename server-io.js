@@ -30,7 +30,7 @@ async function setup(newIo) {
 			let redirectUri = botDomain + "/v2/test";
 
 			let scope =
-				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts";
+				"openid channel:manage:broadcast+channel:manage:predictions+channel:manage:redemptions+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel_subscriptions+moderator:read:chatters+moderator:read:followers+channel:manage:polls+moderator:manage:announcements+moderator:manage:shoutouts+bits:read";
 
 			io.emit("setDetails v2Admin", { clientId, redirectUri, scope });
 		} else if (socket.handshake.headers.referer.includes("auth")) {
