@@ -22,9 +22,7 @@ async function listPrediction(redeemDetails, variableMap) {
 	}
 
 	const prediction = await this.createPrediction();
-	console.log(4);
 	if (!prediction) {
-		console.log(5);
 		this.updateRedemptionStatusByIds(rewardId, redeemIds, "CANCELED");
 
 		output = this.getOutput("errorCreatingPrediction");
@@ -34,7 +32,7 @@ async function listPrediction(redeemDetails, variableMap) {
 		this.say(message);
 		return;
 	}
-	console.log(6);
+
 	let list = [];
 	try {
 		list = await this.aggregate([
@@ -47,12 +45,10 @@ async function listPrediction(redeemDetails, variableMap) {
 			{ $sample: { size: 1 } },
 		]);
 	} catch (err) {
-		console.log(7);
 		console.error(err);
 	}
 
 	if (list.length === 0 || !list[0]?.text || typeof list[0].text !== "string") {
-		console.log(8);
 		this.updateRedemptionStatusByIds(rewardId, redeemIds, "CANCELED");
 		this.cancelPrediction(prediction.id);
 
@@ -63,20 +59,18 @@ async function listPrediction(redeemDetails, variableMap) {
 		this.say(message);
 		return;
 	}
-	console.log(9);
 	output = this.getOutput("startedPrediction");
 	if (output) {
-		console.log(10);
 		message = this.getProcessedOutput(output.message, variableMap);
 		this.say(message);
 	}
-	console.log(11);
+
+	this.playAudio();
+
 	await this.sleep(this.getDuration());
 	const moderator = process.env.TWITCH_BOT_ID;
 	await this.sendAnnouncement(moderator, { message: list[0].text });
 
-	this.playAudio();
-	console.log(12);
 	this.updateRedemptionStatusByIds(rewardId, redeemIds, "FULFILLED");
 }
 
