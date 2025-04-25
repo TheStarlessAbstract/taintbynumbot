@@ -1,5 +1,6 @@
 const BaseCommand = require("./baseCommand");
 const steam = require("../../repos/steam");
+const { isValueNumber } = require("../../utils/valueChecks");
 
 class Steam extends BaseCommand {
 	constructor(channelId, name, { type, output, versions }) {
@@ -46,8 +47,9 @@ class Steam extends BaseCommand {
 	validOption(option) {
 		if (!option) return false;
 		if (
-			this.isValueNumber(option) ||
-			(option.endsWith("%") && this.isValueNumber(option.slice(0, -1)))
+			option &&
+			(isValueNumber(option) ||
+				(option.endsWith("%") && isValueNumber(option.slice(0, -1))))
 		)
 			return true;
 
