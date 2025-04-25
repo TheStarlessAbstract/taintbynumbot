@@ -11,39 +11,35 @@ async function init() {
 	const channelIds = [...channels.keys()];
 
 	channelIds.forEach((channelId, key) => {
-		pubSubClient.onRedemption(channelId, async (redeem) => {
-			const channelName = channelsService.getChannelName(channelId);
-			const redeemDetails = getRedeemDetails(redeem);
-			const variableMap = createVariableMap(redeemDetails, channelName);
-			const redeemName = redeemDetails.rewardTitle;
-
-			let redemption = channelsService.getChannelRedemption(
-				channelId,
-				redeemName
-			);
-
-			if (!redemption) {
-				const dbRedeem = await findOne({
-					channelId,
-					name: redeemName,
-				});
-				if (!dbRedeem) return;
-
-				const redemptionType = getRedemptionType(dbRedeem.type);
-				redemption = new redemptionType.class(
-					channelId,
-					channelName,
-					redeemName,
-					dbRedeem
-				);
-				redemption.setAction(redemptionType.action);
-				channelsService.addChannelRedemption(channelId, redeemName, redemption);
-			}
-
-			const action = redemption.getAction();
-			if (!action) return;
-			action(redeemDetails, variableMap);
-		});
+		// pubSubClient.onRedemption(channelId, async (redeem) => {
+		// 	const channelName = channelsService.getChannelName(channelId);
+		// 	const redeemDetails = getRedeemDetails(redeem);
+		// 	const variableMap = createVariableMap(redeemDetails, channelName);
+		// 	const redeemName = redeemDetails.rewardTitle;
+		// 	let redemption = channelsService.getChannelRedemption(
+		// 		channelId,
+		// 		redeemName
+		// 	);
+		// 	if (!redemption) {
+		// 		const dbRedeem = await findOne({
+		// 			channelId,
+		// 			name: redeemName,
+		// 		});
+		// 		if (!dbRedeem) return;
+		// 		const redemptionType = getRedemptionType(dbRedeem.type);
+		// 		redemption = new redemptionType.class(
+		// 			channelId,
+		// 			channelName,
+		// 			redeemName,
+		// 			dbRedeem
+		// 		);
+		// 		redemption.setAction(redemptionType.action);
+		// 		channelsService.addChannelRedemption(channelId, redeemName, redemption);
+		// 	}
+		// 	const action = redemption.getAction();
+		// 	if (!action) return;
+		// 	action(redeemDetails, variableMap);
+		// });
 	});
 }
 
