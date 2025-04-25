@@ -65,13 +65,13 @@ const handler = async (channelName, userName, message, msg) => {
 		permitted: userPermission,
 	};
 
-	if (version?.cost) {
+	if (version?.cost && messageDetails.channelId !== messageDetails.userId) {
 		const { user, canPay, bypass } = await checkUserBalance(
 			messageDetails.channelId,
 			messageDetails.userId,
 			version?.cost.points
 		);
-		if (!user) return;
+		if (user === null) return;
 
 		if (!canPay && version?.luck?.active && !bypass) {
 			commandConfig.diceRoll = diceRoll(version.luck?.odds);
@@ -233,15 +233,14 @@ async function checkUserBalance(channelId, userId, cost) {
 		!isNonEmptyString(userId) ||
 		!isValueNumber(cost)
 	)
-		return;
+		return { user: null, canPay: false, bypass: false };
 
 	const user = await points.findOne({
 		channelId: channelId,
 		viewerId: userId,
 	});
 
-	if (!user) return;
-	if (channelId === userId) return { user, canPay: true, bypass: true };
+	if (!user) return { user: null, canPay: false, bypass: false };
 	if (!user || user.points < cost)
 		return { user: null, canPay: false, bypass: false };
 
