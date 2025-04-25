@@ -8,13 +8,11 @@ async function init() {
 	const users = await User.find({ role: { $ne: "bot" } }, "twitchId").exec();
 	const userIds = getUserIds(users);
 	for (let i = 0; i < userIds.length; i++) {
-		let points = await LoyaltyPoints.find({
-			twitchId: userIds[i],
-		});
+		let points = await LoyaltyPoints.find({});
 
 		for (let j = 0; j < points.length; j++) {
 			list.push({
-				channelId: points[j].twitchId,
+				channelId: "100612361",
 				viewerId: points[j].userId,
 				points: points[j].points,
 				follower: points[j].follower,
