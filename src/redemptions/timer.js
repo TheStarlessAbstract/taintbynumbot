@@ -1,9 +1,9 @@
 const { play } = require("../services/audio");
 
 async function timer(redeemDetails, variableMap) {
-	const { message } = redeemDetails;
+	let { message } = redeemDetails;
 	// check if message is required, and has been provided
-	if (!checkMessageRequirement(message)) return; // cancel redeem
+	if (!this.checkMessageRequirement(message)) return; // cancel redeem
 
 	const duration = this.getDuration();
 	let timeString = this.getTimeString(duration);
