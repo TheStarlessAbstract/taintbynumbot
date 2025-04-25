@@ -42,7 +42,11 @@ const suggestGame = async function (config) {
 		return this.getOutputString("noGames", config.configMap);
 
 	let outputType;
+<<<<<<< Updated upstream
 	if (option && !option.endsWith("%") && isValueNumber(option)) {
+=======
+	if (isValueNumber(option)) {
+>>>>>>> Stashed changes
 		// minutes played
 		const minutes = parseInt(option) * 60;
 		steamGames = steamGames.filter((game) => game.playTime <= minutes);
