@@ -156,6 +156,7 @@ router.get("/v2/test", async (req, res) => {
 		user.role = role;
 	} else if (user.tokens.has("twitch")) {
 		let twitchToken = user.tokens.get("twitch");
+		console.log(response.data.scope);
 		twitchToken = {
 			tokenType: "twitch",
 			accessToken: response.data.access_token,
@@ -175,6 +176,7 @@ router.get("/v2/test", async (req, res) => {
 		});
 	}
 
+	console.log(user.tokens.get("twitch").scope);
 	user.save();
 	res.redirect("/spotify");
 });
