@@ -3,7 +3,6 @@ require("dotenv").config();
 const db = require("./services/db");
 const twitchRepo = require("./repos/twitch");
 const discord = require("./services/discord");
-// const discord = require("../bot-discord");
 
 init();
 
