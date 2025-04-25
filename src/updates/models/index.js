@@ -5,7 +5,7 @@ const cardGame = require("./cardGame");
 
 async function init() {
 	// await loyaltyPoints();
-	await users();
+	// await users();
 	// await counter();
 	// await cardGame();
 }
