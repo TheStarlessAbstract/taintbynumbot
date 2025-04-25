@@ -1,7 +1,8 @@
-const ApiClient = require("@twurple/api").ApiClient;
-const ChatClient = require("@twurple/chat").ChatClient;
-const PubSubClient = require("@twurple/pubsub").PubSubClient;
-const RefreshingAuthProvider = require("@twurple/auth").RefreshingAuthProvider;
+const { ApiClient } = require("@twurple/api");
+const { ChatClient } = require("@twurple/chat");
+const { PubSubClient } = require("@twurple/pubsub");
+const { RefreshingAuthProvider } = require("@twurple/auth");
+const { EventSubWsListener } = require("@twurple/eventsub-ws");
 
 const { find, findOne } = require("./../queries/users");
 const twitchController = require("../controllers/twitch");
@@ -14,6 +15,7 @@ const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 let apiClient;
 let chatClient;
 let pubSubClient;
+let eventSubListener;
 
 async function init() {
 	const users = await find(
@@ -52,6 +54,7 @@ async function init() {
 	apiClient = createApiClient(authProvider);
 	chatClient = await createChatClient(authProvider);
 	pubSubClient = createPubSubClient(authProvider);
+	eventSubListener = createEventSubListener();
 
 	twitchController.init();
 
@@ -117,6 +120,10 @@ function createPubSubClient(authProvider) {
 	return new PubSubClient({ authProvider });
 }
 
+function createEventSubListener() {
+	return new EventSubWsListener({ apiClient });
+}
+
 async function getUsernames() {
 	const usersFromDb = await find({ role: { $ne: "bot" } }, "displayName");
 	const displayNames = usersFromDb.map((user) => user.displayName);
@@ -136,7 +143,12 @@ function getPubSubClient() {
 	return pubSubClient;
 }
 
+function getEventSubListener() {
+	return eventSubListener;
+}
+
 exports.init = init;
 exports.getApiClient = getApiClient;
 exports.getChatClient = getChatClient;
 exports.getPubSubClient = getPubSubClient;
+exports.getEventSubListener = getEventSubListener;
