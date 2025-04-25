@@ -14,15 +14,13 @@ async function copyAndUpdate() {
 	let userIds = helper.getUserIds(users);
 
 	for (let i = 0; i < userIds.length; i++) {
-		let activeCommands = await Command.find({
-			streamerId: userIds[i],
-		});
+		let activeCommands = await Command.find({});
 
 		let list = [];
 
 		for (let j = 0; j < activeCommands.length; j++) {
 			list.push({
-				channelId: activeCommands[j].streamerId,
+				channelId: "100612361",
 				chatName: activeCommands[j].name,
 				type: "text",
 				createdBy: activeCommands[j].createdBy,
