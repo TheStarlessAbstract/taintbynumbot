@@ -8,8 +8,6 @@ const redemption = function (redeemDetails, variableMap) {
 	if (this.audio.length > 0) {
 		this.playAudio();
 	}
-
-	console.log(redeemDetails.rewardTitle);
 };
 
 module.exports = redemption;
