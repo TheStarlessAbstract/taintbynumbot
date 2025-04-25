@@ -74,7 +74,6 @@ class Redemption {
 	}
 
 	playAudio() {
-		console.log(this.audio);
 		play(this.channelId, this.audio);
 	}
 
