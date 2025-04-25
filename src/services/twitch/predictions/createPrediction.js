@@ -4,6 +4,7 @@ const createPrediction = async (broadcaster, data) => {
 	const apiClient = twitchRepo.getApiClient();
 	let predictions;
 
+	console.log("data", data);
 	try {
 		predictions = await apiClient.predictions.createPrediction(
 			broadcaster,
