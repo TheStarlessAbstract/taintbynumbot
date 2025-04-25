@@ -14,6 +14,7 @@ const getCounterForCategory = async function (config) {
 	}
 
 	const count = await this.count(game);
+	config.configMap.set("game", game);
 	config.configMap.set("total", count);
 
 	return this.getOutputString("total", config.configMap);
