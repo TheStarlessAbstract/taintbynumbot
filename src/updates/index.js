@@ -12,11 +12,11 @@ init();
 
 async function init() {
 	await db.connect();
-	// await commands();
+	await commands();
 	// await audio();
 	// await quote();
 	// await tinder();
-	await models();
+	// await models();
 	// await redemptions();
 	// await clips();
 	await db.disconnect();
