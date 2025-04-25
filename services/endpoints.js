@@ -129,17 +129,7 @@ router.get("/v2/test", async (req, res) => {
 		channelId,
 	});
 
-	if (user) {
-		let twitchToken = user.get("twitch");
-		twitchToken = {
-			tokenType: "twitch",
-			accessToken: response.data.access_token,
-			refreshToken: response.data.refresh_token,
-			scope: response.data.scope,
-			expiresIn: response.data.expires_in,
-			obtainmentTimestamp: 0,
-		};
-	} else {
+	if (!user) {
 		user = new UserNew({
 			channelId,
 			displayName: users.data.data[0].display_name,
@@ -164,6 +154,25 @@ router.get("/v2/test", async (req, res) => {
 		else if (channelId == process.env.TWITCH_BOT_ID) role = "bot";
 
 		user.role = role;
+	} else if (user.tokens.has("twitch")) {
+		let twitchToken = user.tokens.get("twitch");
+		twitchToken = {
+			tokenType: "twitch",
+			accessToken: response.data.access_token,
+			refreshToken: response.data.refresh_token,
+			scope: response.data.scope,
+			expiresIn: response.data.expires_in,
+			obtainmentTimestamp: 0,
+		};
+	} else if (!user.tokens.has("twitch")) {
+		user.tokens.set("twitch", {
+			tokenType: "twitch",
+			accessToken: response.data.access_token,
+			refreshToken: response.data.refresh_token,
+			scope: response.data.scope,
+			expiresIn: response.data.expires_in,
+			obtainmentTimestamp: 0,
+		});
 	}
 
 	user.save();
