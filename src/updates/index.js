@@ -12,7 +12,7 @@ init();
 
 async function init() {
 	await db.connect();
-	await commands();
+	// await commands();
 	// await audio();
 	// await quote();
 	// await tinder();
