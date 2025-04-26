@@ -11,9 +11,10 @@ const sendAnnouncement = async (broadcaster, moderator, announcement) => {
 	}
 
 	try {
-		await apiClient.asUser(moderator, async (ctx) => {
-			await ctx.chat.sendAnnouncement(broadcaster, announcement);
-		});
+		await apiClient.asUser(
+			moderator,
+			async (ctx) => await ctx.chat.sendAnnouncement(broadcaster, announcement)
+		);
 	} catch (err) {
 		console.error(err);
 	}
