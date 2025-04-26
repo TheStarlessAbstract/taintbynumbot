@@ -10,7 +10,12 @@ async function init() {
 	setupSignalHandlers();
 
 	await db.connect();
-	if (!(await twitchRepo.init())) await db.disconnect();
+	if (!(await twitchRepo.init())) {
+		await db.disconnect();
+		console.log("Twitch init failed, exiting...");
+		process.exit(0);
+	}
+
 	console.log("Twitch init done");
 	await discord.init();
 }
