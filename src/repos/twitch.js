@@ -51,9 +51,13 @@ async function init() {
 		authProvider.addUser(users[i].channelId, token, intent);
 	}
 
+	console.log("apiClient");
 	apiClient = createApiClient(authProvider);
+	console.log("chatClient");
 	chatClient = await createChatClient(authProvider);
+	console.log("pubSubClient");
 	pubSubClient = createPubSubClient(authProvider);
+	console.log("eventSubListener");
 	eventSubListener = createEventSubListener();
 
 	twitchController.init();
