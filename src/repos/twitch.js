@@ -18,6 +18,7 @@ let pubSubClient;
 let eventSubListener;
 
 async function init() {
+	console.log("Twitch init");
 	const users = await find(
 		{ "tokens.twitch": { $exists: true } },
 		"channelId displayName messages messageCountTrigger messageIntervalLength customBot role tokens.twitch discordCommandsChannelId"
