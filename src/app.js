@@ -11,6 +11,7 @@ async function init() {
 
 	await db.connect();
 	if (!(await twitchRepo.init())) await db.disconnect();
+	console.log("Twitch init done");
 	await discord.init();
 }
 
